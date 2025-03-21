@@ -4,8 +4,19 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Info } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceDot } from "recharts";
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer, 
+  ReferenceDot, 
+  TooltipProps
+} from "recharts";
 import { NarrativeData } from "@shared/schema";
+import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 
 interface NarrativeChartProps {
   view: "sentiment" | "tension" | "combined";
@@ -90,11 +101,52 @@ export default function NarrativeChart({ view }: NarrativeChartProps) {
               />
               <YAxis domain={[-1, 1]} label={{ value: 'Score', angle: -90, position: 'insideLeft' }} />
               <Tooltip 
-                formatter={(value: any, name: string) => [
-                  `${typeof value === 'number' ? value.toFixed(2) : value}`, 
-                  name === "sentiment" ? "Sentiment" : "Tension"
-                ]}
-                labelFormatter={(chapter: string) => `Chapter ${chapter}`}
+                wrapperStyle={{ pointerEvents: 'auto' }}
+                content={({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
+                  if (active && payload && payload.length) {
+                    const chapterNum = parseInt(label);
+                    const chapterData = filteredData.find((ch: any) => ch.chapter === chapterNum);
+                    const hasKeyEvents = chapterData && chapterData.keyEvents && chapterData.keyEvents.length > 0;
+                    
+                    return (
+                      <div style={{
+                        backgroundColor: 'white',
+                        border: '1px solid #ccc',
+                        padding: '10px',
+                        borderRadius: '4px',
+                        boxShadow: '0 2px 5px rgba(0, 0, 0, 0.15)'
+                      }}>
+                        <h3 style={{ margin: '0 0 5px', fontSize: '14px', fontWeight: 'bold' }}>
+                          Chapter {label}
+                        </h3>
+                        {payload.map((entry, index) => (
+                          <p key={`item-${index}`} style={{ margin: '2px 0', fontSize: '12px' }}>
+                            <span style={{ 
+                              color: entry.name === "sentiment" ? "hsl(var(--chart-1))" : "hsl(var(--chart-2))",
+                              fontWeight: 'bold'
+                            }}>
+                              {entry.name === "sentiment" ? "Sentiment" : "Tension"}:
+                            </span> {entry.value.toFixed(2)}
+                          </p>
+                        ))}
+                        {hasKeyEvents && (
+                          <div style={{ marginTop: '5px', borderTop: '1px solid #eee', paddingTop: '5px' }}>
+                            <p style={{ margin: '2px 0', fontSize: '12px', fontWeight: 'bold', color: 'hsl(var(--chart-3))' }}>
+                              Key Event:
+                            </p>
+                            {chapterData.keyEvents.map((event: any, idx: number) => (
+                              <div key={idx} style={{ marginTop: '2px' }}>
+                                <p style={{ margin: '0', fontSize: '12px', fontWeight: 'bold' }}>{event.type}</p>
+                                <p style={{ margin: '0', fontSize: '11px' }}>{event.description}</p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
               />
               
               {/* Conditionally render lines based on view */}
