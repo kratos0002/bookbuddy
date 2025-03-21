@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Info } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceDot } from "recharts";
+import { NarrativeData } from "@shared/schema";
 
 interface NarrativeChartProps {
   view: "sentiment" | "tension" | "combined";
@@ -13,7 +14,7 @@ interface NarrativeChartProps {
 export default function NarrativeChart({ view }: NarrativeChartProps) {
   const [selectedPart, setSelectedPart] = useState("all");
   
-  const { data: narrativeData, isLoading } = useQuery({
+  const { data: narrativeData, isLoading } = useQuery<NarrativeData>({
     queryKey: ['/api/books/1/narrative-data'],
   });
   
@@ -39,15 +40,15 @@ export default function NarrativeChart({ view }: NarrativeChartProps) {
   let filteredData = narrativeData?.chapters || [];
   
   if (selectedPart === "part1") {
-    filteredData = filteredData.filter(ch => ch.chapter <= 8);
+    filteredData = filteredData.filter((ch: any) => ch.chapter <= 8);
   } else if (selectedPart === "part2") {
-    filteredData = filteredData.filter(ch => ch.chapter > 8 && ch.chapter <= 17);
+    filteredData = filteredData.filter((ch: any) => ch.chapter > 8 && ch.chapter <= 17);
   } else if (selectedPart === "part3") {
-    filteredData = filteredData.filter(ch => ch.chapter > 17);
+    filteredData = filteredData.filter((ch: any) => ch.chapter > 17);
   }
   
   // Find chapters with key events for reference dots
-  const chaptersWithEvents = filteredData.filter(ch => ch.keyEvents && ch.keyEvents.length > 0);
+  const chaptersWithEvents = filteredData.filter((ch: any) => ch.keyEvents && ch.keyEvents.length > 0);
   
   return (
     <Card className="bg-background rounded-lg shadow-md p-6 mb-6">
@@ -89,8 +90,11 @@ export default function NarrativeChart({ view }: NarrativeChartProps) {
               />
               <YAxis domain={[-1, 1]} label={{ value: 'Score', angle: -90, position: 'insideLeft' }} />
               <Tooltip 
-                formatter={(value, name) => [value.toFixed(2), name === "sentiment" ? "Sentiment" : "Tension"]}
-                labelFormatter={(chapter) => `Chapter ${chapter}`}
+                formatter={(value: any, name: string) => [
+                  typeof value === 'number' ? value.toFixed(2) : value, 
+                  name === "sentiment" ? "Sentiment" : "Tension"
+                ]}
+                labelFormatter={(chapter: string) => `Chapter ${chapter}`}
               />
               
               {/* Conditionally render lines based on view */}
@@ -119,7 +123,7 @@ export default function NarrativeChart({ view }: NarrativeChartProps) {
               )}
               
               {/* Add reference dots for key events */}
-              {chaptersWithEvents.map((chapter) => (
+              {chaptersWithEvents.map((chapter: any) => (
                 <ReferenceDot
                   key={`event-${chapter.chapter}`}
                   x={chapter.chapter}
