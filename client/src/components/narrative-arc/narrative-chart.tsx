@@ -21,12 +21,12 @@ export default function NarrativeChart({ view }: NarrativeChartProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>
+          <CardTitle className="flex">
             <Skeleton className="h-6 w-60" />
           </CardTitle>
-          <CardDescription>
+          <div className="mt-1">
             <Skeleton className="h-4 w-40" />
-          </CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
           <Skeleton className="h-80 w-full" />

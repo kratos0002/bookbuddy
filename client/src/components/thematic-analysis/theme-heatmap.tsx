@@ -24,12 +24,12 @@ export default function ThemeHeatmap({ view }: ThemeHeatmapProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>
+          <CardTitle className="flex">
             <Skeleton className="h-6 w-60" />
           </CardTitle>
-          <CardDescription>
+          <div className="mt-1">
             <Skeleton className="h-4 w-40" />
-          </CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
           <Skeleton className="h-80 w-full" />
@@ -64,9 +64,10 @@ export default function ThemeHeatmap({ view }: ThemeHeatmapProps) {
                 return null;
               }
               
-              // Generate color based on intensity (blue scale)
+              // Generate color based on intensity (primary color scale)
               const colorIntensity = Math.floor(intensity * 100);
-              const bg = `rgba(59, 130, 246, ${intensity})`;
+              // Use our primary purple-blue color for the theme following the vibrant design
+              const bg = `rgba(94, 94, 255, ${intensity * 0.9 + 0.1})`; 
               
               return (
                 <div 
@@ -133,7 +134,7 @@ export default function ThemeHeatmap({ view }: ThemeHeatmapProps) {
       <CardFooter className="p-0 pt-6 justify-center">
         <div className="text-xs text-muted-foreground flex items-center">
           <span>Low Intensity</span>
-          <div className="w-48 h-3 mx-2 bg-gradient-to-r from-blue-100 via-blue-400 to-blue-700 rounded"></div>
+          <div className="w-48 h-4 mx-2 bg-gradient-to-r from-violet-100 via-indigo-400 to-violet-700 rounded shadow-sm"></div>
           <span>High Intensity</span>
         </div>
       </CardFooter>

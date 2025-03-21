@@ -1,0 +1,119 @@
+# LitViz Design System & Visual Elements
+
+## Design Theme: "Literary Clarity"
+
+Create a design system for the LitViz platform that combines scholarly elegance with modern data visualization, appealing specifically to book readers, students, and educators. The design should evoke the feeling of a premium reading experience while making complex literary analysis accessible.
+
+## Color Palette
+
+### Primary Colors
+- **Rich Navy Blue** (#1A365D): Primary brand color, evoking depth and seriousness
+- **Warm Cream** (#F9F5EB): Background color, reminiscent of aged paper, easy on the eyes
+- **Deep Burgundy** (#7D2E3B): Accent color for important elements and highlights
+
+### Secondary Colors
+- **Forest Green** (#2C5530): Secondary accent, representing growth and understanding
+- **Muted Gold** (#C8A951): For emphasis and premium elements
+- **Subtle Gray** (#707070): For supporting text and UI elements
+
+### Data Visualization Colors
+- **Sentiment Scale**: Gradient from #9E2B25 (negative) through #F9F5EB (neutral) to #467355 (positive)
+- **Tension Scale**: From #E9D985 (low tension) to #BB4430 (high tension)
+- **Theme Strength**: #3066BE with varying opacity levels
+- **Character Connections**: Types defined by distinct hues (family - #6B9AC4, romantic - #D8315B, conflict - #3E1929)
+
+## Typography
+
+### Font Pairings
+- **Headings**: Playfair Display (serif) - Elegant, literary feel
+- **Body Text**: Source Sans Pro (sans-serif) - Highly readable for long passages
+- **Data Labels**: Roboto Mono (monospace) - Clear for data points and small text
+- **Quotes/Literary Excerpts**: Libre Baskerville (serif) - Distinguished look for book quotes
+
+### Type Scale
+- Base size: 16px (body)
+- Scale ratio: 1.25 (major third)
+- Clearly defined hierarchy from h1 through h6
+
+## UI Elements
+
+### Navigation
+- Subtle tab-based navigation resembling book tabs or bookmarks
+- Current section highlighted with burgundy underline
+- Smooth transitions between sections
+
+### Cards & Containers
+- Soft shadows (4px blur, 20% opacity)
+- Rounded corners (4px radius)
+- Subtle texture resembling paper grain on containers
+- 1px borders in light gray
+
+### Buttons & Controls
+- Toggle switches with literary-themed icons
+- Filters resembling bookmark tabs
+- Primary action buttons in navy with cream text
+- Secondary actions as outlined buttons
+
+### Charts & Visualizations
+- Paper-like background texture
+- Ink-style data lines (1.5px stroke width)
+- Chapter markers resembling small bookmarks
+- Tooltips styled as annotation cards with deckled edges
+- Clear legends with book-themed iconography
+
+## Responsive Behavior
+- Desktop: Full visualization experience with side panels
+- Tablet: Scrollable visualizations with collapsed details
+- Mobile: Stacked viewing experience prioritizing readability
+
+## Accessibility Considerations
+- Minimum contrast ratio of 4.5:1 for all text
+- Alternative text descriptions for all visualizations
+- Focus states clearly visible for keyboard navigation
+- Color not used as the sole means of conveying information
+
+## Theme Variants
+
+### Light Mode (Default)
+- Warm cream background
+- Dark text for maximum readability
+- Visualization colors at full saturation
+
+### Dark Mode
+- Deep navy (#0F1A2A) background
+- Light text (#E8E8E8)
+- Visualization colors adjusted for dark background
+- Reduced brightness to prevent eye strain during evening reading
+
+### High Contrast Mode
+- Black background (#000000)
+- White text (#FFFFFF)
+- Simplified color scheme with increased contrast for visualizations
+
+## Animation & Transitions
+- Page transitions evoking turning pages (subtle right-to-left sweep)
+- Data loading animations resembling ink spreading on paper
+- Hover states with gentle scaling (1.02×)
+- Chart transitions with 400ms ease-in-out timing
+
+## Icon System
+- Custom literary-themed icon set including:
+  - Book, page, and chapter markers
+  - Character silhouettes
+  - Theme and motif symbols
+  - Navigation elements based on book terminology
+
+## Empty States & Loading
+- Loading states with animated quotes from "1984"
+- Empty states with relevant book illustrations
+- Error states with literary-themed messages
+
+## Implementation Notes for Replit
+- Use CSS variables for the color system for easy theme switching
+- Include Tailwind CSS for utility classes
+- Implement themed components with styled-components or Emotion
+- Store design tokens in a separate constants file
+- Include common components in a shared UI library
+- Use SVG for custom icons to maintain quality at all sizes
+
+This design system focuses on creating a premium, literary atmosphere that respects the source material while making complex analysis accessible and engaging for book lovers.
