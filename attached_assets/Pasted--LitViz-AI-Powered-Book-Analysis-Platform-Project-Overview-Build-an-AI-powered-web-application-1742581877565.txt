@@ -1,0 +1,90 @@
+# LitViz: AI-Powered Book Analysis Platform
+
+## Project Overview
+Build an AI-powered web application for analyzing and visualizing literary works, with George Orwell's "1984" as the MVP case study. The platform will provide readers, students, and educators with deep insights into narrative structure, thematic elements, and character relationships through interactive visualizations and AI-generated analysis.
+
+## Core Features
+
+### 1. Narrative Arc Visualization
+- Create an interactive line chart showing sentiment and tension across chapters
+- Highlight key plot events on the timeline
+- Allow users to toggle between different metrics (sentiment, tension, etc.)
+- Display chapter-specific information on hover/click
+
+### 2. Thematic Analysis
+- Identify and analyze major themes in the text (totalitarianism, surveillance, etc.)
+- Generate visualizations showing theme prevalence throughout the book
+- Provide textual analysis with supporting quotes for each theme
+- Create a heatmap showing theme intensity by chapter
+
+### 3. Character Network
+- Build an interactive network graph showing character relationships
+- Size nodes based on character importance/mentions
+- Color edges to represent relationship types
+- Allow filtering to focus on specific characters
+
+### 4. AI-Generated Analysis
+- Produce comprehensive textual analysis of the book's key elements:
+  - Plot summary with chapter breakdowns
+  - Character analyses with psychological insights
+  - Thematic explorations with textual evidence
+  - Writing style assessment with examples
+  - Historical context and contemporary relevance
+
+## Technical Requirements
+
+### Frontend
+- React.js for component-based UI
+- Recharts or D3.js for interactive data visualizations
+- Responsive design that works on desktop and tablets
+- Clean, reader-friendly typography
+- Light/dark mode toggle
+
+### Backend
+- Node.js/Express server
+- Pre-processed analysis of "1984" stored in JSON format
+- Simple API endpoints to serve visualization data and analysis content
+- (Optional) Text processing pipeline for future book additions
+
+### Data
+- Pre-analyzed text of "1984" with:
+  - Chapter-by-chapter sentiment scores
+  - Tension/conflict metrics
+  - Theme identification and scoring
+  - Character mention tracking and relationship mapping
+  - Key event identification
+
+## User Flow
+1. User lands on homepage featuring "1984" as the showcase book
+2. User selects from visualization options (Narrative Arc, Character Network, etc.)
+3. User interacts with visualizations through clicks, hovers, filters
+4. User can toggle between visual and textual analysis modes
+5. User can explore specific elements (themes, characters, chapters) in detail
+
+## MVP Scope Limitations
+- Focus solely on "1984" for initial implementation
+- Use pre-processed data rather than live AI analysis
+- Implement core visualizations first, with additional features planned for future iterations
+- No user accounts or saved preferences for MVP
+
+## Design Guidelines
+- Clean, academic aesthetic with good readability
+- Color schemes that enhance comprehension of data
+- Intuitive navigation between different analysis types
+- Minimize visual clutter while maximizing information density
+- Use typography hierarchies to organize information
+
+## Stretch Goals (Post-MVP)
+- Allow users to upload additional books for analysis
+- Add comparison features between different works
+- Implement social sharing of visualizations
+- Create educational worksheet generators
+- Add annotation capabilities for teachers and students
+
+## Resources
+- Full text of "1984" (public domain or properly licensed)
+- Pre-analyzed data sets for sentiment, themes, etc.
+- Example visualizations for inspiration
+- Documentation for chosen visualization libraries
+
+This project should create a compelling educational tool that enhances understanding and appreciation of literature through modern visualization techniques, with "1984" serving as an ideal showcase given its rich themes and enduring relevance.
