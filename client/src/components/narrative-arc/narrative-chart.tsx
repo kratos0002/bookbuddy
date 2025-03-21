@@ -90,11 +90,36 @@ export default function NarrativeChart({ view }: NarrativeChartProps) {
               />
               <YAxis domain={[-1, 1]} label={{ value: 'Score', angle: -90, position: 'insideLeft' }} />
               <Tooltip 
-                formatter={(value: any, name: string) => [
-                  typeof value === 'number' ? value.toFixed(2) : value, 
-                  name === "sentiment" ? "Sentiment" : "Tension"
-                ]}
-                labelFormatter={(chapter: string) => `Chapter ${chapter}`}
+                content={(props: any) => {
+                  const { payload, label } = props;
+                  if (!payload || payload.length === 0) return null;
+                  
+                  // Find chapter data to check for key events
+                  const chapterData = filteredData.find((ch: any) => ch.chapter.toString() === label);
+                  const hasKeyEvents = chapterData && chapterData.keyEvents && chapterData.keyEvents.length > 0;
+                  
+                  return (
+                    <div className="rounded-md bg-background border p-2 shadow-md">
+                      <p className="font-bold text-sm mb-1">Chapter {label}</p>
+                      {payload.map((entry: any, index: number) => (
+                        <p key={index} className="text-sm">
+                          {entry.name === "sentiment" ? "Sentiment" : "Tension"}: {entry.value.toFixed(2)}
+                        </p>
+                      ))}
+                      {hasKeyEvents && (
+                        <div className="mt-2 border-t pt-1">
+                          <p className="text-xs font-medium text-primary">Key Event:</p>
+                          {chapterData.keyEvents.map((event: any, idx: number) => (
+                            <div key={idx} className="mt-1">
+                              <p className="text-xs font-medium">{event.type}</p>
+                              <p className="text-xs">{event.description}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }}
               />
               
               {/* Conditionally render lines based on view */}
