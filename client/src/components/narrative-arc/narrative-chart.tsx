@@ -55,7 +55,9 @@ export default function NarrativeChart({ view }: NarrativeChartProps) {
         <div className="flex justify-between items-center">
           <div>
             <CardTitle>Emotional Journey Through "1984"</CardTitle>
-            <CardDescription>Hover over points for chapter details</CardDescription>
+            <CardDescription>
+              Negative values show darker/oppressive mood. Larger circles mark key plot events.
+            </CardDescription>
           </div>
           <div className="text-sm">
             <Select value={selectedPart} onValueChange={setSelectedPart}>
@@ -155,9 +157,10 @@ export default function NarrativeChart({ view }: NarrativeChartProps) {
         </div>
         
         <div>
-          <button className="text-sm text-primary flex items-center">
-            <Info className="mr-1 h-4 w-4" /> How is this calculated?
-          </button>
+          <div className="text-sm text-muted-foreground flex items-center">
+            <Info className="mr-1 h-4 w-4" /> 
+            <span>Sentiment ranges from -1 (negative/oppressive) to 1 (positive/hopeful)</span>
+          </div>
         </div>
       </CardFooter>
     </Card>
