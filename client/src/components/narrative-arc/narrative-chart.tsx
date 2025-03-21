@@ -90,36 +90,11 @@ export default function NarrativeChart({ view }: NarrativeChartProps) {
               />
               <YAxis domain={[-1, 1]} label={{ value: 'Score', angle: -90, position: 'insideLeft' }} />
               <Tooltip 
-                content={(props: any) => {
-                  const { payload, label } = props;
-                  if (!payload || payload.length === 0) return null;
-                  
-                  // Find chapter data to check for key events
-                  const chapterData = filteredData.find((ch: any) => ch.chapter.toString() === label);
-                  const hasKeyEvents = chapterData && chapterData.keyEvents && chapterData.keyEvents.length > 0;
-                  
-                  return (
-                    <div className="rounded-md bg-background border p-2 shadow-md">
-                      <p className="font-bold text-sm mb-1">Chapter {label}</p>
-                      {payload.map((entry: any, index: number) => (
-                        <p key={index} className="text-sm">
-                          {entry.name === "sentiment" ? "Sentiment" : "Tension"}: {entry.value.toFixed(2)}
-                        </p>
-                      ))}
-                      {hasKeyEvents && (
-                        <div className="mt-2 border-t pt-1">
-                          <p className="text-xs font-medium text-primary">Key Event:</p>
-                          {chapterData.keyEvents.map((event: any, idx: number) => (
-                            <div key={idx} className="mt-1">
-                              <p className="text-xs font-medium">{event.type}</p>
-                              <p className="text-xs">{event.description}</p>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }}
+                formatter={(value: any, name: string) => [
+                  `${typeof value === 'number' ? value.toFixed(2) : value}`, 
+                  name === "sentiment" ? "Sentiment" : "Tension"
+                ]}
+                labelFormatter={(chapter: string) => `Chapter ${chapter}`}
               />
               
               {/* Conditionally render lines based on view */}
@@ -163,32 +138,52 @@ export default function NarrativeChart({ view }: NarrativeChartProps) {
         </div>
       </CardContent>
       
-      <CardFooter className="p-0 pt-4 flex justify-between">
-        <div className="flex flex-wrap space-x-4">
-          {(view === "sentiment" || view === "combined") && (
+      <CardFooter className="flex flex-col space-y-4 p-0 pt-4">
+        <div className="flex justify-between">
+          <div className="flex flex-wrap space-x-4">
+            {(view === "sentiment" || view === "combined") && (
+              <div className="flex items-center">
+                <span className="inline-block w-3 h-3 bg-[hsl(var(--chart-1))] rounded-full mr-2"></span>
+                <span className="text-sm">Sentiment</span>
+              </div>
+            )}
+            
+            {(view === "tension" || view === "combined") && (
+              <div className="flex items-center">
+                <span className="inline-block w-3 h-3 bg-[hsl(var(--chart-2))] rounded-full mr-2"></span>
+                <span className="text-sm">Tension</span>
+              </div>
+            )}
+            
             <div className="flex items-center">
-              <span className="inline-block w-3 h-3 bg-[hsl(var(--chart-1))] rounded-full mr-2"></span>
-              <span className="text-sm">Sentiment</span>
+              <span className="inline-block w-3 h-3 bg-[hsl(var(--chart-3))] rounded-full mr-2"></span>
+              <span className="text-sm">Key Events</span>
             </div>
-          )}
+          </div>
           
-          {(view === "tension" || view === "combined") && (
-            <div className="flex items-center">
-              <span className="inline-block w-3 h-3 bg-[hsl(var(--chart-2))] rounded-full mr-2"></span>
-              <span className="text-sm">Tension</span>
+          <div>
+            <div className="text-sm text-muted-foreground flex items-center">
+              <Info className="mr-1 h-4 w-4" /> 
+              <span>Sentiment ranges from -1 (negative/oppressive) to 1 (positive/hopeful)</span>
             </div>
-          )}
-          
-          <div className="flex items-center">
-            <span className="inline-block w-3 h-3 bg-[hsl(var(--chart-3))] rounded-full mr-2"></span>
-            <span className="text-sm">Key Events</span>
           </div>
         </div>
         
-        <div>
-          <div className="text-sm text-muted-foreground flex items-center">
-            <Info className="mr-1 h-4 w-4" /> 
-            <span>Sentiment ranges from -1 (negative/oppressive) to 1 (positive/hopeful)</span>
+        {/* Key Events Section */}
+        <div className="border-t pt-3">
+          <h4 className="text-sm font-medium mb-2">Major Plot Events</h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {chaptersWithEvents.map((chapter: any) => (
+              <div key={`info-event-${chapter.chapter}`} className="p-2 rounded-md bg-muted text-sm">
+                <div className="font-medium mb-1">Chapter {chapter.chapter}</div>
+                {chapter.keyEvents && chapter.keyEvents.map((event: any, idx: number) => (
+                  <div key={idx}>
+                    <div className="text-xs font-medium text-primary">{event.type}</div>
+                    <div className="text-xs">{event.description}</div>
+                  </div>
+                ))}
+              </div>
+            ))}
           </div>
         </div>
       </CardFooter>
