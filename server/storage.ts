@@ -1,5 +1,7 @@
 import { 
-  users, 
+  users, books, chapters, keyEvents, themes, themeQuotes, themeIntensities,
+  characters, relationships, aiAnalyses, characterPersonas, librarianPersonas,
+  conversations, messages,
   type User, 
   type InsertUser, 
   type Book,
@@ -25,6 +27,9 @@ import {
   type InsertMessage,
   type ChatMode
 } from "@shared/schema";
+
+import { db } from "./db";
+import { eq, and, inArray } from "drizzle-orm";
 
 import {
   bookData,
@@ -279,8 +284,8 @@ export class MemStorage implements IStorage {
   }
   
   async getThemeById(id: number): Promise<Theme | undefined> {
-    for (const themes of this.themes.values()) {
-      const theme = themes.find(t => t.id === id);
+    for (const themes of Array.from(this.themes.values())) {
+      const theme = themes.find((t: Theme) => t.id === id);
       if (theme) return theme;
     }
     return undefined;
@@ -302,8 +307,8 @@ export class MemStorage implements IStorage {
   }
   
   async getCharacterById(id: number): Promise<Character | undefined> {
-    for (const characters of this.characters.values()) {
-      const character = characters.find(c => c.id === id);
+    for (const characters of Array.from(this.characters.values())) {
+      const character = characters.find((c: Character) => c.id === id);
       if (character) return character;
     }
     return undefined;
@@ -420,4 +425,232 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  // User methods
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+  
+  // Book methods
+  async getBook(id: number): Promise<Book | undefined> {
+    const [book] = await db.select().from(books).where(eq(books.id, id));
+    return book || undefined;
+  }
+  
+  async getAllBooks(): Promise<Book[]> {
+    return db.select().from(books);
+  }
+  
+  // Chapter methods
+  async getChaptersByBookId(bookId: number): Promise<Chapter[]> {
+    return db.select().from(chapters).where(eq(chapters.bookId, bookId));
+  }
+  
+  // KeyEvent methods
+  async getKeyEventsByBookId(bookId: number): Promise<KeyEvent[]> {
+    return db.select().from(keyEvents).where(eq(keyEvents.bookId, bookId));
+  }
+  
+  // Theme methods
+  async getThemesByBookId(bookId: number): Promise<Theme[]> {
+    return db.select().from(themes).where(eq(themes.bookId, bookId));
+  }
+  
+  async getThemeById(id: number): Promise<Theme | undefined> {
+    const [theme] = await db.select().from(themes).where(eq(themes.id, id));
+    return theme || undefined;
+  }
+  
+  // ThemeQuote methods
+  async getQuotesByThemeId(themeId: number): Promise<ThemeQuote[]> {
+    return db.select().from(themeQuotes).where(eq(themeQuotes.themeId, themeId));
+  }
+  
+  // ThemeIntensity methods
+  async getThemeIntensitiesByBookId(bookId: number): Promise<ThemeIntensity[]> {
+    // We need to join with themes to get intensities by book ID
+    const themeIds = await db.select({ id: themes.id })
+      .from(themes)
+      .where(eq(themes.bookId, bookId));
+    
+    if (themeIds.length === 0) return [];
+    
+    return db.select().from(themeIntensities)
+      .where(inArray(themeIntensities.themeId, themeIds.map((t: {id: number}) => t.id)));
+  }
+  
+  // Character methods
+  async getCharactersByBookId(bookId: number): Promise<Character[]> {
+    return db.select().from(characters).where(eq(characters.bookId, bookId));
+  }
+  
+  async getCharacterById(id: number): Promise<Character | undefined> {
+    const [character] = await db.select().from(characters).where(eq(characters.id, id));
+    return character || undefined;
+  }
+  
+  // Relationship methods
+  async getRelationshipsByBookId(bookId: number): Promise<Relationship[]> {
+    return db.select().from(relationships).where(eq(relationships.bookId, bookId));
+  }
+  
+  // AI Analysis methods
+  async getAiAnalysisByBookId(bookId: number): Promise<AiAnalysis[]> {
+    return db.select().from(aiAnalyses).where(eq(aiAnalyses.bookId, bookId));
+  }
+  
+  async getAiAnalysisBySection(bookId: number, section: string): Promise<AiAnalysis | undefined> {
+    const [analysis] = await db.select().from(aiAnalyses)
+      .where(and(
+        eq(aiAnalyses.bookId, bookId),
+        eq(aiAnalyses.sectionName, section)
+      ));
+    return analysis || undefined;
+  }
+  
+  // Visualization data methods
+  async getCharacterNetworkData(bookId: number): Promise<GraphData> {
+    // This requires complex transformation and might depend on book data
+    // For now, using mock data as placeholder
+    const mockData = characterNetworkData;
+    return mockData;
+  }
+  
+  async getNarrativeData(bookId: number): Promise<NarrativeData> {
+    // This requires complex transformation and might depend on chapter/event data
+    // For now, using mock data as placeholder
+    const mockData = narrativeData;
+    return mockData;
+  }
+  
+  async getThemeHeatmapData(bookId: number): Promise<ThemeHeatmapData> {
+    // This requires complex transformation and might depend on themes/intensity data
+    // For now, using mock data as placeholder
+    const mockData = themeHeatmapData;
+    return mockData;
+  }
+  
+  // Character Persona methods
+  async getCharacterPersonas(): Promise<CharacterPersona[]> {
+    return db.select().from(characterPersonas);
+  }
+  
+  async getCharacterPersonaById(id: number): Promise<CharacterPersona | undefined> {
+    const [persona] = await db.select().from(characterPersonas).where(eq(characterPersonas.id, id));
+    return persona || undefined;
+  }
+  
+  async getCharacterPersonaByCharacterId(characterId: number): Promise<CharacterPersona | undefined> {
+    const [persona] = await db.select().from(characterPersonas)
+      .where(eq(characterPersonas.characterId, characterId));
+    return persona || undefined;
+  }
+  
+  // Librarian Persona methods
+  async getLibrarianPersonas(): Promise<LibrarianPersona[]> {
+    return db.select().from(librarianPersonas);
+  }
+  
+  async getLibrarianPersonaById(id: number): Promise<LibrarianPersona | undefined> {
+    const [persona] = await db.select().from(librarianPersonas).where(eq(librarianPersonas.id, id));
+    return persona || undefined;
+  }
+  
+  async getLibrarianPersonaByBookId(bookId: number): Promise<LibrarianPersona | undefined> {
+    const [persona] = await db.select().from(librarianPersonas)
+      .where(eq(librarianPersonas.bookId, bookId));
+    return persona || undefined;
+  }
+  
+  // Conversation methods
+  async getConversations(): Promise<Conversation[]> {
+    return db.select().from(conversations);
+  }
+  
+  async getConversationById(id: number): Promise<Conversation | undefined> {
+    const [conversation] = await db.select().from(conversations).where(eq(conversations.id, id));
+    return conversation || undefined;
+  }
+  
+  async createConversation(insertConversation: InsertConversation): Promise<Conversation> {
+    const [conversation] = await db.insert(conversations).values(insertConversation).returning();
+    return conversation;
+  }
+  
+  // Message methods
+  async getMessagesByConversationId(conversationId: number): Promise<Message[]> {
+    return db.select().from(messages)
+      .where(eq(messages.conversationId, conversationId))
+      .orderBy(messages.sentAt);
+  }
+  
+  async createMessage(insertMessage: InsertMessage): Promise<Message> {
+    const [message] = await db.insert(messages).values(insertMessage).returning();
+    return message;
+  }
+}
+
+// Initialize the database and seed with mock data if needed
+async function initializeDatabase() {
+  try {
+    // Check if we have any books in the database
+    const existingBooks = await db.select().from(books);
+    
+    if (existingBooks.length === 0) {
+      console.log("Seeding database with initial data...");
+      
+      // Insert mock data
+      await db.insert(books).values(bookData);
+      
+      // Insert chapters
+      await db.insert(chapters).values(chapterData);
+      
+      // Insert key events
+      await db.insert(keyEvents).values(keyEventData);
+      
+      // Insert themes
+      await db.insert(themes).values(themeData);
+      
+      // Insert theme quotes
+      await db.insert(themeQuotes).values(themeQuoteData);
+      
+      // Insert character data
+      await db.insert(characters).values(characterData);
+      
+      // Insert relationship data
+      await db.insert(relationships).values(relationshipData);
+      
+      // Insert AI analysis data
+      await db.insert(aiAnalyses).values(aiAnalysisData);
+      
+      // Insert character personas
+      await db.insert(characterPersonas).values(characterPersonaData);
+      
+      // Insert librarian personas
+      await db.insert(librarianPersonas).values(librarianPersonaData);
+      
+      console.log("Database seeded successfully");
+    } else {
+      console.log("Database already contains data, skipping seed");
+    }
+  } catch (error) {
+    console.error("Error initializing database:", error);
+  }
+}
+
+// Initialize database
+initializeDatabase().catch(console.error);
+
+// Export an instance of DatabaseStorage
+export const storage = new DatabaseStorage();

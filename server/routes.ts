@@ -486,13 +486,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Create a test message
-      const testMessage: Message = {
-        id: 0,
+      // Using InsertMessage instead of Message since we don't need all properties
+      const testMessageInput: InsertMessage = {
         conversationId: 0,
         senderId: null,
         isUserMessage: true,
         content: prompt,
-        sentAt: new Date(),
         sentimentScore: null,
         relevantThemeIds: null,
         relevantQuoteIds: null
@@ -502,7 +501,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const response = await generateCharacterResponse(
         character,
         characterPersona,
-        [testMessage],
+        [{
+          ...testMessageInput,
+          id: 0,
+          sentAt: new Date()
+        } as Message], // Cast to Message with required properties
         [],
         []
       );
