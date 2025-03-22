@@ -1,0 +1,116 @@
+[
+  {
+    "name": "Totalitarianism",
+    "keywords": [
+      "big brother",
+      "party",
+      "government",
+      "control",
+      "watching",
+      "surveillance"
+    ],
+    "occurrence_count": 273,
+    "evidence_sentence_ids": [
+      "124",
+      "567",
+      "890",
+      "1234",
+      "5678"
+    ]
+  },
+  {
+    "name": "Surveillance",
+    "keywords": [
+      "telescreen",
+      "watching",
+      "spying",
+      "observe",
+      "listen",
+      "monitor"
+    ],
+    "occurrence_count": 189,
+    "evidence_sentence_ids": [
+      "456",
+      "789",
+      "1011",
+      "2345",
+      "6789"
+    ]
+  },
+  {
+    "name": "Psychological Manipulation",
+    "keywords": [
+      "doublethink",
+      "newspeak",
+      "thoughtcrime",
+      "memory",
+      "alter",
+      "propaganda"
+    ],
+    "occurrence_count": 156,
+    "evidence_sentence_ids": [
+      "321",
+      "654",
+      "987",
+      "3456",
+      "7890"
+    ]
+  },
+  {
+    "name": "Rebellion",
+    "keywords": [
+      "resist",
+      "rebel",
+      "freedom",
+      "fight",
+      "against",
+      "defy"
+    ],
+    "occurrence_count": 124,
+    "evidence_sentence_ids": [
+      "135",
+      "579",
+      "1113",
+      "4567",
+      "8901"
+    ]
+  },
+  {
+    "name": "Loss of Identity",
+    "keywords": [
+      "identity",
+      "self",
+      "individual",
+      "personality",
+      "conform",
+      "vaporize"
+    ],
+    "occurrence_count": 98,
+    "evidence_sentence_ids": [
+      "246",
+      "680",
+      "1224",
+      "5678",
+      "9012"
+    ]
+  },
+  {
+    "name": "Historical Revisionism",
+    "keywords": [
+      "history",
+      "memory",
+      "change",
+      "rewrite",
+      "record",
+      "ministry of truth"
+    ],
+    "occurrence_count": 87,
+    "evidence_sentence_ids": [
+      "357",
+      "791",
+      "1335",
+      "6789",
+      "1234"
+    ]
+  }
+]

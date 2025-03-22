@@ -1,0 +1,128 @@
+[
+  {
+    "id": "1",
+    "name": "Winston Smith",
+    "aliases": [
+      "Winston",
+      "Smith",
+      "Winston Smith",
+      "Comrade Smith"
+    ],
+    "quote_count": 87,
+    "mention_count": 458,
+    "sample_quotes": [
+      "Freedom is the freedom to say that two plus two make four. If that is granted, all else follows.",
+      "We shall meet in the place where there is no darkness.",
+      "Perhaps one did not want to be loved so much as to be understood.",
+      "Being in a minority, even in a minority of one, did not make you mad.",
+      "Until they become conscious they will never rebel, and until after they have rebelled they cannot become conscious."
+    ],
+    "gender": "male",
+    "traits": [
+      "rebellious",
+      "intellectual",
+      "introspective",
+      "paranoid",
+      "curious"
+    ],
+    "role": "protagonist",
+    "description": "Winston Smith is a low-ranking member of the ruling Party in London, in the nation of Oceania. Everywhere Winston goes, even his own home, the Party watches him through telescreens. He works at the Ministry of Truth, where he alters historical records to fit Party needs. He is haunted by memories he's uncertain of and is searching for truth amidst the Party's lies."
+  },
+  {
+    "id": "2",
+    "name": "Julia",
+    "aliases": [
+      "Julia",
+      "the dark-haired girl"
+    ],
+    "quote_count": 52,
+    "mention_count": 211,
+    "sample_quotes": [
+      "I love you.",
+      "I'm good at spotting people who don't belong. As soon as I saw you I knew you were against THEM.",
+      "It's the one thing they can't do. They can make you say anything\u2014anything\u2014but they can't make you believe it.",
+      "If you kept the small rules, you could break the big ones.",
+      "I'm only a rebel from the waist downwards."
+    ],
+    "gender": "female",
+    "traits": [
+      "rebellious",
+      "pragmatic",
+      "sensual",
+      "resourceful",
+      "adaptable"
+    ],
+    "role": "love interest/ally",
+    "description": "Julia is a young woman who maintains an outward appearance of Party orthodoxy but secretly rebels by having affairs with Party members. She is less interested in intellectual rebellion than Winston and more focused on living life on her own terms within the existing system. She works in the Fiction Department of the Ministry of Truth."
+  },
+  {
+    "id": "3",
+    "name": "O'Brien",
+    "aliases": [
+      "O'Brien",
+      "Comrade O'Brien"
+    ],
+    "quote_count": 65,
+    "mention_count": 169,
+    "sample_quotes": [
+      "The object of persecution is persecution. The object of torture is torture. The object of power is power.",
+      "Power is in tearing human minds to pieces and putting them together again in new shapes of your own choosing.",
+      "If you want a picture of the future, imagine a boot stamping on a human face\u2014for ever.",
+      "How does one man assert his power over another, Winston? By making him suffer.",
+      "Power is not a means; it is an end."
+    ],
+    "gender": "male",
+    "traits": [
+      "intelligent",
+      "calculating",
+      "manipulative",
+      "powerful",
+      "loyal to Party"
+    ],
+    "role": "antagonist",
+    "description": "O'Brien is a high-ranking member of the Inner Party who poses as a member of the Brotherhood resistance movement. He initially gains Winston's trust but later reveals himself as an agent of the Thought Police. He is the embodiment of the Party's power and effectively serves as Winston's torturer and re-educator at the Ministry of Love."
+  },
+  {
+    "id": "4",
+    "name": "Big Brother",
+    "aliases": [
+      "Big Brother",
+      "Leader"
+    ],
+    "quote_count": 0,
+    "mention_count": 103,
+    "sample_quotes": [],
+    "gender": "male",
+    "traits": [
+      "omnipresent",
+      "authoritarian",
+      "symbolic"
+    ],
+    "role": "figurehead/symbol",
+    "description": "Big Brother is the face of the Party and the figurehead of Oceania. He is described as a man with a mustache and represents the embodiment of the Party's power and authority. It is unclear if he actually exists as a person or is merely a fabrication of the Party to inspire loyalty and fear."
+  },
+  {
+    "id": "5",
+    "name": "Mr. Charrington",
+    "aliases": [
+      "Charrington",
+      "Mr. Charrington",
+      "the old man"
+    ],
+    "quote_count": 18,
+    "mention_count": 42,
+    "sample_quotes": [
+      "You are the dead.",
+      "It's beautiful, that is, I mean the steel is beautiful.",
+      "There's another room upstairs that you might care to take a look at."
+    ],
+    "gender": "male",
+    "traits": [
+      "deceptive",
+      "patient",
+      "observant"
+    ],
+    "role": "hidden antagonist",
+    "description": "Mr. Charrington appears to be an elderly shopkeeper in the prole district who rents a room above his shop to Winston and Julia for their secret meetings. He presents himself as a sympathetic figure interested in antiques and the past, but is ultimately revealed to be a member of the Thought Police who has been monitoring them."
+  }
+]

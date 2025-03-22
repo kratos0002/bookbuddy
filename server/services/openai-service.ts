@@ -17,18 +17,12 @@ const apiKey = process.env.OPENAI_API_KEY;
 // Create OpenAI client if API key is available
 const openai = apiKey ? new OpenAI({ apiKey }) : null;
 
-// Initialize book context service
-bookContextService.initialize()
-  .then(success => {
-    if (success) {
-      log('BookNLP context service initialized successfully', 'openai-service');
-    } else {
-      log('BookNLP context service initialization failed - using default prompts', 'openai-service');
-    }
-  })
-  .catch(err => {
-    log(`Error initializing BookNLP context service: ${err.message}`, 'openai-service');
-  });
+// Check if BookNLP context service is initialized
+if (bookContextService.isInitialized()) {
+  log('BookNLP context service initialized successfully', 'openai-service');
+} else {
+  log('BookNLP context service initialization failed - using default prompts', 'openai-service');
+}
 
 // Character response generation
 export async function generateCharacterResponse(
