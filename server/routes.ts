@@ -337,82 +337,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const newMessage = await storage.createMessage(messageData);
-      res.status(201).json(newMessage);
       
-      // If it's a user message, generate an AI response asynchronously
-      // Don't try to send another response here
+      // If it's a user message, start AI response generation in the background
       if (messageData.isUserMessage) {
-        // Process the AI response in the background
-        // We use setImmediate instead of setTimeout to avoid TypeScript issues
-        setImmediate(async () => {
-          try {
-        // Get the conversation to determine the mode and characters
-        const conversation = await storage.getConversationById(id);
-        if (!conversation) {
-          return;
-        }
+        // Use setTimeout to run this completely separate from the current request
+        setTimeout(() => {
+          generateAIResponse(id, messageData);
+        }, 0);
+      }
+      
+      // Return the user's message immediately
+      return res.status(201).json(newMessage);
+    } catch (err) {
+      console.error("Error processing message:", err);
+      return res.status(500).json({ message: "Failed to create message" });
+    }
+  });
+  
+  // Helper function to generate AI responses asynchronously
+  async function generateAIResponse(conversationId: number, messageData: InsertMessage): Promise<void> {
+    try {
+      // Get the conversation to determine the mode and characters
+      const conversation = await storage.getConversationById(conversationId);
+      if (!conversation) {
+        console.log("No conversation found for ID:", conversationId);
+        return;
+      }
+      
+      const messages = await storage.getMessagesByConversationId(conversationId);
+      
+      let responseContent = "I cannot respond at the moment.";
+      
+      if (conversation.conversationMode === ChatModes.CHARACTER) {
+        // Get relevant character data
+        const characterIds = Array.isArray(conversation.characterIds) 
+          ? conversation.characterIds 
+          : [conversation.characterIds];
         
-        const messages = await storage.getMessagesByConversationId(id);
-        
-        let responseContent = "I cannot respond at the moment.";
-        
-        if (conversation.conversationMode === ChatModes.CHARACTER) {
-          // Get relevant character data
-          const characterIds = Array.isArray(conversation.characterIds) 
-            ? conversation.characterIds 
-            : [conversation.characterIds];
+        if (characterIds.length > 0) {
+          const character = await storage.getCharacterById(characterIds[0]);
+          const characterPersona = await storage.getCharacterPersonaByCharacterId(characterIds[0]);
           
-          if (characterIds.length > 0) {
-            const character = await storage.getCharacterById(characterIds[0]);
-            const characterPersona = await storage.getCharacterPersonaByCharacterId(characterIds[0]);
-            
-            if (character && characterPersona) {
-              // Get relevant themes and quotes
-              const relevantThemes = messageData.relevantThemeIds && Array.isArray(messageData.relevantThemeIds)
-                ? await Promise.all(
-                    messageData.relevantThemeIds.map(id => storage.getThemeById(id))
-                  ).then(themes => themes.filter(t => t !== undefined) as Theme[])
-                : [];
-              
-              const relevantQuotes = messageData.relevantQuoteIds && Array.isArray(messageData.relevantQuoteIds)
-                ? await Promise.all(
-                    messageData.relevantQuoteIds.map(async (id) => {
-                      for (const themeId of relevantThemes.map(t => t.id)) {
-                        const quotes = await storage.getQuotesByThemeId(themeId);
-                        const quote = quotes.find(q => q.id === id);
-                        if (quote) return quote;
-                      }
-                      return null;
-                    })
-                  ).then(quotes => quotes.filter(q => q !== null) as ThemeQuote[])
-                : [];
-              
-              // Generate AI response from character
-              responseContent = await generateCharacterResponse(
-                character, 
-                characterPersona, 
-                messages, 
-                relevantThemes,
-                relevantQuotes
-              );
-            }
-          }
-        } else if (conversation.isLibrarianPresent) {
-          // Librarian mode
-          console.log("Processing librarian response for conversation:", id);
-          const bookId = 1; // Default to 1984 for now
-          const librarianPersona = await storage.getLibrarianPersonaByBookId(bookId);
-          
-          if (librarianPersona) {
-            console.log("Found librarian persona:", librarianPersona.name);
+          if (character && characterPersona) {
             // Get relevant themes and quotes
             const relevantThemes = messageData.relevantThemeIds && Array.isArray(messageData.relevantThemeIds)
               ? await Promise.all(
                   messageData.relevantThemeIds.map(id => storage.getThemeById(id))
                 ).then(themes => themes.filter(t => t !== undefined) as Theme[])
               : [];
-            
-            console.log("Found relevant themes:", relevantThemes.map(t => t.name));
             
             const relevantQuotes = messageData.relevantQuoteIds && Array.isArray(messageData.relevantQuoteIds)
               ? await Promise.all(
@@ -427,57 +399,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 ).then(quotes => quotes.filter(q => q !== null) as ThemeQuote[])
               : [];
             
-            console.log("Found relevant quotes:", relevantQuotes.length);
-            
-            // Generate AI response from librarian
-            console.log("Generating librarian response...");
-            try {
-              responseContent = await generateLibrarianResponse(
-                librarianPersona, 
-                messages, 
-                relevantThemes,
-                relevantQuotes
-              );
-              console.log("Librarian response generated successfully");
-            } catch (error) {
-              console.error("Error generating librarian response:", error);
-              responseContent = "I apologize, but I'm having trouble formulating a response at the moment.";
-            }
+            // Generate AI response from character
+            responseContent = await generateCharacterResponse(
+              character, 
+              characterPersona, 
+              messages, 
+              relevantThemes,
+              relevantQuotes
+            );
           }
         }
+      } else if (conversation.isLibrarianPresent) {
+        // Librarian mode
+        console.log("Processing librarian response for conversation:", conversationId);
+        const bookId = 1; // Default to 1984 for now
+        const librarianPersona = await storage.getLibrarianPersonaByBookId(bookId);
         
-        // Create the AI response message
-        const responseMessage: InsertMessage = {
-          conversationId: id,
-          content: responseContent,
-          isUserMessage: false,
-          // For character chat, set senderId to the character's ID
-          senderId: conversation.conversationMode === ChatModes.CHARACTER && 
-            Array.isArray(conversation.characterIds) && 
-            conversation.characterIds.length > 0 
-              ? conversation.characterIds[0] 
-              : null
-        };
-        
-        console.log("Creating AI response message:", {
-          conversationId: id,
-          isUserMessage: false,
-          contentLength: responseContent ? responseContent.length : 0,
-          senderId: responseMessage.senderId
-        });
-        
-        const createdMessage = await storage.createMessage(responseMessage);
-        console.log("Created AI response with ID:", createdMessage.id);
-          } catch (processingError) {
-            console.error("Error processing AI response:", processingError);
+        if (librarianPersona) {
+          console.log("Found librarian persona:", librarianPersona.name);
+          // Get relevant themes and quotes
+          const relevantThemes = messageData.relevantThemeIds && Array.isArray(messageData.relevantThemeIds)
+            ? await Promise.all(
+                messageData.relevantThemeIds.map(id => storage.getThemeById(id))
+              ).then(themes => themes.filter(t => t !== undefined) as Theme[])
+            : [];
+          
+          console.log("Found relevant themes:", relevantThemes.map(t => t.name));
+          
+          const relevantQuotes = messageData.relevantQuoteIds && Array.isArray(messageData.relevantQuoteIds)
+            ? await Promise.all(
+                messageData.relevantQuoteIds.map(async (id) => {
+                  for (const themeId of relevantThemes.map(t => t.id)) {
+                    const quotes = await storage.getQuotesByThemeId(themeId);
+                    const quote = quotes.find(q => q.id === id);
+                    if (quote) return quote;
+                  }
+                  return null;
+                })
+              ).then(quotes => quotes.filter(q => q !== null) as ThemeQuote[])
+            : [];
+          
+          console.log("Found relevant quotes:", relevantQuotes.length);
+          
+          // Generate AI response from librarian
+          console.log("Generating librarian response...");
+          try {
+            responseContent = await generateLibrarianResponse(
+              librarianPersona, 
+              messages, 
+              relevantThemes,
+              relevantQuotes
+            );
+            console.log("Librarian response generated successfully");
+          } catch (error) {
+            console.error("Error generating librarian response:", error);
+            responseContent = "I apologize, but I'm having trouble formulating a response at the moment.";
           }
-        }, 0);
+        }
       }
-    } catch (err) {
-      console.error("Error processing message:", err);
-      return res.status(500).json({ message: "Failed to create message" });
+      
+      // Create the AI response message
+      const responseMessage: InsertMessage = {
+        conversationId: conversationId,
+        content: responseContent,
+        isUserMessage: false,
+        // For character chat, set senderId to the character's ID
+        senderId: conversation.conversationMode === ChatModes.CHARACTER && 
+          Array.isArray(conversation.characterIds) && 
+          conversation.characterIds.length > 0 
+            ? conversation.characterIds[0] 
+            : null
+      };
+      
+      console.log("Creating AI response message:", {
+        conversationId: conversationId,
+        isUserMessage: false,
+        contentLength: responseContent ? responseContent.length : 0,
+        senderId: responseMessage.senderId
+      });
+      
+      const createdMessage = await storage.createMessage(responseMessage);
+      console.log("Created AI response with ID:", createdMessage.id);
+    } catch (processingError) {
+      console.error("Error processing AI response:", processingError);
     }
-  });
+  }
 
   // OpenAI configuration check
   app.get("/api/openai/status", async (req, res) => {
