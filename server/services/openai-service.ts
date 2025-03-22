@@ -89,17 +89,22 @@ export async function generateLibrarianResponse(
   relevantThemes: Theme[] = [],
   relevantQuotes: ThemeQuote[] = []
 ): Promise<string> {
+  console.log("Starting librarian response generation...");
+  
   if (!openai) {
+    console.error("OpenAI client not available");
     return "I cannot respond at the moment. Please check the OpenAI API key configuration.";
   }
 
   // Format previous messages for context
+  console.log(`Formatting ${messages.length} messages for context`);
   const formattedMessages: ChatCompletionMessageParam[] = messages.map(msg => ({
     role: msg.isUserMessage ? "user" as const : "assistant" as const,
     content: msg.content
   }));
 
   // Build system prompt from librarian persona
+  console.log("Building system prompt with librarian persona:", librarianPersona.name);
   const systemPrompt = `
 You are ${librarianPersona.name}, a librarian and literary guide specialized in George Orwell's "1984".
 
@@ -123,6 +128,7 @@ Respond to the user's literary questions or discussions about "1984", providing 
 `;
 
   try {
+    console.log("Sending request to OpenAI...");
     // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -137,9 +143,21 @@ Respond to the user's literary questions or discussions about "1984", providing 
       presence_penalty: 0.2,
     });
 
+    console.log("Received response from OpenAI");
     return response.choices[0].message.content || "I cannot respond at the moment.";
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating librarian response:", error);
+    
+    // Provide more detailed error information
+    if (error.response) {
+      console.error("OpenAI API response error:", {
+        status: error.response.status,
+        data: error.response.data
+      });
+    } else if (error.message) {
+      console.error("Error message:", error.message);
+    }
+    
     return "I cannot respond at the moment due to a technical issue.";
   }
 }

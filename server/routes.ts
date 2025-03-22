@@ -454,7 +454,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
               : null
         };
         
-        await storage.createMessage(responseMessage);
+        console.log("Creating AI response message:", {
+          conversationId: id,
+          isUserMessage: false,
+          contentLength: responseContent ? responseContent.length : 0,
+          senderId: responseMessage.senderId
+        });
+        
+        const createdMessage = await storage.createMessage(responseMessage);
+        console.log("Created AI response with ID:", createdMessage.id);
+        
+        // Send the response message back to the client
+        res.json(createdMessage);
       }
     } catch (err) {
       console.error("Error processing message:", err);
