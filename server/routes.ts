@@ -339,8 +339,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newMessage = await storage.createMessage(messageData);
       res.status(201).json(newMessage);
       
-      // If it's a user message, generate an AI response
+      // If it's a user message, generate an AI response asynchronously
+      // Don't try to send another response here
       if (messageData.isUserMessage) {
+        // Process the AI response in the background
+        // We use setImmediate instead of setTimeout to avoid TypeScript issues
+        setImmediate(async () => {
+          try {
         // Get the conversation to determine the mode and characters
         const conversation = await storage.getConversationById(id);
         if (!conversation) {
@@ -463,9 +468,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         const createdMessage = await storage.createMessage(responseMessage);
         console.log("Created AI response with ID:", createdMessage.id);
-        
-        // Send the response message back to the client
-        return res.status(201).json(createdMessage);
+          } catch (processingError) {
+            console.error("Error processing AI response:", processingError);
+          }
+        }, 0);
       }
     } catch (err) {
       console.error("Error processing message:", err);
