@@ -306,6 +306,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/conversations/:id/messages", async (req, res) => {
     try {
+      console.log("Received message request");
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid conversation ID" });
@@ -313,6 +314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const messageData = req.body as InsertMessage;
       messageData.conversationId = id;
+      console.log("Processing message:", messageData);
       
       // For user messages, we want to analyze sentiment and identify relevant themes and quotes
       if (messageData.isUserMessage) {
