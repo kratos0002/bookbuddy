@@ -400,12 +400,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
               : [];
             
             // Generate AI response from character
+            // Convert messages to conversation history format
+            const conversationHistory = messages
+              .filter(msg => msg.id !== messageData.id) // Exclude the current message that's being responded to
+              .map(msg => ({
+                role: msg.isUserMessage ? 'user' : 'assistant',
+                content: msg.content
+              }));
+            
             responseContent = await generateCharacterResponse(
               character, 
               characterPersona, 
-              messages, 
-              relevantThemes,
-              relevantQuotes
+              messageData.content, // The latest user message
+              conversationHistory
             );
           }
         }
@@ -444,11 +451,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Generate AI response from librarian
           console.log("Generating librarian response...");
           try {
+            // Convert messages to conversation history format
+            const conversationHistory = messages
+              .filter(msg => msg.id !== messageData.id) // Exclude the current message that's being responded to
+              .map(msg => ({
+                role: msg.isUserMessage ? 'user' : 'assistant',
+                content: msg.content
+              }));
+            
             responseContent = await generateLibrarianResponse(
               librarianPersona, 
-              messages, 
-              relevantThemes,
-              relevantQuotes
+              messageData.content, // The latest user message
+              conversationHistory
             );
             console.log("Librarian response generated successfully");
           } catch (error) {

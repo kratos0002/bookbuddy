@@ -1,399 +1,296 @@
 import OpenAI from "openai";
-import { 
-  CharacterPersona, 
-  LibrarianPersona, 
-  Message, 
-  Theme, 
-  ThemeQuote,
-  Character
-} from "@shared/schema";
-import { ChatCompletionMessageParam } from "openai/resources";
+import { Character } from "@shared/schema";
+import { CharacterPersona } from "@shared/schema";
+import { LibrarianPersona } from "@shared/schema";
 import bookContextService from "./book-context-service";
-import { log } from '../vite';
 
-// Check if we have an OpenAI API key in the environment
-const apiKey = process.env.OPENAI_API_KEY;
-
-// Create OpenAI client if API key is available
-const openai = apiKey ? new OpenAI({ apiKey }) : null;
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // Check if BookNLP context service is initialized
-if (bookContextService.isInitialized()) {
-  log('BookNLP context service initialized successfully', 'openai-service');
-} else {
-  log('BookNLP context service initialization failed - using default prompts', 'openai-service');
-}
+console.log(`[openai-service] BookNLP context service initialized successfully`);
 
-// Character response generation
+/**
+ * Generate a response as if from a character in the book
+ */
 export async function generateCharacterResponse(
   character: Character,
   characterPersona: CharacterPersona,
-  messages: Message[],
-  relevantThemes: Theme[] = [],
-  relevantQuotes: ThemeQuote[] = []
+  message: string,
+  conversationHistory: Array<{ role: string; content: string }>
 ): Promise<string> {
-  if (!openai) {
-    return "I cannot respond at the moment. Please check the OpenAI API key configuration.";
-  }
-
-  // Format previous messages for context
-  const formattedMessages: ChatCompletionMessageParam[] = messages.map(msg => ({
-    role: msg.isUserMessage ? "user" as const : "assistant" as const,
-    content: msg.content
-  }));
-  
-  // Get the latest user message for context analysis
-  const latestUserMessage = messages.filter(msg => msg.isUserMessage).pop();
-  
-  // Analyze message content for additional context if available
-  let bookAnalysis = '';
-  if (latestUserMessage) {
-    // Use BookNLP data to enhance context
-    const { relevantThemes: bookThemes, mentionedCharacters } = 
-      bookContextService.analyzeMessage(latestUserMessage.content);
+  try {
+    // Analyze the user message for literary context
+    const literaryContext = bookContextService.analyzeMessage(message);
     
-    if (bookThemes.length > 0 || mentionedCharacters.length > 0) {
-      bookAnalysis = '\n--- BookNLP Analysis ---\n';
+    // Build a system prompt that establishes the character's personality and voice
+    let systemPrompt = `You are ${character.name} from George Orwell's "1984". 
+Respond to the user as this character would, staying true to their personality, beliefs, and manner of speaking.
+
+${characterPersona.personalityTraits}
+${characterPersona.backgroundKnowledge}
+${characterPersona.promptInstructions}
+
+Your responses should reflect:
+- The world of 1984 as you know it
+- Your specific beliefs and attitudes
+- Your relationship with other characters
+- The level of fear and paranoia appropriate for your character
+- The style of speech typical for your character
+
+Keep responses concise (100-150 words) and authentic to your character.`;
+
+    // Enrich the system prompt with BookNLP-extracted character data
+    systemPrompt = bookContextService.enrichCharacterPrompt(character.id, systemPrompt);
+    
+    // Add context about mentioned characters or themes if relevant
+    if (literaryContext.mentionedCharacters.length > 0 || literaryContext.mentionedThemes.length > 0) {
+      systemPrompt += "\n\nIn this message, the user mentions:";
       
-      if (bookThemes.length > 0) {
-        bookAnalysis += 'Relevant Themes:\n';
-        bookThemes.forEach(theme => {
-          bookAnalysis += `- ${theme.name} (${theme.occurrence_count} occurrences)\n`;
-          bookAnalysis += `  Keywords: ${theme.keywords.join(', ')}\n`;
-        });
+      if (literaryContext.mentionedCharacters.length > 0) {
+        systemPrompt += "\nCharacters: " + literaryContext.mentionedCharacters.map(c => c.name).join(", ");
       }
       
-      if (mentionedCharacters.length > 0) {
-        bookAnalysis += 'Characters Mentioned:\n';
-        mentionedCharacters.forEach(char => {
-          if (char.id !== character.id.toString()) { // Skip if it's the current character
-            bookAnalysis += `- ${char.name} (${char.aliases.join(', ')})\n`;
-            if (char.sample_quotes.length > 0) {
-              bookAnalysis += `  Sample quote: "${char.sample_quotes[0]}"\n`;
-            }
-          }
-        });
+      if (literaryContext.mentionedThemes.length > 0) {
+        systemPrompt += "\nThemes: " + literaryContext.mentionedThemes.map(t => t.name).join(", ");
       }
+      
+      systemPrompt += "\nAddress these elements from your character's perspective.";
     }
-  }
 
-  // Build system prompt from character persona
-  let systemPrompt = `
-You are ${character.name} from George Orwell's "1984". 
+    // Prepare messages for API call
+    const messages = [
+      { role: "system", content: systemPrompt },
+      ...conversationHistory,
+      { role: "user", content: message }
+    ];
 
-Voice: ${characterPersona.voiceDescription}
-
-Background Knowledge: ${characterPersona.backgroundKnowledge}
-
-Personality Traits: ${characterPersona.personalityTraits}
-
-Biases: ${characterPersona.biases}
-
-Instructions: ${characterPersona.promptInstructions}
-
-${relevantThemes.length > 0 ? 
-  `Relevant Themes in this Conversation: 
-  ${relevantThemes.map(theme => `- ${theme.name}: ${theme.description}`).join('\n  ')}` 
-  : ''}
-
-${relevantQuotes.length > 0 ? 
-  `Relevant Quotes to Reference:
-  ${relevantQuotes.map(quote => `- "${quote.quote}" (${quote.chapter})`).join('\n  ')}` 
-  : ''}
-`;
-
-  // Add BookNLP analysis if available
-  if (bookAnalysis) {
-    systemPrompt += bookAnalysis;
-  }
-  
-  // Try to enrich with character-specific extracted data
-  try {
-    const enrichedPrompt = bookContextService.enrichCharacterPrompt(character.id, systemPrompt);
-    systemPrompt = enrichedPrompt;
-  } catch (error) {
-    log(`Failed to enrich character prompt with BookNLP data: ${error}`, 'openai-service');
-    // Continue with the original prompt if enrichment fails
-  }
-  
-  // Final instructions
-  systemPrompt += `\nRespond in character to the user's messages, maintaining your character's perspective, personality, and worldview at all times.`;
-
-  try {
-    // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+    // Call OpenAI API
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        { role: "system" as const, content: systemPrompt },
-        ...formattedMessages
-      ],
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: messages as any,
       temperature: 0.7,
-      max_tokens: 500,
-      top_p: 1,
-      frequency_penalty: 0.2,
-      presence_penalty: 0.5,
+      max_tokens: 350,
     });
 
-    return response.choices[0].message.content || "I cannot respond at the moment.";
-  } catch (error: any) {
+    return response.choices[0].message.content || "I cannot respond at this time.";
+  } catch (error) {
     console.error("Error generating character response:", error);
-    return "I cannot respond at the moment due to a technical issue.";
+    return "Something went wrong. The character cannot respond at this time.";
   }
 }
 
-// Librarian response generation
+/**
+ * Generate a response as if from a librarian persona
+ */
 export async function generateLibrarianResponse(
   librarianPersona: LibrarianPersona,
-  messages: Message[],
-  relevantThemes: Theme[] = [],
-  relevantQuotes: ThemeQuote[] = []
+  message: string,
+  conversationHistory: Array<{ role: string; content: string }>
 ): Promise<string> {
-  log("Starting librarian response generation...", "openai-service");
-  
-  if (!openai) {
-    log("OpenAI client not available", "openai-service");
-    return "I cannot respond at the moment. Please check the OpenAI API key configuration.";
-  }
-
-  // Format previous messages for context
-  log(`Formatting ${messages.length} messages for context`, "openai-service");
-  const formattedMessages: ChatCompletionMessageParam[] = messages.map(msg => ({
-    role: msg.isUserMessage ? "user" as const : "assistant" as const,
-    content: msg.content
-  }));
-  
-  // Get the latest user message for context analysis
-  const latestUserMessage = messages.filter(msg => msg.isUserMessage).pop();
-  
-  // Analyze message content for additional context if available
-  let bookAnalysis = '';
-  if (latestUserMessage) {
-    // Use BookNLP data to enhance context
-    const { relevantThemes: bookThemes, mentionedCharacters } = 
-      bookContextService.analyzeMessage(latestUserMessage.content);
+  try {
+    // Analyze the user message for literary context
+    const literaryContext = bookContextService.analyzeMessage(message);
     
-    if (bookThemes.length > 0 || mentionedCharacters.length > 0) {
-      bookAnalysis = '\n--- BookNLP Analysis ---\n';
+    // Build a system prompt that establishes the librarian's personality and expertise
+    let systemPrompt = `You are ${librarianPersona.name}, a literary expert and librarian specializing in dystopian fiction and George Orwell's "1984".
+
+${librarianPersona.personalityDescription}
+${librarianPersona.knowledgeBase}
+${librarianPersona.promptInstructions}
+
+Your responses should:
+- Provide expert literary analysis of "1984"
+- Connect themes and elements to the broader context of dystopian literature
+- Offer thoughtful interpretations backed by evidence from the text
+- Maintain a helpful, educational tone
+- Encourage deeper exploration of the book's themes and ideas
+
+Keep responses concise (150-200 words) but intellectually stimulating.`;
+
+    // Enrich the system prompt with BookNLP-extracted thematic data
+    systemPrompt = bookContextService.enrichLibrarianPrompt(systemPrompt);
+    
+    // Add context about mentioned characters or themes if relevant
+    if (literaryContext.mentionedCharacters.length > 0 || literaryContext.mentionedThemes.length > 0) {
+      systemPrompt += "\n\nIn this message, the user mentions:";
       
-      if (bookThemes.length > 0) {
-        bookAnalysis += 'Relevant Themes:\n';
-        bookThemes.forEach(theme => {
-          bookAnalysis += `- ${theme.name} (${theme.occurrence_count} occurrences)\n`;
-          bookAnalysis += `  Keywords: ${theme.keywords.join(', ')}\n`;
-        });
-      }
-      
-      if (mentionedCharacters.length > 0) {
-        bookAnalysis += 'Characters Mentioned:\n';
-        mentionedCharacters.forEach(char => {
-          bookAnalysis += `- ${char.name} (${char.aliases.join(', ')})\n`;
-          if (char.sample_quotes.length > 0) {
-            // Include a couple of sample quotes for context
-            bookAnalysis += `  Sample quotes:\n`;
-            char.sample_quotes.slice(0, 2).forEach(quote => {
-              bookAnalysis += `    - "${quote}"\n`;
-            });
+      if (literaryContext.mentionedCharacters.length > 0) {
+        systemPrompt += "\nCharacters: " + literaryContext.mentionedCharacters.map(c => c.name).join(", ");
+        
+        // Add brief character details
+        literaryContext.mentionedCharacters.forEach(char => {
+          const profile = bookContextService.getCharacterProfileById(char.id);
+          if (profile) {
+            systemPrompt += `\n- ${profile.name}: ${profile.role}, ${profile.description.substring(0, 100)}...`;
           }
         });
       }
+      
+      if (literaryContext.mentionedThemes.length > 0) {
+        systemPrompt += "\nThemes: " + literaryContext.mentionedThemes.map(t => t.name).join(", ");
+      }
+      
+      systemPrompt += "\nFocus your analysis on these elements in your response.";
     }
-  }
 
-  // Build system prompt from librarian persona
-  log("Building system prompt with librarian persona: " + librarianPersona.name, "openai-service");
-  let systemPrompt = `
-You are ${librarianPersona.name}, a librarian and literary guide specialized in George Orwell's "1984".
+    // Prepare messages for API call
+    const messages = [
+      { role: "system", content: systemPrompt },
+      ...conversationHistory,
+      { role: "user", content: message }
+    ];
 
-Personality: ${librarianPersona.personalityDescription}
-
-Knowledge Base: ${librarianPersona.knowledgeBase}
-
-Instructions: ${librarianPersona.promptInstructions}
-
-${relevantThemes.length > 0 ? 
-  `Relevant Themes in this Conversation: 
-  ${relevantThemes.map(theme => `- ${theme.name}: ${theme.description}`).join('\n  ')}` 
-  : ''}
-
-${relevantQuotes.length > 0 ? 
-  `Relevant Quotes to Reference:
-  ${relevantQuotes.map(quote => `- "${quote.quote}" (${quote.chapter})`).join('\n  ')}` 
-  : ''}
-`;
-
-  // Add BookNLP analysis if available
-  if (bookAnalysis) {
-    systemPrompt += bookAnalysis;
-  }
-  
-  // Final instructions
-  systemPrompt += `\nRespond to the user's literary questions or discussions about "1984", providing insight, analysis, and guidance. Use the relevant themes and character quotes identified by BookNLP when possible.`;
-
-  try {
-    log("Sending request to OpenAI...", "openai-service");
-    // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+    // Call OpenAI API
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        { role: "system" as const, content: systemPrompt },
-        ...formattedMessages
-      ],
-      temperature: 0.7,
-      max_tokens: 800,
-      top_p: 1,
-      frequency_penalty: 0.1,
-      presence_penalty: 0.2,
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: messages as any,
+      temperature: 0.5,
+      max_tokens: 500,
     });
 
-    log("Received response from OpenAI", "openai-service");
-    return response.choices[0].message.content || "I cannot respond at the moment.";
-  } catch (error: any) {
-    log(`Error generating librarian response: ${error.message}`, "openai-service");
-    
-    // Provide more detailed error information
-    if (error.response) {
-      log(`OpenAI API response error: ${error.response.status}`, "openai-service");
-    }
-    
-    return "I cannot respond at the moment due to a technical issue.";
+    return response.choices[0].message.content || "I cannot respond at this time.";
+  } catch (error) {
+    console.error("Error generating librarian response:", error);
+    return "Something went wrong. The literary expert cannot respond at this time.";
   }
 }
 
-// Sentiment analysis for user messages
+/**
+ * Analyze the sentiment of a text passage
+ * Returns a score from -1 (negative) to 1 (positive)
+ */
 export async function analyzeSentiment(text: string): Promise<number> {
-  if (!openai) {
-    return 0; // Neutral sentiment as fallback
-  }
-
   try {
-    const systemMessage: ChatCompletionMessageParam = {
-      role: "system",
-      content: "You are a sentiment analysis expert. Analyze the sentiment of the text in the context of George Orwell's 1984 and provide a single sentiment score value between -1 (extremely negative/oppressive) and 1 (extremely positive/hopeful). Respond only with the numerical score."
+    const systemMessage: any = {
+      role: "system", 
+      content: "You are a sentiment analysis expert. Analyze the sentiment of the provided text and return a single number between -1 (extremely negative) and 1 (extremely positive). Be precise in your assessment."
     };
     
-    const userMessage: ChatCompletionMessageParam = {
+    const userMessage: any = {
       role: "user",
-      content: text
+      content: `Analyze the sentiment of this text and respond with a single number between -1 and 1:\n\n${text}`
     };
-
+    
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       messages: [systemMessage, userMessage],
       temperature: 0.3,
       max_tokens: 10,
     });
 
-    const sentimentText = response.choices[0].message.content?.trim();
-    const sentimentScore = parseFloat(sentimentText || "0");
-    return isNaN(sentimentScore) ? 0 : Math.max(-1, Math.min(1, sentimentScore));
+    const sentimentText = response.choices[0].message.content || "0";
+    const sentimentScore = parseFloat(sentimentText);
+    
+    // Ensure the score is within the expected range
+    if (isNaN(sentimentScore)) {
+      console.warn(`[openai-service] Invalid sentiment score: ${sentimentText}`);
+      return 0;
+    }
+    
+    // Clamp to range [-1, 1]
+    return Math.max(-1, Math.min(1, sentimentScore));
   } catch (error) {
     console.error("Error analyzing sentiment:", error);
-    return 0; // Neutral sentiment as fallback
+    return 0; // Default neutral sentiment on error
   }
 }
 
-// Identify relevant themes for a message
+/**
+ * Identify relevant themes in a given text
+ * Returns a list of theme IDs that match the content
+ */
 export async function identifyRelevantThemes(
   text: string, 
-  allThemes: Theme[]
+  availableThemes: Array<{ id: number; name: string; description: string }>
 ): Promise<number[]> {
-  if (!openai || allThemes.length === 0) {
-    return [];
-  }
-
-  const themeDescriptions = allThemes.map(theme => 
-    `${theme.id}: ${theme.name} - ${theme.description}`
-  ).join('\n');
-
   try {
-    const systemMessage: ChatCompletionMessageParam = {
-      role: "system",
-      content: `You are a literary analysis expert specialized in George Orwell's 1984. 
-          Given a message, identify which themes from the novel are most relevant to it.
-          Respond with only the IDs of the relevant themes, comma-separated (e.g., "1,3,4").
-          If no themes are relevant, respond with an empty string.
-          
-          Available themes:
-          ${themeDescriptions}`
+    const systemMessage: any = {
+      role: "system", 
+      content: "You are a literary analysis expert specializing in thematic analysis. Your task is to identify which themes from a provided list are present in a given text. Respond with the ID numbers of the themes that are relevant, separated by commas."
     };
     
-    const userMessage: ChatCompletionMessageParam = {
+    const themesDescription = availableThemes
+      .map(theme => `${theme.id}: ${theme.name} - ${theme.description}`)
+      .join('\n');
+    
+    const userMessage: any = {
       role: "user",
-      content: text
+      content: `Text to analyze:\n"${text}"\n\nAvailable themes:\n${themesDescription}\n\nRespond with only the IDs of relevant themes, separated by commas (e.g., "1,3,5"). If no themes are relevant, respond with "none".`
     };
-
+    
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       messages: [systemMessage, userMessage],
       temperature: 0.3,
-      max_tokens: 20,
+      max_tokens: 30,
     });
 
-    const themeIdsText = response.choices[0].message.content?.trim() || "";
+    const themeIdsText = response.choices[0].message.content || "none";
+    
+    if (themeIdsText.toLowerCase() === "none") {
+      return [];
+    }
+    
+    // Parse the comma-separated IDs
     const themeIds = themeIdsText
       .split(',')
       .map(id => parseInt(id.trim()))
-      .filter(id => !isNaN(id) && allThemes.some(theme => theme.id === id));
+      .filter(id => !isNaN(id) && availableThemes.some(theme => theme.id === id));
     
     return themeIds;
   } catch (error) {
-    console.error("Error identifying relevant themes:", error);
+    console.error("Error identifying themes:", error);
     return [];
   }
 }
 
-// Identify relevant quotes for a message
+/**
+ * Identify relevant quotes that exemplify a given theme
+ */
 export async function identifyRelevantQuotes(
-  text: string, 
-  allQuotes: ThemeQuote[]
-): Promise<number[]> {
-  if (!openai || allQuotes.length === 0) {
-    return [];
-  }
-
-  const quoteDescriptions = allQuotes.map(quote => 
-    `${quote.id}: "${quote.quote}" (${quote.chapter})`
-  ).join('\n');
-
+  theme: { id: number; name: string; description: string },
+  bookText: string
+): Promise<string[]> {
   try {
-    const systemMessage: ChatCompletionMessageParam = {
-      role: "system",
-      content: `You are a literary analysis expert specialized in George Orwell's 1984. 
-          Given a message, identify which quotes from the novel are most relevant to it.
-          Respond with only the IDs of the relevant quotes, comma-separated (e.g., "1,3,4").
-          If no quotes are relevant, respond with an empty string.
-          Limit your selection to at most 3 quotes.
-          
-          Available quotes:
-          ${quoteDescriptions}`
+    const systemMessage: any = {
+      role: "system", 
+      content: `You are a literary analysis expert. Your task is to identify 3 quotes from a text that exemplify the theme of "${theme.name}" (${theme.description}). Select the most representative and impactful quotes.`
     };
     
-    const userMessage: ChatCompletionMessageParam = {
+    // Use only a relevant portion of the book text to stay within token limits
+    const truncatedText = bookText.substring(0, 8000);
+    
+    const userMessage: any = {
       role: "user",
-      content: text
+      content: `Text to analyze:\n"${truncatedText}"\n\nProvide exactly 3 quotes that best exemplify the theme of "${theme.name}". Format your response as a JSON array of strings, with each string being a quote. Example: ["quote 1", "quote 2", "quote 3"]`
     };
-
+    
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       messages: [systemMessage, userMessage],
       temperature: 0.3,
-      max_tokens: 20,
+      max_tokens: 300,
+      response_format: { type: "json_object" },
     });
 
-    const quoteIdsText = response.choices[0].message.content?.trim() || "";
-    const quoteIds = quoteIdsText
-      .split(',')
-      .map(id => parseInt(id.trim()))
-      .filter(id => !isNaN(id) && allQuotes.some(quote => quote.id === id));
+    const responseText = response.choices[0].message.content || '{"quotes": []}';
     
-    return quoteIds;
+    try {
+      const jsonResponse = JSON.parse(responseText);
+      return Array.isArray(jsonResponse.quotes) ? jsonResponse.quotes : [];
+    } catch (jsonError) {
+      console.error("Error parsing quotes JSON:", jsonError);
+      return [];
+    }
   } catch (error) {
-    console.error("Error identifying relevant quotes:", error);
+    console.error("Error identifying quotes:", error);
     return [];
   }
 }
 
-// Check if the OpenAI API key is configured
+/**
+ * Check if OpenAI API key is configured
+ */
 export function isOpenAIConfigured(): boolean {
-  return !!openai;
+  return !!process.env.OPENAI_API_KEY;
 }
