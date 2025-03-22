@@ -65,7 +65,7 @@ Respond in character to the user's messages, maintaining your character's perspe
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
-        { role: "system", content: systemPrompt },
+        { role: "system" as const, content: systemPrompt },
         ...formattedMessages
       ],
       temperature: 0.7,
@@ -127,7 +127,7 @@ Respond to the user's literary questions or discussions about "1984", providing 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
-        { role: "system", content: systemPrompt },
+        { role: "system" as const, content: systemPrompt },
         ...formattedMessages
       ],
       temperature: 0.7,
@@ -151,19 +151,19 @@ export async function analyzeSentiment(text: string): Promise<number> {
   }
 
   try {
+    const systemMessage: ChatCompletionMessageParam = {
+      role: "system",
+      content: "You are a sentiment analysis expert. Analyze the sentiment of the text in the context of George Orwell's 1984 and provide a single sentiment score value between -1 (extremely negative/oppressive) and 1 (extremely positive/hopeful). Respond only with the numerical score."
+    };
+    
+    const userMessage: ChatCompletionMessageParam = {
+      role: "user",
+      content: text
+    };
+
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: 
-            "You are a sentiment analysis expert. Analyze the sentiment of the text in the context of George Orwell's 1984 and provide a single sentiment score value between -1 (extremely negative/oppressive) and 1 (extremely positive/hopeful). Respond only with the numerical score.",
-        },
-        {
-          role: "user",
-          content: text,
-        },
-      ],
+      messages: [systemMessage, userMessage],
       temperature: 0.3,
       max_tokens: 10,
     });
@@ -191,24 +191,25 @@ export async function identifyRelevantThemes(
   ).join('\n');
 
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: `You are a literary analysis expert specialized in George Orwell's 1984. 
+    const systemMessage: ChatCompletionMessageParam = {
+      role: "system",
+      content: `You are a literary analysis expert specialized in George Orwell's 1984. 
           Given a message, identify which themes from the novel are most relevant to it.
           Respond with only the IDs of the relevant themes, comma-separated (e.g., "1,3,4").
           If no themes are relevant, respond with an empty string.
           
           Available themes:
-          ${themeDescriptions}`,
-        },
-        {
-          role: "user",
-          content: text,
-        },
-      ],
+          ${themeDescriptions}`
+    };
+    
+    const userMessage: ChatCompletionMessageParam = {
+      role: "user",
+      content: text
+    };
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [systemMessage, userMessage],
       temperature: 0.3,
       max_tokens: 20,
     });
@@ -240,25 +241,26 @@ export async function identifyRelevantQuotes(
   ).join('\n');
 
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: `You are a literary analysis expert specialized in George Orwell's 1984. 
+    const systemMessage: ChatCompletionMessageParam = {
+      role: "system",
+      content: `You are a literary analysis expert specialized in George Orwell's 1984. 
           Given a message, identify which quotes from the novel are most relevant to it.
           Respond with only the IDs of the relevant quotes, comma-separated (e.g., "1,3,4").
           If no quotes are relevant, respond with an empty string.
           Limit your selection to at most 3 quotes.
           
           Available quotes:
-          ${quoteDescriptions}`,
-        },
-        {
-          role: "user",
-          content: text,
-        },
-      ],
+          ${quoteDescriptions}`
+    };
+    
+    const userMessage: ChatCompletionMessageParam = {
+      role: "user",
+      content: text
+    };
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [systemMessage, userMessage],
       temperature: 0.3,
       max_tokens: 20,
     });
