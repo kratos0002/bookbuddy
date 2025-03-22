@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Send, ArrowLeft, Info } from "lucide-react";
+import { Send, ArrowLeft, Info, Loader2 } from "lucide-react";
 
 export default function ChatPage() {
   const { id } = useParams();
@@ -24,6 +24,10 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Track when we're waiting for an AI response
+  const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
+  const [lastMessageTimestamp, setLastMessageTimestamp] = useState<Date | null>(null);
 
   // Default to create a new conversation if no ID is provided
   const isNewConversation = !conversationId;
@@ -52,10 +56,18 @@ export default function ChatPage() {
   });
   
   // Get messages for this conversation
-  const { data: messages = [], isLoading: isLoadingMessages, error: messagesError } = useQuery<Message[]>({
+  const { 
+    data: messages = [], 
+    isLoading: isLoadingMessages, 
+    error: messagesError,
+    refetch: refetchMessages
+  } = useQuery<Message[]>({
     queryKey: ['/api/conversations', conversationId, 'messages'],
     enabled: !!conversationId,
-    refetchInterval: 3000, // Poll for new messages every 3 seconds
+    // Override the default staleTime and refetchInterval for this query
+    staleTime: 1000,
+    refetchInterval: 2000, // Poll more frequently - every 2 seconds
+    refetchIntervalInBackground: true,
   });
   
   // Create a new conversation
@@ -117,8 +129,46 @@ export default function ChatPage() {
       console.log("Message mutation completed successfully:", data);
       // Clear the input
       setMessageInput("");
-      // Invalidate and refetch messages
-      queryClient.invalidateQueries({ queryKey: ['/api/conversations', conversationId, 'messages'] });
+      
+      // Set waiting for response state
+      setIsWaitingForResponse(true);
+      setLastMessageTimestamp(new Date());
+      
+      // Immediately refetch to show the user's message
+      refetchMessages();
+      
+      // Start polling more aggressively for the AI response
+      const checkForResponse = () => {
+        refetchMessages().then((result) => {
+          const newMessages = result.data || [];
+          
+          // Check if we have a new AI message after our user message
+          const userMessageIndex = newMessages.findIndex(m => m.id === data.id);
+          const hasAIResponse = userMessageIndex >= 0 && userMessageIndex < newMessages.length - 1;
+          
+          if (hasAIResponse) {
+            // We got a response, stop waiting
+            setIsWaitingForResponse(false);
+          } else {
+            // No response yet, check again in a second if we haven't been waiting too long
+            const waitingTime = new Date().getTime() - (lastMessageTimestamp?.getTime() || 0);
+            
+            if (waitingTime < 20000) { // Stop checking after 20 seconds to avoid infinite polling
+              setTimeout(checkForResponse, 1000);
+            } else {
+              setIsWaitingForResponse(false);
+              toast({
+                title: "Response Timeout",
+                description: "The AI is taking too long to respond. Try refreshing the page.",
+                variant: "destructive",
+              });
+            }
+          }
+        });
+      };
+      
+      // Start checking for response
+      setTimeout(checkForResponse, 1000);
     },
     onError: (error) => {
       console.error("Error in send message mutation:", error);
@@ -332,35 +382,72 @@ export default function ChatPage() {
           {/* Messages area */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages && messages.length > 0 ? (
-              messages.map((message: Message) => (
-                <div 
-                  key={message.id} 
-                  className={`flex ${message.isUserMessage ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div className={`flex max-w-[80%] ${message.isUserMessage ? 'flex-row-reverse' : 'flex-row'}`}>
-                    <Avatar className={`h-8 w-8 ${message.isUserMessage ? 'ml-2' : 'mr-2'}`}>
-                      {getSenderImage(message.senderId) && (
-                        <AvatarImage src={getSenderImage(message.senderId) as string} />
-                      )}
-                      <AvatarFallback>
-                        {getCharacterName(message.senderId)?.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div 
-                      className={`px-4 py-2 rounded-lg ${
-                        message.isUserMessage 
-                          ? 'bg-primary text-primary-foreground' 
-                          : 'bg-muted'
-                      }`}
-                    >
-                      <div className="text-xs mb-1">
-                        {getCharacterName(message.senderId)}
+              <>
+                {messages.map((message: Message) => (
+                  <div 
+                    key={message.id} 
+                    className={`flex ${message.isUserMessage ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div className={`flex max-w-[80%] ${message.isUserMessage ? 'flex-row-reverse' : 'flex-row'}`}>
+                      <Avatar className={`h-8 w-8 ${message.isUserMessage ? 'ml-2' : 'mr-2'}`}>
+                        {getSenderImage(message.senderId) && (
+                          <AvatarImage src={getSenderImage(message.senderId) as string} />
+                        )}
+                        <AvatarFallback>
+                          {getCharacterName(message.senderId)?.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div 
+                        className={`px-4 py-2 rounded-lg ${
+                          message.isUserMessage 
+                            ? 'bg-primary text-primary-foreground' 
+                            : 'bg-muted'
+                        }`}
+                      >
+                        <div className="text-xs mb-1">
+                          {getCharacterName(message.senderId)}
+                        </div>
+                        <div className="whitespace-pre-wrap">{message.content}</div>
                       </div>
-                      <div className="whitespace-pre-wrap">{message.content}</div>
                     </div>
                   </div>
-                </div>
-              ))
+                ))}
+                
+                {/* Show typing indicator when waiting for AI response */}
+                {isWaitingForResponse && (
+                  <div className="flex justify-start">
+                    <div className="flex max-w-[80%] flex-row">
+                      <Avatar className="h-8 w-8 mr-2">
+                        {conversation?.isLibrarianPresent ? (
+                          <AvatarImage src="/librarian-avatar.png" alt="Alexandria" />
+                        ) : (
+                          <AvatarImage 
+                            src={getSenderImage(conversation?.characterIds as number) as string} 
+                            alt={getCharacterName(conversation?.characterIds as number)}
+                          />
+                        )}
+                        <AvatarFallback>
+                          {conversation?.isLibrarianPresent ? 'A' : 
+                            getCharacterName(conversation?.characterIds as number)?.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="px-4 py-2 rounded-lg bg-muted">
+                        <div className="text-xs mb-1">
+                          {conversation?.isLibrarianPresent 
+                            ? 'Alexandria' 
+                            : getCharacterName(conversation?.characterIds as number)}
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                          <div className="w-2 h-2 rounded-full bg-primary animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                          <div className="w-2 h-2 rounded-full bg-primary animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                          <span className="ml-2 text-xs text-muted-foreground">thinking...</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 No messages yet. Start the conversation!
