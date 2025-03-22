@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, jsonb, real } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, jsonb, real, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -242,3 +242,114 @@ export interface ThemeHeatmapData {
   chapters: number[];
   intensities: Array<Array<number>>;
 }
+
+// Character Persona schema - for conversations
+export const characterPersonas = pgTable("character_personas", {
+  id: serial("id").primaryKey(),
+  characterId: integer("character_id").notNull(), // References the Character model
+  voiceDescription: text("voice_description").notNull(), // How the character speaks
+  backgroundKnowledge: text("background_knowledge").notNull(), // What the character knows
+  personalityTraits: text("personality_traits").notNull(), // Key personality traits
+  biases: text("biases").notNull(), // Character's biases and viewpoints
+  promptInstructions: text("prompt_instructions").notNull(), // Instructions for AI prompt
+  avatarUrl: text("avatar_url"), // Optional avatar image
+});
+
+export const insertCharacterPersonaSchema = createInsertSchema(characterPersonas).pick({
+  characterId: true,
+  voiceDescription: true,
+  backgroundKnowledge: true,
+  personalityTraits: true,
+  biases: true,
+  promptInstructions: true,
+  avatarUrl: true,
+});
+
+export type InsertCharacterPersona = z.infer<typeof insertCharacterPersonaSchema>;
+export type CharacterPersona = typeof characterPersonas.$inferSelect;
+
+// Librarian Persona schema - special role as guide
+export const librarianPersonas = pgTable("librarian_personas", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  bookId: integer("book_id").notNull(),
+  personalityDescription: text("personality_description").notNull(),
+  knowledgeBase: text("knowledge_base").notNull(), // What the librarian knows about the book
+  promptInstructions: text("prompt_instructions").notNull(), // Instructions for AI prompt
+  avatarUrl: text("avatar_url"), // Optional avatar image
+});
+
+export const insertLibrarianPersonaSchema = createInsertSchema(librarianPersonas).pick({
+  name: true,
+  bookId: true,
+  personalityDescription: true,
+  knowledgeBase: true,
+  promptInstructions: true,
+  avatarUrl: true,
+});
+
+export type InsertLibrarianPersona = z.infer<typeof insertLibrarianPersonaSchema>;
+export type LibrarianPersona = typeof librarianPersonas.$inferSelect;
+
+// Conversation schema
+export const conversations = pgTable("conversations", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(), // User having the conversation
+  bookId: integer("book_id").notNull(), // Book being discussed
+  title: text("title").notNull(), // Title/summary of the conversation
+  startedAt: timestamp("started_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  characterIds: jsonb("character_ids").notNull(), // Array of character IDs involved
+  isLibrarianPresent: boolean("is_librarian_present").notNull().default(false), // Whether librarian is involved
+  conversationMode: text("conversation_mode").notNull(), // 'character', 'analysis', 'thematic', etc.
+});
+
+export const insertConversationSchema = createInsertSchema(conversations).pick({
+  userId: true,
+  bookId: true,
+  title: true,
+  characterIds: true,
+  isLibrarianPresent: true,
+  conversationMode: true,
+});
+
+export type InsertConversation = z.infer<typeof insertConversationSchema>;
+export type Conversation = typeof conversations.$inferSelect;
+
+// Message schema
+export const messages = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id").notNull(),
+  senderId: integer("sender_id"), // Character ID or null for user
+  isUserMessage: boolean("is_user_message").notNull(),
+  content: text("content").notNull(),
+  sentAt: timestamp("sent_at").notNull().defaultNow(),
+  sentimentScore: real("sentiment_score"), // Optional sentiment analysis
+  relevantThemeIds: jsonb("relevant_theme_ids"), // Array of theme IDs relevant to this message
+  relevantQuoteIds: jsonb("relevant_quote_ids"), // Array of quote IDs referenced
+});
+
+export const insertMessageSchema = createInsertSchema(messages).pick({
+  conversationId: true,
+  senderId: true,
+  isUserMessage: true,
+  content: true,
+  sentimentScore: true,
+  relevantThemeIds: true,
+  relevantQuoteIds: true,
+});
+
+export type InsertMessage = z.infer<typeof insertMessageSchema>;
+export type Message = typeof messages.$inferSelect;
+
+// Define ChatModes enum for conversation types
+export const ChatModes = {
+  CHARACTER: 'character',
+  ANALYSIS: 'analysis',
+  THEMATIC: 'thematic',
+  COMPARISON: 'comparison',
+  HISTORICAL: 'historical',
+  COMPREHENSIVE: 'comprehensive'
+} as const;
+
+export type ChatMode = typeof ChatModes[keyof typeof ChatModes];

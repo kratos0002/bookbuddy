@@ -1,0 +1,113 @@
+# BookBuddy: Talk to Your Books
+
+## Project Overview
+Create an interactive web application that allows users to have conversations with AI characters representing books, starting with George Orwell's "1984" as the MVP. Users can talk to a friendly librarian AI who can provide analysis, facilitate character conversations, explore themes, and guide literary discovery through natural conversation rather than static visualizations.
+
+## Core Concept
+BookBuddy transforms literary analysis from passive consumption to active conversation. Users select "1984" and can then:
+1. Chat with the Librarian about the book's themes, plot, historical context, and analysis
+2. Have simulated conversations with main characters (Winston, Julia, O'Brien)
+3. Explore thematic questions through guided discussions
+4. Request specific insights while maintaining a conversational experience
+
+## Key Features
+
+### 1. The Librarian Interface
+- Friendly AI guide with deep knowledge of "1984"
+- Natural language conversation about any aspect of the book
+- Ability to suggest discussion topics based on user interests
+- Can switch between different conversation modes (analysis, character chats, etc.)
+
+### 2. Character Conversations
+- Talk directly to Winston Smith, Julia, O'Brien, or other characters
+- Characters respond in their authentic voice and perspective
+- Characters have knowledge limited to their viewpoint in the book
+- Option to ask characters hypothetical questions beyond the book's scope
+
+### 3. Thematic Exploration
+- Discuss major themes like totalitarianism, surveillance, truth manipulation
+- Librarian can provide quotes and examples from the text
+- Compare themes to historical events or other literary works
+- Explore modern relevance of the book's themes
+
+### 4. Literary Analysis Features
+- Request summaries of specific chapters or sections
+- Discuss writing style, symbolism, and narrative techniques
+- Explore character motivations and relationships
+- Unpack complex passages with the Librarian's help
+
+## Technical Requirements
+
+### Frontend
+- React.js with a clean, book-themed UI
+- Chat-style interface with conversation history
+- Character/mode switcher component
+- Responsive design for desktop and mobile
+- Simple animations for character/mode transitions
+
+### Backend
+- Node.js/Express server
+- Integration with AI language model API (OpenAI, Anthropic, etc.)
+- Context management to maintain conversation continuity
+- Pre-loaded knowledge base about "1984"
+
+### AI Implementation
+- Custom prompts for the Librarian persona
+- Character-specific prompts capturing unique voices and knowledge
+- System to track conversation history for contextual responses
+- Fallback mechanisms for questions outside the book's scope
+
+## User Flow
+1. User lands on homepage showing "1984" as the featured book
+2. User clicks to begin conversation with the Librarian
+3. Librarian welcomes user and offers conversation possibilities:
+   - General discussion about the book
+   - Analysis of specific aspects
+   - Character conversations
+   - Thematic exploration
+4. User converses naturally, with the Librarian guiding the experience
+5. User can switch between modes (Librarian, characters, etc.) at any time
+
+## MVP Scope
+- Focus solely on "1984" with well-crafted character and librarian personas
+- Implement core conversation capabilities with the Librarian
+- Include at least three character conversations (Winston, Julia, O'Brien)
+- Cover major themes and analysis points
+- Simple, intuitive interface prioritizing conversation quality
+
+## Design Guidelines
+- Bookish aesthetic with subtle references to "1984" imagery
+- Clean, distraction-free chat interface
+- Clear indication of which mode/character is active
+- Thoughtful use of typography reflecting the literary nature
+- Dark/light mode option (with dark mode defaulting to a subtle "1984" theme)
+
+## Conversation Examples
+
+### Librarian Mode:
+```
+User: Can you tell me about the themes in 1984?
+Librarian: Absolutely! "1984" explores several powerful themes, with totalitarianism being perhaps the most prominent. Orwell examines how a government can control every aspect of life—from language (Newspeak) to history (constant revision) to even thought itself ("thoughtcrime"). Would you like to explore this theme deeper, or should we discuss others like surveillance, psychological manipulation, or resistance?
+```
+
+### Character Mode (Winston):
+```
+User: Winston, what makes you continue writing in your diary despite the risks?
+Winston: The risks... yes, there's no way around it—I'm already dead for starting the diary. But there's something about putting words on paper that feels like... preservation. Of what, I'm not sure anymore. Sanity? Memory? The simple truth that 2+2=4? When the Party controls everything, even a small act of recording your private thoughts becomes rebellion. I don't have much hope, but if hope exists at all, I must follow it, even to the end.
+```
+
+## Stretch Goals
+- Add more books beyond "1984"
+- Implement group conversations with multiple characters
+- Create "what if" scenarios exploring alternative plot developments
+- Add multimedia elements (book quotes appearing in visual form)
+- Implement social sharing of interesting conversations
+
+## Technical Implementation Notes
+- Use conversation context management to maintain coherent discussions
+- Design prompts that balance character authenticity with informational accuracy
+- Create seamless transitions between different conversation modes
+- Implement rate limiting and response caching for API efficiency
+- Design for progressive enhancement of the conversation experience
+
+This project transforms book analysis from passive consumption to active dialogue, making literary exploration more engaging and personal while still delivering rich analytical content.

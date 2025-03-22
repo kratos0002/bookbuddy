@@ -13,7 +13,17 @@ import {
   type AiAnalysis,
   type GraphData,
   type NarrativeData,
-  type ThemeHeatmapData
+  type ThemeHeatmapData,
+  // New conversation-related types
+  type CharacterPersona,
+  type InsertCharacterPersona,
+  type LibrarianPersona,
+  type InsertLibrarianPersona,
+  type Conversation,
+  type InsertConversation,
+  type Message,
+  type InsertMessage,
+  type ChatMode
 } from "@shared/schema";
 
 import {
