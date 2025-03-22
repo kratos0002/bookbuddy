@@ -394,16 +394,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         } else if (conversation.isLibrarianPresent) {
           // Librarian mode
+          console.log("Processing librarian response for conversation:", id);
           const bookId = 1; // Default to 1984 for now
           const librarianPersona = await storage.getLibrarianPersonaByBookId(bookId);
           
           if (librarianPersona) {
+            console.log("Found librarian persona:", librarianPersona.name);
             // Get relevant themes and quotes
             const relevantThemes = messageData.relevantThemeIds && Array.isArray(messageData.relevantThemeIds)
               ? await Promise.all(
                   messageData.relevantThemeIds.map(id => storage.getThemeById(id))
                 ).then(themes => themes.filter(t => t !== undefined) as Theme[])
               : [];
+            
+            console.log("Found relevant themes:", relevantThemes.map(t => t.name));
             
             const relevantQuotes = messageData.relevantQuoteIds && Array.isArray(messageData.relevantQuoteIds)
               ? await Promise.all(
@@ -418,13 +422,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 ).then(quotes => quotes.filter(q => q !== null) as ThemeQuote[])
               : [];
             
+            console.log("Found relevant quotes:", relevantQuotes.length);
+            
             // Generate AI response from librarian
-            responseContent = await generateLibrarianResponse(
-              librarianPersona, 
-              messages, 
-              relevantThemes,
-              relevantQuotes
-            );
+            console.log("Generating librarian response...");
+            try {
+              responseContent = await generateLibrarianResponse(
+                librarianPersona, 
+                messages, 
+                relevantThemes,
+                relevantQuotes
+              );
+              console.log("Librarian response generated successfully");
+            } catch (error) {
+              console.error("Error generating librarian response:", error);
+              responseContent = "I apologize, but I'm having trouble formulating a response at the moment.";
+            }
           }
         }
         
