@@ -68,6 +68,12 @@ export default function ChatPage() {
     staleTime: 1000,
     refetchInterval: 2000, // Poll more frequently - every 2 seconds
     refetchIntervalInBackground: true,
+    onSuccess: (data) => {
+      console.log("Successfully fetched messages:", data);
+    },
+    onError: (error) => {
+      console.error("Error fetching messages:", error);
+    }
   });
   
   // Create a new conversation
