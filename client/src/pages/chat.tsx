@@ -213,10 +213,10 @@ export default function ChatPage() {
     });
   };
   
-  // Scroll to bottom of messages when new ones arrive
+  // Scroll to bottom of messages when new ones arrive or waiting state changes
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isWaitingForResponse]);
   
   // Get the character name for display
   const getCharacterName = (senderId: number | null) => {
@@ -462,16 +462,20 @@ export default function ChatPage() {
               <Input
                 value={messageInput}
                 onChange={(e) => setMessageInput(e.target.value)}
-                placeholder="Type your message..."
+                placeholder={isWaitingForResponse ? "Waiting for response..." : "Type your message..."}
                 className="flex-1"
-                disabled={sendMessage.isPending}
+                disabled={sendMessage.isPending || isWaitingForResponse}
               />
               <Button 
                 type="submit" 
                 size="icon" 
-                disabled={!messageInput.trim() || sendMessage.isPending}
+                disabled={!messageInput.trim() || sendMessage.isPending || isWaitingForResponse}
               >
-                <Send className="h-5 w-5" />
+                {sendMessage.isPending ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Send className="h-5 w-5" />
+                )}
               </Button>
             </div>
           </form>
