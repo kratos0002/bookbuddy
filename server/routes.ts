@@ -465,11 +465,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("Created AI response with ID:", createdMessage.id);
         
         // Send the response message back to the client
-        res.json(createdMessage);
+        return res.status(201).json(createdMessage);
       }
     } catch (err) {
       console.error("Error processing message:", err);
-      res.status(500).json({ message: "Failed to create message" });
+      return res.status(500).json({ message: "Failed to create message" });
     }
   });
 
