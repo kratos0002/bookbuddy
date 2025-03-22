@@ -187,12 +187,13 @@ export default function ChatPage() {
     if (characters && Array.isArray(characters) && characters.length > 0) {
       const character = characters.find((c: Character) => c.id === senderId);
       if (character) {
-        // Return character image if available, or initial letter
-        return character.imageUrl || null;
+        // Try to find character persona with avatar
+        const persona = personas?.find((p: CharacterPersona) => p.characterId === senderId);
+        return persona?.avatarUrl || "/default-character.png"; // Use a default image instead of null
       }
     }
     
-    return null;
+    return "/default-character.png"; // Default character avatar
   };
   
   // Loading state
@@ -286,7 +287,7 @@ export default function ChatPage() {
                     <div className="bg-muted/50 p-4 rounded-md">
                       <h3 className="font-medium mb-2">Character Profile:</h3>
                       <p className="text-sm text-muted-foreground">
-                        {personas.find(p => p.characterId === selectedCharacterId)?.description}
+                        {personas.find(p => p.characterId === selectedCharacterId)?.personalityTraits || 'No profile available.'}
                       </p>
                     </div>
                   )}
@@ -338,7 +339,9 @@ export default function ChatPage() {
                 >
                   <div className={`flex max-w-[80%] ${message.isUserMessage ? 'flex-row-reverse' : 'flex-row'}`}>
                     <Avatar className={`h-8 w-8 ${message.isUserMessage ? 'ml-2' : 'mr-2'}`}>
-                      <AvatarImage src={getSenderImage(message.senderId)} />
+                      {getSenderImage(message.senderId) && (
+                        <AvatarImage src={getSenderImage(message.senderId) as string} />
+                      )}
                       <AvatarFallback>
                         {getCharacterName(message.senderId)?.charAt(0)}
                       </AvatarFallback>
