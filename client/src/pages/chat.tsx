@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useParams } from "wouter";
@@ -28,6 +28,12 @@ export default function ChatPage() {
   // Track when we're waiting for an AI response
   const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
   const [lastMessageTimestamp, setLastMessageTimestamp] = useState<Date | null>(null);
+  
+  // Directly fetch messages (as a backup to the React Query)
+  const [directMessages, setDirectMessages] = useState<Message[]>([]);
+  
+  // Also trigger fetchMessages when sending a new message
+  const [triggerRefetch, setTriggerRefetch] = useState(0);
 
   // Default to create a new conversation if no ID is provided
   const isNewConversation = !conversationId;
@@ -143,13 +149,37 @@ export default function ChatPage() {
       // Immediately refetch to show the user's message
       refetchMessages();
       
+      // Also manually fetch messages with our direct fetch approach
+      fetchMessages();
+      
+      // Trigger additional refetches with timer
+      setTriggerRefetch(prev => prev + 1);
+      
       // Start polling more aggressively for the AI response
-      const checkForResponse = () => {
-        refetchMessages().then((result) => {
+      const checkForResponse = async () => {
+        try {
+          // First try direct fetch
+          await fetchMessages();
+          
+          // Check if we have received an AI response in directMessages
+          if (directMessages.length >= 2) {
+            const userMessageIndex = directMessages.findIndex(m => m.id === data.id);
+            const hasAIResponse = userMessageIndex >= 0 && userMessageIndex < directMessages.length - 1;
+            
+            if (hasAIResponse) {
+              // We got a response, stop waiting
+              setIsWaitingForResponse(false);
+              return;
+            }
+          }
+          
+          // Also check with React Query
+          const result = await refetchMessages();
           const newMessages = result.data || [];
           
           // Check if we have a new AI message after our user message
-          const userMessageIndex = newMessages.findIndex(m => m.id === data.id);
+          const userMessageIndex = Array.isArray(newMessages) ? 
+            newMessages.findIndex(m => m.id === data.id) : -1;
           const hasAIResponse = userMessageIndex >= 0 && userMessageIndex < newMessages.length - 1;
           
           if (hasAIResponse) {
@@ -170,7 +200,16 @@ export default function ChatPage() {
               });
             }
           }
-        });
+        } catch (error) {
+          console.error("Error checking for response:", error);
+          // Continue polling even if this check failed
+          const waitingTime = new Date().getTime() - (lastMessageTimestamp?.getTime() || 0);
+          if (waitingTime < 20000) {
+            setTimeout(checkForResponse, 1000);
+          } else {
+            setIsWaitingForResponse(false);
+          }
+        }
       };
       
       // Start checking for response
@@ -219,10 +258,38 @@ export default function ChatPage() {
     });
   };
   
+  // Direct fetch function for messages
+  const fetchMessages = useCallback(async () => {
+    if (!conversationId) return;
+    
+    try {
+      const response = await fetch(`/api/conversations/${conversationId}/messages`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch messages: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log("Directly fetched messages:", data);
+      setDirectMessages(data);
+    } catch (error) {
+      console.error("Error directly fetching messages:", error);
+    }
+  }, [conversationId]);
+  
+  // Fetch messages on mount and after sending a message
+  useEffect(() => {
+    if (conversationId) {
+      fetchMessages();
+      // Set up polling interval
+      const interval = setInterval(fetchMessages, 2000);
+      return () => clearInterval(interval);
+    }
+  }, [conversationId, fetchMessages, triggerRefetch]);
+  
   // Scroll to bottom of messages when new ones arrive or waiting state changes
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isWaitingForResponse]);
+  }, [messages, directMessages, isWaitingForResponse]);
   
   // Get the character name for display
   const getCharacterName = (senderId: number | null) => {
@@ -387,9 +454,9 @@ export default function ChatPage() {
         <>
           {/* Messages area */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages && messages.length > 0 ? (
+            {directMessages.length > 0 ? (
               <>
-                {messages.map((message: Message) => (
+                {directMessages.map((message: Message) => (
                   <div 
                     key={message.id} 
                     className={`flex ${message.isUserMessage ? 'justify-end' : 'justify-start'}`}
