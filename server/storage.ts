@@ -38,7 +38,11 @@ import {
   aiAnalysisData,
   characterNetworkData,
   narrativeData,
-  themeHeatmapData
+  themeHeatmapData,
+  characterPersonaData,
+  librarianPersonaData,
+  conversationData,
+  messageData
 } from "./mock-data";
 
 // modify the interface with any CRUD methods
@@ -85,6 +89,25 @@ export interface IStorage {
   getCharacterNetworkData(bookId: number): Promise<GraphData>;
   getNarrativeData(bookId: number): Promise<NarrativeData>;
   getThemeHeatmapData(bookId: number): Promise<ThemeHeatmapData>;
+  
+  // Character Persona methods
+  getCharacterPersonas(): Promise<CharacterPersona[]>;
+  getCharacterPersonaById(id: number): Promise<CharacterPersona | undefined>;
+  getCharacterPersonaByCharacterId(characterId: number): Promise<CharacterPersona | undefined>;
+  
+  // Librarian Persona methods
+  getLibrarianPersonas(): Promise<LibrarianPersona[]>;
+  getLibrarianPersonaById(id: number): Promise<LibrarianPersona | undefined>;
+  getLibrarianPersonaByBookId(bookId: number): Promise<LibrarianPersona | undefined>;
+  
+  // Conversation methods
+  getConversations(): Promise<Conversation[]>;
+  getConversationById(id: number): Promise<Conversation | undefined>;
+  createConversation(conversation: InsertConversation): Promise<Conversation>;
+  
+  // Message methods
+  getMessagesByConversationId(conversationId: number): Promise<Message[]>;
+  createMessage(message: InsertMessage): Promise<Message>;
 }
 
 export class MemStorage implements IStorage {
@@ -102,6 +125,12 @@ export class MemStorage implements IStorage {
   private narrativeDataMap: Map<number, NarrativeData>;
   private themeHeatmaps: Map<number, ThemeHeatmapData>;
   
+  // New conversation-related maps
+  private characterPersonas: Map<number, CharacterPersona>;
+  private librarianPersonas: Map<number, LibrarianPersona>;
+  private conversations: Map<number, Conversation>;
+  private messages: Map<number, Message[]>;
+  
   currentId: number;
 
   constructor() {
@@ -118,6 +147,12 @@ export class MemStorage implements IStorage {
     this.characterNetworks = new Map();
     this.narrativeDataMap = new Map();
     this.themeHeatmaps = new Map();
+    
+    // Initialize conversation-related maps
+    this.characterPersonas = new Map();
+    this.librarianPersonas = new Map();
+    this.conversations = new Map();
+    this.messages = new Map();
     
     this.currentId = 1;
     
@@ -164,6 +199,41 @@ export class MemStorage implements IStorage {
     
     // Add theme heatmap data
     this.themeHeatmaps.set(bookData.id, themeHeatmapData);
+    
+    // Add character personas
+    if (characterPersonaData) {
+      characterPersonaData.forEach(persona => {
+        this.characterPersonas.set(persona.id, persona);
+      });
+    }
+    
+    // Add librarian personas
+    if (librarianPersonaData) {
+      librarianPersonaData.forEach(persona => {
+        this.librarianPersonas.set(persona.id, persona);
+      });
+    }
+    
+    // Add conversations and messages
+    if (conversationData) {
+      conversationData.forEach(conversation => {
+        this.conversations.set(conversation.id, conversation);
+      });
+    }
+    
+    if (messageData) {
+      const messagesByConversation = messageData.reduce((acc, message) => {
+        if (!acc.has(message.conversationId)) {
+          acc.set(message.conversationId, []);
+        }
+        acc.get(message.conversationId)?.push(message);
+        return acc;
+      }, new Map<number, Message[]>());
+      
+      messagesByConversation.forEach((messages, conversationId) => {
+        this.messages.set(conversationId, messages);
+      });
+    }
   }
 
   // User methods
@@ -265,6 +335,88 @@ export class MemStorage implements IStorage {
   
   async getThemeHeatmapData(bookId: number): Promise<ThemeHeatmapData> {
     return this.themeHeatmaps.get(bookId) || { themes: [], chapters: [], intensities: [] };
+  }
+  
+  // Character Persona methods
+  async getCharacterPersonas(): Promise<CharacterPersona[]> {
+    return Array.from(this.characterPersonas.values());
+  }
+  
+  async getCharacterPersonaById(id: number): Promise<CharacterPersona | undefined> {
+    return this.characterPersonas.get(id);
+  }
+  
+  async getCharacterPersonaByCharacterId(characterId: number): Promise<CharacterPersona | undefined> {
+    return Array.from(this.characterPersonas.values()).find(
+      (persona) => persona.characterId === characterId
+    );
+  }
+  
+  // Librarian Persona methods
+  async getLibrarianPersonas(): Promise<LibrarianPersona[]> {
+    return Array.from(this.librarianPersonas.values());
+  }
+  
+  async getLibrarianPersonaById(id: number): Promise<LibrarianPersona | undefined> {
+    return this.librarianPersonas.get(id);
+  }
+  
+  async getLibrarianPersonaByBookId(bookId: number): Promise<LibrarianPersona | undefined> {
+    return Array.from(this.librarianPersonas.values()).find(
+      (persona) => persona.bookId === bookId
+    );
+  }
+  
+  // Conversation methods
+  async getConversations(): Promise<Conversation[]> {
+    return Array.from(this.conversations.values());
+  }
+  
+  async getConversationById(id: number): Promise<Conversation | undefined> {
+    return this.conversations.get(id);
+  }
+  
+  async createConversation(insertConversation: InsertConversation): Promise<Conversation> {
+    const id = this.currentId++;
+    // Add current timestamp for timestamps
+    const now = new Date();
+    const conversation: Conversation = { 
+      ...insertConversation, 
+      id,
+      startedAt: now,
+      updatedAt: now,
+      isLibrarianPresent: insertConversation.isLibrarianPresent ?? false
+    };
+    this.conversations.set(id, conversation);
+    this.messages.set(id, []); // Initialize empty message array for this conversation
+    return conversation;
+  }
+  
+  // Message methods
+  async getMessagesByConversationId(conversationId: number): Promise<Message[]> {
+    return this.messages.get(conversationId) || [];
+  }
+  
+  async createMessage(insertMessage: InsertMessage): Promise<Message> {
+    const id = this.currentId++;
+    // Add current timestamp
+    const now = new Date();
+    const message: Message = { 
+      ...insertMessage, 
+      id,
+      sentAt: now,
+      sentimentScore: insertMessage.sentimentScore ?? null,
+      senderId: insertMessage.senderId ?? null,
+      relevantThemeIds: insertMessage.relevantThemeIds ?? [],
+      relevantQuoteIds: insertMessage.relevantQuoteIds ?? []
+    };
+    
+    // Add message to the conversation's message list
+    const conversationMessages = this.messages.get(message.conversationId) || [];
+    conversationMessages.push(message);
+    this.messages.set(message.conversationId, conversationMessages);
+    
+    return message;
   }
 }
 
