@@ -1,6 +1,15 @@
-import type { Express } from "express";
+import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { 
+  generateCharacterResponse, 
+  generateLibrarianResponse,
+  analyzeSentiment,
+  identifyRelevantThemes,
+  identifyRelevantQuotes,
+  isOpenAIConfigured
+} from "./services/openai-service";
+import { ChatMode, InsertConversation, InsertMessage } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Book routes
