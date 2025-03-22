@@ -9,7 +9,7 @@ import {
   identifyRelevantQuotes,
   isOpenAIConfigured
 } from "./services/openai-service";
-import { ChatModes, InsertConversation, InsertMessage, Theme, ThemeQuote } from "@shared/schema";
+import { ChatModes, InsertConversation, InsertMessage, Message, Theme, ThemeQuote } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Book routes
@@ -453,6 +453,231 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/openai/status", async (req, res) => {
     const isConfigured = isOpenAIConfigured();
     res.json({ configured: isConfigured });
+  });
+
+  // Test OpenAI integration
+  app.post("/api/openai/test", async (req, res) => {
+    try {
+      if (!isOpenAIConfigured()) {
+        return res.status(500).json({ 
+          success: false, 
+          message: "OpenAI is not configured. Check your API key."
+        });
+      }
+
+      const { prompt } = req.body;
+      
+      if (!prompt) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "No prompt provided" 
+        });
+      }
+
+      // Get a test character to use
+      const character = await storage.getCharacterById(1); // Winston
+      const characterPersona = await storage.getCharacterPersonaByCharacterId(1);
+      
+      if (!character || !characterPersona) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Character or persona not found" 
+        });
+      }
+
+      // Create a test message
+      const testMessage: Message = {
+        id: 0,
+        conversationId: 0,
+        senderId: null,
+        isUserMessage: true,
+        content: prompt,
+        sentAt: new Date(),
+        sentimentScore: null,
+        relevantThemeIds: null,
+        relevantQuoteIds: null
+      };
+
+      // Generate a response
+      const response = await generateCharacterResponse(
+        character,
+        characterPersona,
+        [testMessage],
+        [],
+        []
+      );
+
+      res.json({ 
+        success: true, 
+        character: character.name,
+        response
+      });
+    } catch (error: any) {
+      console.error("Error testing OpenAI:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to generate response", 
+        error: error.message 
+      });
+    }
+  });
+  
+  // Test full conversation flow (create + send message) in one endpoint
+  app.post("/api/chat/test", async (req, res) => {
+    try {
+      const { message, characterId = 1, isLibrarian = false } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "No message provided" 
+        });
+      }
+      
+      console.log(`Starting test chat with ${isLibrarian ? 'librarian' : `character ${characterId}`}: "${message}"`);
+      
+      // 1. Create a conversation
+      const conversationData: InsertConversation = {
+        userId: 1, // Default user
+        bookId: 1, // 1984
+        title: `Test conversation - ${new Date().toLocaleString()}`,
+        characterIds: isLibrarian ? [] : [characterId],
+        isLibrarianPresent: isLibrarian,
+        conversationMode: isLibrarian ? ChatModes.ANALYSIS : ChatModes.CHARACTER
+      };
+      
+      const conversation = await storage.createConversation(conversationData);
+      console.log(`Created conversation with ID: ${conversation.id}`);
+      
+      // 2. Send the user message
+      const messageData: InsertMessage = {
+        conversationId: conversation.id,
+        content: message,
+        isUserMessage: true,
+        senderId: null
+      };
+      
+      // For user messages, analyze sentiment and identify relevant themes and quotes
+      messageData.sentimentScore = await analyzeSentiment(messageData.content);
+        
+      // Get relevant themes if possible
+      const allThemes = await storage.getThemesByBookId(1);
+      const relevantThemeIds = await identifyRelevantThemes(messageData.content, allThemes);
+      messageData.relevantThemeIds = relevantThemeIds;
+      
+      // Get relevant quotes if possible
+      const allQuotes = await Promise.all(
+        relevantThemeIds.map(themeId => storage.getQuotesByThemeId(themeId))
+      );
+      const flattenedQuotes = allQuotes.flat();
+      const relevantQuoteIds = await identifyRelevantQuotes(messageData.content, flattenedQuotes);
+      messageData.relevantQuoteIds = relevantQuoteIds;
+      
+      const userMessage = await storage.createMessage(messageData);
+      console.log(`Created user message with ID: ${userMessage.id}`);
+      
+      // 3. Generate and store AI response
+      let responseContent = "I cannot respond at the moment.";
+      
+      if (!isLibrarian) {
+        // Get character data
+        const character = await storage.getCharacterById(characterId);
+        const characterPersona = await storage.getCharacterPersonaByCharacterId(characterId);
+        
+        if (character && characterPersona) {
+          // Get relevant themes and quotes for context
+          const relevantThemes = messageData.relevantThemeIds && Array.isArray(messageData.relevantThemeIds)
+            ? await Promise.all(
+                messageData.relevantThemeIds.map(id => storage.getThemeById(id))
+              ).then(themes => themes.filter(t => t !== undefined) as Theme[])
+            : [];
+          
+          const relevantQuotes = messageData.relevantQuoteIds && Array.isArray(messageData.relevantQuoteIds)
+            ? await Promise.all(
+                messageData.relevantQuoteIds.map(async (id) => {
+                  for (const themeId of relevantThemes.map(t => t.id)) {
+                    const quotes = await storage.getQuotesByThemeId(themeId);
+                    const quote = quotes.find(q => q.id === id);
+                    if (quote) return quote;
+                  }
+                  return null;
+                })
+              ).then(quotes => quotes.filter(q => q !== null) as ThemeQuote[])
+            : [];
+          
+          // Generate response from character
+          responseContent = await generateCharacterResponse(
+            character, 
+            characterPersona, 
+            [userMessage], 
+            relevantThemes,
+            relevantQuotes
+          );
+        }
+      } else {
+        // Librarian mode
+        const librarianPersona = await storage.getLibrarianPersonaByBookId(1);
+        
+        if (librarianPersona) {
+          // Get relevant themes and quotes
+          const relevantThemes = messageData.relevantThemeIds && Array.isArray(messageData.relevantThemeIds)
+            ? await Promise.all(
+                messageData.relevantThemeIds.map(id => storage.getThemeById(id))
+              ).then(themes => themes.filter(t => t !== undefined) as Theme[])
+            : [];
+          
+          const relevantQuotes = messageData.relevantQuoteIds && Array.isArray(messageData.relevantQuoteIds)
+            ? await Promise.all(
+                messageData.relevantQuoteIds.map(async (id) => {
+                  for (const themeId of relevantThemes.map(t => t.id)) {
+                    const quotes = await storage.getQuotesByThemeId(themeId);
+                    const quote = quotes.find(q => q.id === id);
+                    if (quote) return quote;
+                  }
+                  return null;
+                })
+              ).then(quotes => quotes.filter(q => q !== null) as ThemeQuote[])
+            : [];
+          
+          // Generate response from librarian
+          responseContent = await generateLibrarianResponse(
+            librarianPersona, 
+            [userMessage], 
+            relevantThemes,
+            relevantQuotes
+          );
+        }
+      }
+      
+      // Create the AI response message
+      const responseMessage: InsertMessage = {
+        conversationId: conversation.id,
+        content: responseContent,
+        isUserMessage: false,
+        senderId: isLibrarian ? null : characterId
+      };
+      
+      const aiMessage = await storage.createMessage(responseMessage);
+      console.log(`Created AI response with ID: ${aiMessage.id}`);
+      
+      // 4. Return the complete conversation data
+      const messages = await storage.getMessagesByConversationId(conversation.id);
+      
+      res.json({
+        success: true,
+        conversation,
+        messages,
+        relevantThemes: messageData.relevantThemeIds,
+        sentimentScore: messageData.sentimentScore
+      });
+    } catch (error: any) {
+      console.error("Error in test chat:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to process chat", 
+        error: error.message 
+      });
+    }
   });
 
   const httpServer = createServer(app);
