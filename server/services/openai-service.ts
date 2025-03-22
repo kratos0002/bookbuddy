@@ -8,12 +8,27 @@ import {
   Character
 } from "@shared/schema";
 import { ChatCompletionMessageParam } from "openai/resources";
+import bookContextService from "./book-context-service";
+import { log } from '../vite';
 
 // Check if we have an OpenAI API key in the environment
 const apiKey = process.env.OPENAI_API_KEY;
 
 // Create OpenAI client if API key is available
 const openai = apiKey ? new OpenAI({ apiKey }) : null;
+
+// Initialize book context service
+bookContextService.initialize()
+  .then(success => {
+    if (success) {
+      log('BookNLP context service initialized successfully', 'openai-service');
+    } else {
+      log('BookNLP context service initialization failed - using default prompts', 'openai-service');
+    }
+  })
+  .catch(err => {
+    log(`Error initializing BookNLP context service: ${err.message}`, 'openai-service');
+  });
 
 // Character response generation
 export async function generateCharacterResponse(
@@ -32,9 +47,44 @@ export async function generateCharacterResponse(
     role: msg.isUserMessage ? "user" as const : "assistant" as const,
     content: msg.content
   }));
+  
+  // Get the latest user message for context analysis
+  const latestUserMessage = messages.filter(msg => msg.isUserMessage).pop();
+  
+  // Analyze message content for additional context if available
+  let bookAnalysis = '';
+  if (latestUserMessage) {
+    // Use BookNLP data to enhance context
+    const { relevantThemes: bookThemes, mentionedCharacters } = 
+      bookContextService.analyzeMessage(latestUserMessage.content);
+    
+    if (bookThemes.length > 0 || mentionedCharacters.length > 0) {
+      bookAnalysis = '\n--- BookNLP Analysis ---\n';
+      
+      if (bookThemes.length > 0) {
+        bookAnalysis += 'Relevant Themes:\n';
+        bookThemes.forEach(theme => {
+          bookAnalysis += `- ${theme.name} (${theme.occurrence_count} occurrences)\n`;
+          bookAnalysis += `  Keywords: ${theme.keywords.join(', ')}\n`;
+        });
+      }
+      
+      if (mentionedCharacters.length > 0) {
+        bookAnalysis += 'Characters Mentioned:\n';
+        mentionedCharacters.forEach(char => {
+          if (char.id !== character.id.toString()) { // Skip if it's the current character
+            bookAnalysis += `- ${char.name} (${char.aliases.join(', ')})\n`;
+            if (char.sample_quotes.length > 0) {
+              bookAnalysis += `  Sample quote: "${char.sample_quotes[0]}"\n`;
+            }
+          }
+        });
+      }
+    }
+  }
 
   // Build system prompt from character persona
-  const systemPrompt = `
+  let systemPrompt = `
 You are ${character.name} from George Orwell's "1984". 
 
 Voice: ${characterPersona.voiceDescription}
@@ -56,9 +106,24 @@ ${relevantQuotes.length > 0 ?
   `Relevant Quotes to Reference:
   ${relevantQuotes.map(quote => `- "${quote.quote}" (${quote.chapter})`).join('\n  ')}` 
   : ''}
-
-Respond in character to the user's messages, maintaining your character's perspective, personality, and worldview at all times.
 `;
+
+  // Add BookNLP analysis if available
+  if (bookAnalysis) {
+    systemPrompt += bookAnalysis;
+  }
+  
+  // Try to enrich with character-specific extracted data
+  try {
+    const enrichedPrompt = bookContextService.enrichCharacterPrompt(character.id, systemPrompt);
+    systemPrompt = enrichedPrompt;
+  } catch (error) {
+    log(`Failed to enrich character prompt with BookNLP data: ${error}`, 'openai-service');
+    // Continue with the original prompt if enrichment fails
+  }
+  
+  // Final instructions
+  systemPrompt += `\nRespond in character to the user's messages, maintaining your character's perspective, personality, and worldview at all times.`;
 
   try {
     // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
@@ -76,7 +141,7 @@ Respond in character to the user's messages, maintaining your character's perspe
     });
 
     return response.choices[0].message.content || "I cannot respond at the moment.";
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating character response:", error);
     return "I cannot respond at the moment due to a technical issue.";
   }
@@ -89,23 +154,60 @@ export async function generateLibrarianResponse(
   relevantThemes: Theme[] = [],
   relevantQuotes: ThemeQuote[] = []
 ): Promise<string> {
-  console.log("Starting librarian response generation...");
+  log("Starting librarian response generation...", "openai-service");
   
   if (!openai) {
-    console.error("OpenAI client not available");
+    log("OpenAI client not available", "openai-service");
     return "I cannot respond at the moment. Please check the OpenAI API key configuration.";
   }
 
   // Format previous messages for context
-  console.log(`Formatting ${messages.length} messages for context`);
+  log(`Formatting ${messages.length} messages for context`, "openai-service");
   const formattedMessages: ChatCompletionMessageParam[] = messages.map(msg => ({
     role: msg.isUserMessage ? "user" as const : "assistant" as const,
     content: msg.content
   }));
+  
+  // Get the latest user message for context analysis
+  const latestUserMessage = messages.filter(msg => msg.isUserMessage).pop();
+  
+  // Analyze message content for additional context if available
+  let bookAnalysis = '';
+  if (latestUserMessage) {
+    // Use BookNLP data to enhance context
+    const { relevantThemes: bookThemes, mentionedCharacters } = 
+      bookContextService.analyzeMessage(latestUserMessage.content);
+    
+    if (bookThemes.length > 0 || mentionedCharacters.length > 0) {
+      bookAnalysis = '\n--- BookNLP Analysis ---\n';
+      
+      if (bookThemes.length > 0) {
+        bookAnalysis += 'Relevant Themes:\n';
+        bookThemes.forEach(theme => {
+          bookAnalysis += `- ${theme.name} (${theme.occurrence_count} occurrences)\n`;
+          bookAnalysis += `  Keywords: ${theme.keywords.join(', ')}\n`;
+        });
+      }
+      
+      if (mentionedCharacters.length > 0) {
+        bookAnalysis += 'Characters Mentioned:\n';
+        mentionedCharacters.forEach(char => {
+          bookAnalysis += `- ${char.name} (${char.aliases.join(', ')})\n`;
+          if (char.sample_quotes.length > 0) {
+            // Include a couple of sample quotes for context
+            bookAnalysis += `  Sample quotes:\n`;
+            char.sample_quotes.slice(0, 2).forEach(quote => {
+              bookAnalysis += `    - "${quote}"\n`;
+            });
+          }
+        });
+      }
+    }
+  }
 
   // Build system prompt from librarian persona
-  console.log("Building system prompt with librarian persona:", librarianPersona.name);
-  const systemPrompt = `
+  log("Building system prompt with librarian persona: " + librarianPersona.name, "openai-service");
+  let systemPrompt = `
 You are ${librarianPersona.name}, a librarian and literary guide specialized in George Orwell's "1984".
 
 Personality: ${librarianPersona.personalityDescription}
@@ -123,12 +225,18 @@ ${relevantQuotes.length > 0 ?
   `Relevant Quotes to Reference:
   ${relevantQuotes.map(quote => `- "${quote.quote}" (${quote.chapter})`).join('\n  ')}` 
   : ''}
-
-Respond to the user's literary questions or discussions about "1984", providing insight, analysis, and guidance.
 `;
 
+  // Add BookNLP analysis if available
+  if (bookAnalysis) {
+    systemPrompt += bookAnalysis;
+  }
+  
+  // Final instructions
+  systemPrompt += `\nRespond to the user's literary questions or discussions about "1984", providing insight, analysis, and guidance. Use the relevant themes and character quotes identified by BookNLP when possible.`;
+
   try {
-    console.log("Sending request to OpenAI...");
+    log("Sending request to OpenAI...", "openai-service");
     // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -143,19 +251,14 @@ Respond to the user's literary questions or discussions about "1984", providing 
       presence_penalty: 0.2,
     });
 
-    console.log("Received response from OpenAI");
+    log("Received response from OpenAI", "openai-service");
     return response.choices[0].message.content || "I cannot respond at the moment.";
   } catch (error: any) {
-    console.error("Error generating librarian response:", error);
+    log(`Error generating librarian response: ${error.message}`, "openai-service");
     
     // Provide more detailed error information
     if (error.response) {
-      console.error("OpenAI API response error:", {
-        status: error.response.status,
-        data: error.response.data
-      });
-    } else if (error.message) {
-      console.error("Error message:", error.message);
+      log(`OpenAI API response error: ${error.response.status}`, "openai-service");
     }
     
     return "I cannot respond at the moment due to a technical issue.";
