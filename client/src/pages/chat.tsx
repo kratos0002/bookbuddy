@@ -73,13 +73,7 @@ export default function ChatPage() {
     // Override the default staleTime and refetchInterval for this query
     staleTime: 1000,
     refetchInterval: 2000, // Poll more frequently - every 2 seconds
-    refetchIntervalInBackground: true,
-    onSuccess: (data) => {
-      console.log("Successfully fetched messages:", data);
-    },
-    onError: (error) => {
-      console.error("Error fetching messages:", error);
-    }
+    refetchIntervalInBackground: true
   });
   
   // Create a new conversation
@@ -174,31 +168,48 @@ export default function ChatPage() {
           }
           
           // Also check with React Query
-          const result = await refetchMessages();
-          const newMessages = result.data || [];
-          
-          // Check if we have a new AI message after our user message
-          const userMessageIndex = Array.isArray(newMessages) ? 
-            newMessages.findIndex(m => m.id === data.id) : -1;
-          const hasAIResponse = userMessageIndex >= 0 && userMessageIndex < newMessages.length - 1;
-          
-          if (hasAIResponse) {
-            // We got a response, stop waiting
-            setIsWaitingForResponse(false);
-          } else {
-            // No response yet, check again in a second if we haven't been waiting too long
-            const waitingTime = new Date().getTime() - (lastMessageTimestamp?.getTime() || 0);
-            
-            if (waitingTime < 20000) { // Stop checking after 20 seconds to avoid infinite polling
-              setTimeout(checkForResponse, 1000);
-            } else {
-              setIsWaitingForResponse(false);
-              toast({
-                title: "Response Timeout",
-                description: "The AI is taking too long to respond. Try refreshing the page.",
-                variant: "destructive",
-              });
+          // Use separate try/catch to prevent type errors
+          try {
+            const result = await refetchMessages();
+            if (result && result.data && Array.isArray(result.data)) {
+              const newMessages = result.data as Message[];
+              if (newMessages.length >= 2) {
+                // Find the user message by comparing the content and timestamps
+                const userMessage = newMessages.find(m => 
+                  m.isUserMessage && m.content === messageInput.trim()
+                );
+                
+                if (userMessage) {
+                  // Found matching user message, see if there's a response after it
+                  const responseExists = newMessages.some(m => 
+                    !m.isUserMessage && 
+                    new Date(m.sentAt).getTime() > new Date(userMessage.sentAt).getTime()
+                  );
+                  
+                  if (responseExists) {
+                    setIsWaitingForResponse(false);
+                    return;
+                  }
+                }
+              }
             }
+          } catch (err) {
+            console.error("Error processing React Query results:", err);
+          }
+          
+          // If we got here, no response was found
+          const waitingTime = new Date().getTime() - (lastMessageTimestamp?.getTime() || 0);
+          
+          // No response yet, check again if we haven't been waiting too long
+          if (waitingTime < 20000) { // Stop checking after 20 seconds to avoid infinite polling
+            setTimeout(checkForResponse, 1000);
+          } else {
+            setIsWaitingForResponse(false);
+            toast({
+              title: "Response Timeout",
+              description: "The AI is taking too long to respond. Try refreshing the page.",
+              variant: "destructive",
+            });
           }
         } catch (error) {
           console.error("Error checking for response:", error);
