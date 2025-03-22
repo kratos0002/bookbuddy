@@ -59,8 +59,13 @@ export default function Home() {
               <Button variant="outline" className="flex items-center">
                 <Download className="mr-2 h-4 w-4" /> Export Analysis
               </Button>
-              <Button className="flex items-center">
+              <Button className="flex items-center mr-2">
                 <Share className="mr-2 h-4 w-4" /> Share
+              </Button>
+              <Button className="flex items-center" asChild>
+                <a href="/chat">
+                  <MessageCircle className="mr-2 h-4 w-4" /> Chat with Book
+                </a>
               </Button>
             </div>
           </div>
