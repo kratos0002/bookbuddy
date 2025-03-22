@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useParams } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
-import { Conversation, Message, ChatModes } from "@shared/schema";
+import { Conversation, Message, ChatModes, Character, CharacterPersona } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -34,25 +34,25 @@ export default function ChatPage() {
   const [isLibrarianMode, setIsLibrarianMode] = useState<boolean>(false);
   
   // Get available characters
-  const { data: characters } = useQuery({
+  const { data: characters = [] } = useQuery<Character[]>({
     queryKey: ['/api/books/1/characters'],
     enabled: isNewConversation,
   });
   
   // Get character personas
-  const { data: personas } = useQuery({
+  const { data: personas = [] } = useQuery<CharacterPersona[]>({
     queryKey: ['/api/character-personas'],
     enabled: isNewConversation,
   });
   
   // Get conversation details if we have an ID
-  const { data: conversation, isLoading: isLoadingConversation } = useQuery({
+  const { data: conversation, isLoading: isLoadingConversation } = useQuery<Conversation>({
     queryKey: ['/api/conversations', conversationId],
     enabled: !!conversationId,
   });
   
   // Get messages for this conversation
-  const { data: messages, isLoading: isLoadingMessages } = useQuery({
+  const { data: messages = [], isLoading: isLoadingMessages, error: messagesError } = useQuery<Message[]>({
     queryKey: ['/api/conversations', conversationId, 'messages'],
     enabled: !!conversationId,
     refetchInterval: 3000, // Poll for new messages every 3 seconds
@@ -101,20 +101,27 @@ export default function ChatPage() {
         throw new Error("No conversation ID");
       }
       
+      console.log(`Sending message to conversation ${conversationId}:`, message);
+      
       const response = await apiRequest(
         'POST',
         `/api/conversations/${conversationId}/messages`,
         message
       );
-      return await response.json();
+      
+      const responseData = await response.json();
+      console.log("Message sent successfully, response:", responseData);
+      return responseData;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Message mutation completed successfully:", data);
       // Clear the input
       setMessageInput("");
       // Invalidate and refetch messages
       queryClient.invalidateQueries({ queryKey: ['/api/conversations', conversationId, 'messages'] });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Error in send message mutation:", error);
       toast({
         title: "Error",
         description: "Failed to send message",
@@ -165,8 +172,8 @@ export default function ChatPage() {
   const getCharacterName = (senderId: number | null) => {
     if (!senderId) return "You";
     
-    if (characters) {
-      const character = characters.find(c => c.id === senderId);
+    if (characters && Array.isArray(characters) && characters.length > 0) {
+      const character = characters.find((c: Character) => c.id === senderId);
       return character ? character.name : "Unknown Character";
     }
     
@@ -177,8 +184,8 @@ export default function ChatPage() {
   const getSenderImage = (senderId: number | null) => {
     if (!senderId) return "/user-avatar.png"; // Default user avatar
     
-    if (characters) {
-      const character = characters.find(c => c.id === senderId);
+    if (characters && Array.isArray(characters) && characters.length > 0) {
+      const character = characters.find((c: Character) => c.id === senderId);
       if (character) {
         // Return character image if available, or initial letter
         return character.imageUrl || null;
