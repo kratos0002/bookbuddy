@@ -1,0 +1,152 @@
+[
+  {
+    "id": "telescreen",
+    "title": "Telescreen",
+    "category": "Technology",
+    "partyDescription": "Telecommunication devices that bring news, entertainment, and Party announcements to citizens of Oceania. A symbol of the Party's commitment to keeping citizens informed and connected.",
+    "reality": "Two-way surveillance devices that monitor citizens at all times, capable of detecting physical movements and vocal sounds. Cannot be turned off by Outer Party members or proles, and are used by the Thought Police to detect thoughtcrime.",
+    "quotes": [
+      "The telescreen received and transmitted simultaneously. Any sound Winston made, above the level of a very low whisper, would be picked up by it; moreover, so long as he remained within the field of vision which the metal plaque commanded, he could be seen as well as heard.",
+      "In the far distance a helicopter skimmed down between the roofs, hovered for an instant like a bluebottle, and darted away again with a curving flight. It was the police patrol, snooping into people's windows."
+    ],
+    "relatedEntries": ["thought-police", "big-brother", "privacy", "surveillance"],
+    "mentionedBy": ["winston-smith", "obrien"],
+    "iconKey": "device",
+    "unlockProgress": "initial"
+  },
+  {
+    "id": "big-brother",
+    "title": "Big Brother",
+    "category": "People",
+    "partyDescription": "The beloved leader of Oceania and the Party. The protector of all citizens who guides the nation with wisdom and strength. Big Brother is infallible and all-powerful.",
+    "reality": "A figurehead created by the Party to personify its power. It's unclear if Big Brother exists as an actual person, but his image serves as the face of the totalitarian regime and fosters a cult of personality.",
+    "quotes": [
+      "BIG BROTHER IS WATCHING YOU, the caption said, while the dark eyes looked deep into Winston's own.",
+      "The hate continued exactly as before, except that the target had been changed."
+    ],
+    "relatedEntries": ["the-party", "thought-police", "emmanuel-goldstein"],
+    "mentionedBy": ["winston-smith", "obrien", "parsons"],
+    "iconKey": "person",
+    "unlockProgress": "initial"
+  },
+  {
+    "id": "newspeak",
+    "title": "Newspeak",
+    "category": "Concepts",
+    "partyDescription": "The evolved language of Oceania, designed to be more efficient and precise. Newspeak eliminates unnecessary words and ambiguity, making communication clearer for all citizens.",
+    "reality": "An artificially created language designed to limit freedom of thought. By eliminating words and narrowing meanings, Newspeak makes it impossible to conceptualize rebellion or even consider ideas outside Party doctrine.",
+    "quotes": [
+      "Don't you see that the whole aim of Newspeak is to narrow the range of thought? In the end we shall make thoughtcrime literally impossible, because there will be no words in which to express it.",
+      "It's a beautiful thing, the destruction of words."
+    ],
+    "relatedEntries": ["thoughtcrime", "doublethink", "ministry-of-truth"],
+    "mentionedBy": ["syme", "winston-smith"],
+    "iconKey": "language",
+    "unlockProgress": "locked"
+  },
+  {
+    "id": "thought-police",
+    "title": "Thought Police",
+    "category": "Organizations",
+    "partyDescription": "A security division that protects citizens from dangerous elements and ensures public safety. They maintain peace and order throughout Oceania.",
+    "reality": "A secret police force that identifies and eliminates anyone who might have rebellious thoughts or question Party orthodoxy. They use surveillance, informants, and psychological manipulation to detect and punish thoughtcrime.",
+    "quotes": [
+      "Thoughts and actions which, when detected, mean death are not formally forbidden, and the endless purges and arrests and tortures and disappearances are not inflicted as punishment for crimes which have actually been committed, but are merely the wiping-out of persons who might perhaps commit a crime at some time in the future.",
+      "In the vast majority of cases there was no trial, no report of the arrest. People simply disappeared, always during the night. Your name was removed from the registers, every record of everything you had ever done was wiped out, your one-time existence was denied and then forgotten."
+    ],
+    "relatedEntries": ["thoughtcrime", "ministry-of-love", "telescreen", "big-brother"],
+    "mentionedBy": ["winston-smith", "julia", "obrien"],
+    "iconKey": "police",
+    "unlockProgress": "locked"
+  },
+  {
+    "id": "doublethink",
+    "title": "Doublethink",
+    "category": "Concepts",
+    "partyDescription": "An advanced cognitive skill that allows Party members to understand complex truths and paradoxes. A mark of intellectual sophistication and Party loyalty.",
+    "reality": "The ability to hold two contradictory beliefs simultaneously and accept both of them as true. This psychological mechanism allows citizens to believe Party propaganda while being aware of reality, protecting them from committing thoughtcrime.",
+    "quotes": [
+      "To know and not to know, to be conscious of complete truthfulness while telling carefully constructed lies, to hold simultaneously two opinions which cancelled out, knowing them to be contradictory and believing in both of them.",
+      "Even to understand the word 'doublethink' involved the use of doublethink."
+    ],
+    "relatedEntries": ["newspeak", "thoughtcrime", "ministry-of-truth", "blackwhite"],
+    "mentionedBy": ["obrien", "winston-smith"],
+    "iconKey": "brain",
+    "unlockProgress": "locked"
+  },
+  {
+    "id": "room-101",
+    "title": "Room 101",
+    "category": "Locations",
+    "partyDescription": "A rehabilitation facility within the Ministry of Love where citizens confront their misunderstandings and emerge with clarity and renewed loyalty.",
+    "reality": "A torture chamber where prisoners face their worst fears as the final step in breaking their resistance. It's designed to destroy the last remnant of personal identity and force complete submission to the Party.",
+    "quotes": [
+      "You asked me once, what was in Room 101. I told you that you knew the answer already. Everyone knows it. The thing that is in Room 101 is the worst thing in the world.",
+      "Do it to Julia! Do it to Julia! Not me! Julia! I don't care what you do to her. Tear her face off, strip her to the bones. Not me! Julia! Not me!"
+    ],
+    "relatedEntries": ["ministry-of-love", "torture", "rats", "obrien"],
+    "mentionedBy": ["obrien", "winston-smith"],
+    "iconKey": "room",
+    "unlockProgress": "locked"
+  },
+  {
+    "id": "ministry-of-truth",
+    "title": "Ministry of Truth",
+    "category": "Organizations",
+    "partyDescription": "The government department responsible for news, entertainment, education, and fine arts. It ensures that all information is accurate and reflects the prosperity of Oceania.",
+    "reality": "The propaganda ministry responsible for falsifying historical records and news to match current Party narratives. It systematically destroys and rewrites all evidence that contradicts the Party's claims, effectively controlling reality through control of information.",
+    "quotes": [
+      "Day by day and almost minute by minute the past was brought up to date.",
+      "Who controls the past controls the future. Who controls the present controls the past."
+    ],
+    "relatedEntries": ["memory-hole", "newspeak", "doublethink", "winston-smith"],
+    "mentionedBy": ["winston-smith", "syme", "parsons"],
+    "iconKey": "building",
+    "unlockProgress": "locked"
+  },
+  {
+    "id": "two-minutes-hate",
+    "title": "Two Minutes Hate",
+    "category": "Events",
+    "partyDescription": "A communal activity that strengthens Party unity by allowing citizens to express righteous anger toward enemies of Oceania.",
+    "reality": "A daily period of psychological manipulation designed to channel citizens' frustration and anger toward designated enemies (especially Emmanuel Goldstein) rather than the Party itself, while reinforcing group conformity and fanaticism.",
+    "quotes": [
+      "The horrible thing about the Two Minutes Hate was not that one was obliged to act a part, but that it was impossible to avoid joining in.",
+      "A hideous ecstasy of fear and vindictiveness, a desire to kill, to torture, to smash faces in with a sledge hammer, seemed to flow through the whole group of people like an electric current, turning one even against one's will into a grimacing, screaming lunatic."
+    ],
+    "relatedEntries": ["emmanuel-goldstein", "telescreens", "hate-week"],
+    "mentionedBy": ["winston-smith", "parsons"],
+    "iconKey": "event",
+    "unlockProgress": "locked"
+  },
+  {
+    "id": "thoughtcrime",
+    "title": "Thoughtcrime",
+    "category": "Concepts",
+    "partyDescription": "A mental lapse of loyalty that can be corrected through proper reeducation. The Party helps citizens overcome these dangerous thoughts.",
+    "reality": "Any thought that questions Party doctrine or authority. The most serious offense in Oceania, thoughtcrime includes any form of doubt, individualism, or desire for freedom, and is punishable by torture and death.",
+    "quotes": [
+      "Thoughtcrime does not entail death: thoughtcrime IS death.",
+      "Whether he wrote DOWN WITH BIG BROTHER, or whether he refrained from writing it, made no difference. Whether he went on with the diary, or whether he did not go on with it, made no difference. The Thought Police would get him just the same."
+    ],
+    "relatedEntries": ["thought-police", "crimestop", "facecrime", "newspeak"],
+    "mentionedBy": ["winston-smith", "obrien", "parsons"],
+    "iconKey": "brain",
+    "unlockProgress": "locked"
+  },
+  {
+    "id": "memory-hole",
+    "title": "Memory Hole",
+    "category": "Objects",
+    "partyDescription": "A waste disposal system for outdated or redundant documents. An efficient way to maintain organized recordkeeping.",
+    "reality": "A system of pneumatic tubes that destroys any document contradicting current Party narrative. Used to completely erase historical records and evidence that might contradict Party claims, allowing history to be constantly rewritten.",
+    "quotes": [
+      "In the walls of the cubicle there were three orifices. To the right of the speakwrite, a small pneumatic tube for written messages, to the left, a larger one for newspapers; and in the side wall, within easy reach of Winston's arm, a large oblong slit protected by a wire grating. This last was for the disposal of waste paper. Similar slits existed in thousands or tens of thousands throughout the building, not only in every room but at short intervals in every corridor. For some reason they were nicknamed memory holes.",
+      "Every record has been destroyed or falsified, every book rewritten, every picture has been repainted, every statue and street building has been renamed, every date has been altered. And the process is continuing day by day and minute by minute. History has stopped. Nothing exists except an endless present in which the Party is always right."
+    ],
+    "relatedEntries": ["ministry-of-truth", "unperson", "doublethink"],
+    "mentionedBy": ["winston-smith", "syme"],
+    "iconKey": "object",
+    "unlockProgress": "locked"
+  }
+] 

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '../components/Layout';
 import HeroSection from '../components/home/HeroSection';
@@ -6,7 +5,7 @@ import FeaturedBookSection from '../components/home/FeaturedBookSection';
 import ComingSoonBooksSection from '../components/home/ComingSoonBooksSection';
 import HowItWorksSection from '../components/home/HowItWorksSection';
 import ValuePropositionSection from '../components/home/ValuePropositionSection';
-import CTASection from '../components/home/CTASection';
+import CombinedCTASection from '../components/home/CombinedCTASection';
 import Footer from '../components/home/Footer';
 
 const HomePage = () => {
@@ -28,8 +27,8 @@ const HomePage = () => {
         {/* Value Proposition */}
         <ValuePropositionSection />
         
-        {/* CTA Section */}
-        <CTASection />
+        {/* Combined CTA Section */}
+        <CombinedCTASection />
         
         {/* Footer */}
         <Footer />

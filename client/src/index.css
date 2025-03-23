@@ -86,7 +86,7 @@
 
 @layer base {
   * {
-    @apply border-border selection:bg-book-primary/20 selection:text-foreground;
+    @apply border-border text-foreground selection-theme;
   }
 
   html, body {
@@ -100,6 +100,10 @@
 }
 
 @layer utilities {
+  .selection-theme {
+    @apply selection:bg-book-primary/20 selection:text-foreground;
+  }
+  
   .glass {
     @apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-sm;
   }

@@ -1,6 +1,6 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useBook } from '../contexts/BookContext';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -8,7 +8,10 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
+  const { selectedBook } = useBook();
   const isHomePage = location.pathname === '/';
+  const isChatPage = location.pathname.startsWith('/chat');
+  const isBookPage = location.pathname.startsWith('/book/');
   
   return (
     <div 
@@ -37,10 +40,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </li>
             <li>
               <Link 
-                to="/conversation" 
-                className={`text-sm hover:text-book-primary transition-colors ${!isHomePage ? 'text-book-primary font-medium' : ''}`}
+                to={`/book/${selectedBook.id}`} 
+                className={`text-sm hover:text-book-primary transition-colors ${isBookPage ? 'text-book-primary font-medium' : ''}`}
               >
                 1984
+              </Link>
+            </li>
+            <li>
+              <Link 
+                to="/chat" 
+                className={`text-sm hover:text-book-primary transition-colors ${isChatPage ? 'text-book-primary font-medium' : ''}`}
+              >
+                Chat GPT-3.5
               </Link>
             </li>
           </ul>
