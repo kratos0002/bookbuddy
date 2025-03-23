@@ -4,6 +4,15 @@ import { CharacterPersona } from "@shared/schema";
 import { LibrarianPersona } from "@shared/schema";
 import bookContextService from "./book-context-service";
 
+// Check for API key
+if (!process.env.OPENAI_API_KEY) {
+  console.error("==============================================");
+  console.error("[openai-service] ERROR: OpenAI API key is not configured!");
+  console.error("[openai-service] Please set the OPENAI_API_KEY environment variable.");
+  console.error("[openai-service] Librarian and character responses will not work properly.");
+  console.error("==============================================");
+}
+
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // Check if BookNLP context service is initialized
@@ -19,6 +28,13 @@ export async function generateCharacterResponse(
   conversationHistory: Array<{ role: string; content: string }>
 ): Promise<string> {
   try {
+    console.log(`[openai-service] Generating character response for ${character.name}`);
+    console.log(`[openai-service] Conversation history received: ${conversationHistory.length} messages`);
+    if (conversationHistory.length > 0) {
+      console.log(`[openai-service] First message role: ${conversationHistory[0].role}`);
+      console.log(`[openai-service] Last message role: ${conversationHistory[conversationHistory.length-1].role}`);
+    }
+    
     // Analyze the user message for literary context
     const literaryContext = bookContextService.analyzeMessage(message);
     
@@ -36,6 +52,9 @@ Your responses should reflect:
 - Your relationship with other characters
 - The level of fear and paranoia appropriate for your character
 - The style of speech typical for your character
+- Your current emotional state and reactions to the conversation so far
+
+Important: Each response should be unique and contextual. Never repeat the same response. Consider the full conversation history when responding.
 
 Keep responses concise (100-150 words) and authentic to your character.`;
 
@@ -57,6 +76,11 @@ Keep responses concise (100-150 words) and authentic to your character.`;
       systemPrompt += "\nAddress these elements from your character's perspective.";
     }
 
+    // Add conversation history context
+    if (conversationHistory.length > 0) {
+      systemPrompt += "\n\nConsider the conversation history when responding. Your responses should evolve naturally based on the discussion.";
+    }
+
     // Prepare messages for API call
     const messages = [
       { role: "system", content: systemPrompt },
@@ -64,14 +88,18 @@ Keep responses concise (100-150 words) and authentic to your character.`;
       { role: "user", content: message }
     ];
 
-    // Call OpenAI API
+    // Call OpenAI API with increased temperature for more variety
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "gpt-3.5-turbo",
       messages: messages as any,
-      temperature: 0.7,
+      temperature: 0.9,
       max_tokens: 350,
+      presence_penalty: 0.6,  // Penalize repetition of similar content
+      frequency_penalty: 0.7, // Penalize repetition of similar words/phrases
     });
 
+    console.log(`[openai-service] Response generated for ${character.name}, length: ${response.choices[0].message.content?.length || 0} chars`);
+    
     return response.choices[0].message.content || "I cannot respond at this time.";
   } catch (error) {
     console.error("Error generating character response:", error);
@@ -88,6 +116,16 @@ export async function generateLibrarianResponse(
   conversationHistory: Array<{ role: string; content: string }>
 ): Promise<string> {
   try {
+    // Add detailed logging
+    console.log(`[openai-service] Starting librarian response generation for message: "${message.substring(0, 30)}..."`);
+    console.log(`[openai-service] Conversation history: ${conversationHistory.length} messages`);
+    
+    // Check environment variables
+    if (!process.env.OPENAI_API_KEY) {
+      console.error("[openai-service] No OpenAI API key found in environment");
+      return "I apologize, but the librarian service is not properly configured. Please contact support.";
+    }
+    
     // Analyze the user message for literary context
     const literaryContext = bookContextService.analyzeMessage(message);
     
@@ -142,16 +180,40 @@ Keep responses concise (150-200 words) but intellectually stimulating.`;
 
     // Call OpenAI API
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "gpt-3.5-turbo",
       messages: messages as any,
-      temperature: 0.5,
+      temperature: 0.8,
       max_tokens: 500,
     });
 
-    return response.choices[0].message.content || "I cannot respond at this time.";
+    // Add response validation
+    if (!response || !response.choices || response.choices.length === 0) {
+      console.error("[openai-service] Empty or invalid response from OpenAI API");
+      return "I apologize, but I'm experiencing technical difficulties at the moment. Please try again later.";
+    }
+
+    const content = response.choices[0].message.content;
+    console.log(`[openai-service] Received OpenAI response of length ${content?.length || 0}`);
+    console.log(`[openai-service] Response preview: ${content?.substring(0, 50)}...`);
+    
+    return content || "I apologize, but I couldn't formulate a proper response at this time.";
   } catch (error) {
-    console.error("Error generating librarian response:", error);
-    return "Something went wrong. The literary expert cannot respond at this time.";
+    console.error("[openai-service] Error generating librarian response:", error);
+    
+    // Provide more detailed error message based on the error type
+    if (error instanceof Error) {
+      console.error(`[openai-service] Error details - name: ${error.name}, message: ${error.message}`);
+      
+      if (error.message.includes("API key")) {
+        return "The librarian is currently unavailable due to API authentication issues.";
+      } else if (error.message.includes("rate limit")) {
+        return "The librarian is currently busy with too many requests. Please try again later.";
+      } else if (error.message.includes("timeout")) {
+        return "The librarian couldn't respond in time. Please try a simpler question.";
+      }
+    }
+    
+    return "I apologize, but I'm having trouble formulating a response at the moment. Please try again with a different question.";
   }
 }
 
@@ -172,7 +234,7 @@ export async function analyzeSentiment(text: string): Promise<number> {
     };
     
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "gpt-3.5-turbo",
       messages: [systemMessage, userMessage],
       temperature: 0.3,
       max_tokens: 10,
@@ -219,7 +281,7 @@ export async function identifyRelevantThemes(
     };
     
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "gpt-3.5-turbo",
       messages: [systemMessage, userMessage],
       temperature: 0.3,
       max_tokens: 30,
@@ -245,45 +307,94 @@ export async function identifyRelevantThemes(
 }
 
 /**
- * Identify relevant quotes that exemplify a given theme
+ * Identify relevant quotes that are related to user message
  */
 export async function identifyRelevantQuotes(
-  theme: { id: number; name: string; description: string },
-  bookText: string
-): Promise<string[]> {
+  messageContent: string | any,
+  quotes: Array<{ id: number; text: string; chapterNumber: number; }>
+): Promise<number[]> {
   try {
-    const systemMessage: any = {
-      role: "system", 
-      content: `You are a literary analysis expert. Your task is to identify 3 quotes from a text that exemplify the theme of "${theme.name}" (${theme.description}). Select the most representative and impactful quotes.`
-    };
-    
-    // Use only a relevant portion of the book text to stay within token limits
-    const truncatedText = bookText.substring(0, 8000);
-    
-    const userMessage: any = {
-      role: "user",
-      content: `Text to analyze:\n"${truncatedText}"\n\nProvide exactly 3 quotes that best exemplify the theme of "${theme.name}". Format your response as a JSON array of strings, with each string being a quote. Example: ["quote 1", "quote 2", "quote 3"]`
-    };
-    
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-      messages: [systemMessage, userMessage],
-      temperature: 0.3,
-      max_tokens: 300,
-      response_format: { type: "json_object" },
-    });
-
-    const responseText = response.choices[0].message.content || '{"quotes": []}';
-    
-    try {
-      const jsonResponse = JSON.parse(responseText);
-      return Array.isArray(jsonResponse.quotes) ? jsonResponse.quotes : [];
-    } catch (jsonError) {
-      console.error("Error parsing quotes JSON:", jsonError);
+    // Ensure messageContent is a string right at the beginning
+    if (typeof messageContent !== 'string') {
+      console.error("Error: messageContent is not a string:", typeof messageContent);
       return [];
     }
+    
+    // Guard clause for empty quotes
+    if (!quotes || quotes.length === 0) {
+      console.log("No quotes provided to identifyRelevantQuotes");
+      return [];
+    }
+    
+    // Validate quotes data structure
+    if (!Array.isArray(quotes)) {
+      console.error("Error: quotes is not an array:", typeof quotes);
+      return [];
+    }
+    
+    // Check if each quote has the expected structure
+    const validQuotes = quotes.filter(q => 
+      q && typeof q === 'object' && 
+      'id' in q && typeof q.id === 'number' &&
+      'text' in q && typeof q.text === 'string'
+    );
+    
+    if (validQuotes.length === 0) {
+      console.error("Error: No valid quotes found in the provided array");
+      console.log("Sample of quotes received:", JSON.stringify(quotes.slice(0, 2)));
+      return [];
+    }
+    
+    // Log the input safely (messageContent is guaranteed to be a string at this point)
+    console.log(`Finding relevant quotes for message: "${messageContent.substring(0, 50)}..." among ${validQuotes.length} quotes`);
+    
+    // Create a system message for the OpenAI API
+    const systemMessage = {
+      role: "system", 
+      content: "You are a literary analysis expert. Identify quotes relevant to the given message."
+    };
+    
+    // Format the quotes for the prompt
+    const quotesText = validQuotes.map(q => `ID ${q.id}: "${q.text}"`).join('\n');
+    
+    // Create a user message with the input and formatted quotes
+    const userMessage = {
+      role: "user",
+      content: `Message: "${messageContent}"\n\nQuotes:\n${quotesText}\n\nReturn only the IDs of relevant quotes as numbers separated by commas. If none are relevant, respond with "none".`
+    };
+    
+    // Make the API call
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [systemMessage, userMessage] as any,
+      temperature: 0.3,
+      max_tokens: 50,
+    });
+
+    // Extract the content from the response
+    const responseContent = response.choices[0].message.content || "none";
+    console.log(`OpenAI response for quote identification: ${responseContent}`);
+    
+    // If no quotes are relevant, return an empty array
+    if (responseContent.toLowerCase().includes("none")) {
+      return [];
+    }
+    
+    // Extract and validate the quote IDs
+    const quoteIds = responseContent
+      .split(',')
+      .map(idStr => {
+        // Extract just the numbers from the response
+        const matches = idStr.trim().match(/\d+/);
+        return matches ? parseInt(matches[0]) : NaN;
+      })
+      .filter(id => !isNaN(id) && validQuotes.some(q => q.id === id));
+    
+    console.log(`Identified ${quoteIds.length} relevant quotes: ${quoteIds.join(', ')}`);
+    return quoteIds;
   } catch (error) {
-    console.error("Error identifying quotes:", error);
+    // Log the full error for debugging
+    console.error("Error in identifyRelevantQuotes:", error);
     return [];
   }
 }
