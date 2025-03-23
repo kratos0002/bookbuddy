@@ -7,16 +7,14 @@
       "government",
       "control",
       "watching",
-      "surveillance"
+      "surveillance",
+      "power",
+      "authority",
+      "police",
+      "ministry"
     ],
-    "occurrence_count": 273,
-    "evidence_sentence_ids": [
-      "124",
-      "567",
-      "890",
-      "1234",
-      "5678"
-    ]
+    "occurrence_count": 0,
+    "evidence_sentence_ids": []
   },
   {
     "name": "Surveillance",
@@ -26,16 +24,14 @@
       "spying",
       "observe",
       "listen",
-      "monitor"
+      "monitor",
+      "camera",
+      "eye",
+      "watched",
+      "privacy"
     ],
-    "occurrence_count": 189,
-    "evidence_sentence_ids": [
-      "456",
-      "789",
-      "1011",
-      "2345",
-      "6789"
-    ]
+    "occurrence_count": 0,
+    "evidence_sentence_ids": []
   },
   {
     "name": "Psychological Manipulation",
@@ -45,16 +41,14 @@
       "thoughtcrime",
       "memory",
       "alter",
-      "propaganda"
+      "propaganda",
+      "brainwash",
+      "mind",
+      "thought",
+      "language"
     ],
-    "occurrence_count": 156,
-    "evidence_sentence_ids": [
-      "321",
-      "654",
-      "987",
-      "3456",
-      "7890"
-    ]
+    "occurrence_count": 0,
+    "evidence_sentence_ids": []
   },
   {
     "name": "Rebellion",
@@ -64,16 +58,14 @@
       "freedom",
       "fight",
       "against",
-      "defy"
+      "defy",
+      "disobey",
+      "rebel",
+      "resistance",
+      "revolution"
     ],
-    "occurrence_count": 124,
-    "evidence_sentence_ids": [
-      "135",
-      "579",
-      "1113",
-      "4567",
-      "8901"
-    ]
+    "occurrence_count": 0,
+    "evidence_sentence_ids": []
   },
   {
     "name": "Loss of Identity",
@@ -83,16 +75,14 @@
       "individual",
       "personality",
       "conform",
-      "vaporize"
+      "vaporize",
+      "person",
+      "human",
+      "dignity",
+      "self-expression"
     ],
-    "occurrence_count": 98,
-    "evidence_sentence_ids": [
-      "246",
-      "680",
-      "1224",
-      "5678",
-      "9012"
-    ]
+    "occurrence_count": 0,
+    "evidence_sentence_ids": []
   },
   {
     "name": "Historical Revisionism",
@@ -102,15 +92,13 @@
       "change",
       "rewrite",
       "record",
-      "ministry of truth"
+      "ministry of truth",
+      "past",
+      "document",
+      "adjust",
+      "memory hole"
     ],
-    "occurrence_count": 87,
-    "evidence_sentence_ids": [
-      "357",
-      "791",
-      "1335",
-      "6789",
-      "1234"
-    ]
+    "occurrence_count": 0,
+    "evidence_sentence_ids": []
   }
 ]

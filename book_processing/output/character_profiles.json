@@ -1,23 +1,33 @@
 [
   {
-    "id": "1",
+    "id": "132",
     "name": "Winston Smith",
     "aliases": [
-      "Winston",
+      "Win - ston",
+      "Goldstein",
+      "Emmanuel Goldstein",
       "Smith",
-      "Winston Smith",
-      "Comrade Smith"
+      "Emmanuel Goldstein Winston",
+      "Winston",
+      "subtle manoeuvrings Winston",
+      "Both Winston",
+      "Winston Smith"
     ],
-    "quote_count": 87,
-    "mention_count": 458,
+    "mention_count": 3050,
+    "quote_count": 279,
+    "gender": "unknown",
     "sample_quotes": [
-      "Freedom is the freedom to say that two plus two make four. If that is granted, all else follows.",
-      "We shall meet in the place where there is no darkness.",
-      "Perhaps one did not want to be loved so much as to be understood.",
-      "Being in a minority, even in a minority of one, did not make you mad.",
-      "Until they become conscious they will never rebel, and until after they have rebelled they cannot become conscious."
+      "\u2018 Swine ! Swine ! Swine ! \u2019",
+      "\u2018 Have you got a spanner ? \u2019",
+      "\u2018 We shall meet in the place where there is no darkness , \u2019",
+      "\u2019 Attention ! Your attention , please ! A newsflash has this moment arrived from the Malabar front . Our forces in South India have won a glorious victory . I am authorized to say that the action we are now reporting may well bring the war within measurable distance of its end . Here is the newsflash \u2014 \u2014 \u2019",
+      "\u2018 Thirty to forty group ! \u2019",
+      "\u2018 Thirty to forty group ! Take your places , please . Thirties to forties ! \u2019",
+      "\u2019 , that is to say \u2014 it had been current earlier . Everything melted into mist . Sometimes , indeed , you could put your finger on a definite lie . It was not true , for example , as was claimed in the Party history books , that the Party had invented aeroplanes . He remembered aeroplanes since his earliest childhood . But you could prove nothing . There was never any evidence . Just once in his whole life he had held in his hands unmistakable documentary proof of the falsification of an historical fact . And on that occasion \u2014 \u2014 \u2018",
+      "\u2019 delay . The messages he had received referred to articles or news items which for one reason or another it was thought neces- sary to alter , or , as the official phrase had it , to rectify . For example , it appeared from \u2018",
+      "\u2019 of the seventeenth of March that Big Brother , in his speech of the previous day , had predicted that the South Indian front would re - main quiet but that a Eurasian offensive would shortly be",
+      "\u2018 Just the man I was looking for , \u2019"
     ],
-    "gender": "male",
     "traits": [
       "rebellious",
       "intellectual",
@@ -29,22 +39,79 @@
     "description": "Winston Smith is a low-ranking member of the ruling Party in London, in the nation of Oceania. Everywhere Winston goes, even his own home, the Party watches him through telescreens. He works at the Ministry of Truth, where he alters historical records to fit Party needs. He is haunted by memories he's uncertain of and is searching for truth amidst the Party's lies."
   },
   {
-    "id": "2",
+    "id": "0",
+    "name": "I",
+    "aliases": [
+      "I"
+    ],
+    "mention_count": 440,
+    "quote_count": 160,
+    "gender": "unknown",
+    "sample_quotes": [
+      "\u2019 he added untruthfully . The queue gave another jerk forward . As they halted he turned and faced Syme again . Each of them took a greasy metal tray from a pile at the end of the counter . \u2018",
+      "\u2019 said Winston indifferently . \u2018",
+      "\u2019 said Syme . His mocking eyes roved over Winston \u2019s face . \u2018",
+      "\u2019 the eyes seemed to say , \u2018",
+      "\u2019 In an intellectual way , Syme was venomously orthodox . He would talk with a disagreeable gloating satisfaction of he - licopter raids on enemy villages , and trials and confessions of thought - criminals , the executions in the cellars of the Ministry of Love . Talking to him was largely a matter of getting him away from such subjects and entangling him ,",
+      "\u2019 , uttered in a youthful and rather silly feminine voice . But the other voice never stopped for an in - stant , even when the girl was speaking . Winston knew the man by sight , though he knew no more about him than that he held some important post in the Fiction Department . He was a man of about thirty , with a muscular throat and a large , mobile mouth . His head was thrown back a little , and because of the angle at which he was sitting , his spectacles caught the light and presented to Winston two blank discs instead of eyes . What was slightly horrible , was that from the stream of sound that poured out of his mouth it was almost impossible to distinguish a single word . Just once Winston caught a phrase\u2014\u2019complete and final elimination of Goldsteinism\u2019\u2014jerked out very rapidly and , as it seemed , all in one piece , like a line of type cast solid . For the rest it was just a noise , a quack - quack - quacking . And yet , though you could not actually hear what the man was saying , you could not be in any doubt about its general nature . He might be denouncing Goldstein and demanding sterner measures against thought - criminals and saboteurs , he might be ful - minating against the atrocities of the Eurasian army , he might be praising Big Brother or the heroes on the Malabar front \u2014 it made no difference . Whatever it was , you could be certain that every word of it was pure orthodoxy , pure Ingsoc . As he watched the eyeless face with the jaw moving rapidly up and down , Winston had a curious feeling that this was not a real human being but some kind of dummy . It was not the man \u2019s brain that was speaking , it was his larynx . The stuff that was coming out of him consisted of words , but",
+      "\u2019m treasurer for our block . We \u2019re",
+      "\u2019 Parsons made the motion of aiming a rifle , and clicked his tongue for the explosion . \u2018",
+      "\u2019 said Syme abstractedly , without looking up from his strip of paper . \u2018",
+      "\u2019 agreed Win - ston dutifully . \u2018"
+    ],
+    "traits": [],
+    "role": "major character",
+    "description": "I is a character in George Orwell's \"1984\"."
+  },
+  {
+    "id": "216",
+    "name": "O\u2019Brien",
+    "aliases": [
+      "Planet eBook.com O\u2019Brien",
+      "THE BOOK\u2019\u2014even O\u2019Brien",
+      "O\u2019Brien",
+      "KNEW!\u2014that O\u2019Brien"
+    ],
+    "mention_count": 419,
+    "quote_count": 94,
+    "gender": "unknown",
+    "sample_quotes": [
+      "\u2018 I am with you , \u2019",
+      "\u2018 I know precisely what you are feeling . I know all about your contempt , your ha - tred , your disgust . But do n\u2019t worry , I am on your side ! \u2019",
+      "\u2018 We shall meet in the place where there is no darkness , \u2019",
+      "\u2018 I am usually at home in the evenings , \u2019",
+      "\u2018 If not , my servant will give you the dictionary . \u2019",
+      "\u2018 Martin is one of us , \u2019",
+      "\u2018 Bring the drinks over here , Martin . Put them on the round table . Have we enough chairs ? Then we may as well sit down and talk in comfort . Bring a chair for yourself , Martin . This is",
+      "\u2018 You did well to tell me , \u2019",
+      "\u2018 You had better go back to your Pantry , Martin , \u2019",
+      "\u2018 I shall switch on in a quarter of an hour . Take a good look at these comrades \u2019"
+    ],
+    "traits": [],
+    "role": "major character",
+    "description": "O\u2019Brien is a character in George Orwell's \"1984\"."
+  },
+  {
+    "id": "207",
     "name": "Julia",
     "aliases": [
-      "Julia",
-      "the dark-haired girl"
+      "Julia"
     ],
-    "quote_count": 52,
-    "mention_count": 211,
+    "mention_count": 350,
+    "quote_count": 69,
+    "gender": "unknown",
     "sample_quotes": [
-      "I love you.",
-      "I'm good at spotting people who don't belong. As soon as I saw you I knew you were against THEM.",
-      "It's the one thing they can't do. They can make you say anything\u2014anything\u2014but they can't make you believe it.",
-      "If you kept the small rules, you could break the big ones.",
-      "I'm only a rebel from the waist downwards."
+      "\u2018 Do n\u2019t go out into the open . There might be someone watching . We \u2019re",
+      "\u2018 We can come here once again , \u2019",
+      "\u2018 It \u2019s generally safe to use any hide - out twice . But not for another month or two , of course . \u2019",
+      "\u2018 Never go home the same way as you went out , \u2019",
+      "\u2018 And now I must go , \u2019",
+      "\u2018 talking by instal - ments \u2019",
+      "\u2019 Always in the stink of women ! How I hate women ! \u2019",
+      "\u2018 did n\u2019t much care for reading , \u2019",
+      "\u2018 One Night in a Girls \u2019",
+      "\u2019 , to be bought furtively by proletarian youths who were un - der the impression that they were buying something illegal . \u2018"
     ],
-    "gender": "female",
     "traits": [
       "rebellious",
       "pragmatic",
@@ -56,73 +123,324 @@
     "description": "Julia is a young woman who maintains an outward appearance of Party orthodoxy but secretly rebels by having affairs with Party members. She is less interested in intellectual rebellion than Winston and more focused on living life on her own terms within the existing system. She works in the Fiction Department of the Ministry of Truth."
   },
   {
-    "id": "3",
-    "name": "O'Brien",
+    "id": "3411",
+    "name": "the girl",
     "aliases": [
-      "O'Brien",
-      "Comrade O'Brien"
+      "the girl"
     ],
-    "quote_count": 65,
-    "mention_count": 169,
+    "mention_count": 235,
+    "quote_count": 24,
+    "gender": "unknown",
     "sample_quotes": [
-      "The object of persecution is persecution. The object of torture is torture. The object of power is power.",
-      "Power is in tearing human minds to pieces and putting them together again in new shapes of your own choosing.",
-      "If you want a picture of the future, imagine a boot stamping on a human face\u2014for ever.",
-      "How does one man assert his power over another, Winston? By making him suffer.",
-      "Power is not a means; it is an end."
+      "\u2019m all right . It hurt for a moment , that \u2019s all . \u2019",
+      "\u2018 It \u2019s nothing , \u2019",
+      "\u2018 I only gave my wrist a bit of a bang . Thanks , comrade ! \u2019",
+      "\u2018 Can you hear me ? \u2019",
+      "\u2018 Can you get Sunday afternoon off ? \u2019",
+      "\u2018 Then listen carefully . You \u2019ll have to remember this . Go to Paddington Station \u2014 \u2014 \u2019",
+      "\u2018 Can you remember all that ? \u2019",
+      "\u2018 You turn left , then right , then left again . And the gate \u2019s got no top bar . \u2019",
+      "\u2018 Yes . What time ? \u2019",
+      "\u2018 About fifteen . You may have to wait . I \u2019ll get there by an - other way . Are you sure you remember everything ? \u2019"
     ],
-    "gender": "male",
-    "traits": [
-      "intelligent",
-      "calculating",
-      "manipulative",
-      "powerful",
-      "loyal to Party"
-    ],
-    "role": "antagonist",
-    "description": "O'Brien is a high-ranking member of the Inner Party who poses as a member of the Brotherhood resistance movement. He initially gains Winston's trust but later reveals himself as an agent of the Thought Police. He is the embodiment of the Party's power and effectively serves as Winston's torturer and re-educator at the Ministry of Love."
+    "traits": [],
+    "role": "major character",
+    "description": "the girl is a character in George Orwell's \"1984\"."
   },
   {
-    "id": "4",
-    "name": "Big Brother",
+    "id": "12",
+    "name": "herself",
+    "aliases": [
+      "herself"
+    ],
+    "mention_count": 146,
+    "quote_count": 4,
+    "gender": "unknown",
+    "sample_quotes": [
+      "\u2019 life even with the certainty that there was torture at the end of it . Sometimes he tried to calculate the number of porcelain bricks in the walls of the cell . It should have been easy , but he always lost count at some point or another . More often he wondered where he was , and what time of day it was . At one moment he felt certain that it was broad daylight outside , and at the next equally certain that it was pitch darkness . In this place , he knew instinctively , the lights would never be turned out . It was the place with no darkness : he saw now why O\u2019Brien had seemed to recognize the allusion . In the Ministry of Love there were no windows . His cell might be at the heart of the building or against its outer wall ; it might be ten floors below ground , or thirty above it . He moved himself mentally from place to place , and tried to deter - mine by the feeling of his body whether he was perched high in the air or buried deep underground . There was a sound of marching boots outside . The steel door opened with a clang . A young officer , a trim black - uni- formed figure who seemed to glitter all over with polished leather , and whose pale , straight - featured face was like a wax mask , stepped smartly through the doorway . He mo - tioned to the guards outside to bring in the prisoner they were leading . The poet Ampleforth shambled into the cell . The door clanged shut again . Ampleforth made one or two uncertain movements from side to side , as though having some idea that there was an - other door to go out of , and then began to wander up and down the cell . He had not yet noticed Winston \u2019s presence .",
+      "\u2018 how soon will they shoot me ? \u2019",
+      "\u2018 You are a difficult case . But do n\u2019t give up hope . Everyone is cured sooner or later . In the end we shall shoot you . \u2019"
+    ],
+    "traits": [],
+    "role": "major character",
+    "description": "herself is a character in George Orwell's \"1984\"."
+  },
+  {
+    "id": "126",
+    "name": "BIG BROTHER",
     "aliases": [
       "Big Brother",
-      "Leader"
+      "BIG BROTHER",
+      "Will Big Brother",
+      "BIG BROTHER DOWN"
     ],
-    "quote_count": 0,
-    "mention_count": 103,
-    "sample_quotes": [],
-    "gender": "male",
-    "traits": [
-      "omnipresent",
-      "authoritarian",
-      "symbolic"
+    "mention_count": 135,
+    "quote_count": 12,
+    "gender": "unknown",
+    "sample_quotes": [
+      "\u2018 B - B! ... B - B ! \u2019",
+      "\u2019 What lessons do we learn from this fact , comrades ? The lesson \u2014 which is also one of the fundamen - tal principles of Ingsoc \u2014 that , \u2019",
+      "\u2019 Yes , I said that ! Said it over and over again , it seems . Between you and me , old man , I \u2019m"
     ],
-    "role": "figurehead/symbol",
-    "description": "Big Brother is the face of the Party and the figurehead of Oceania. He is described as a man with a mustache and represents the embodiment of the Party's power and authority. It is unclear if he actually exists as a person or is merely a fabrication of the Party to inspire loyalty and fear."
+    "traits": [],
+    "role": "major character",
+    "description": "BIG BROTHER is a character in George Orwell's \"1984\"."
   },
   {
-    "id": "5",
-    "name": "Mr. Charrington",
+    "id": "441",
+    "name": "one",
     "aliases": [
+      "one"
+    ],
+    "mention_count": 105,
+    "quote_count": 3,
+    "gender": "unknown",
+    "sample_quotes": [
+      "\u2018 to think in an orthodox manner \u2019"
+    ],
+    "traits": [],
+    "role": "major character",
+    "description": "one is a character in George Orwell's \"1984\"."
+  },
+  {
+    "id": "177",
+    "name": "Katharine",
+    "aliases": [
+      "Katharine"
+    ],
+    "mention_count": 101,
+    "quote_count": 4,
+    "gender": "unknown",
+    "sample_quotes": [
+      "\u2018 our duty to the Par - ty \u2019",
+      "\u2018 I \u2019ve been at school too , dear . Sex talks once a month for the over - sixteens . And in the Youth Movement . They rub it into you for years . I dare say it works in a lot of cases . But of course you can never tell ; people are such hypocrites . \u2019",
+      "\u2018 When you make love you \u2019re",
+      "\u2018 just to keep people frightened \u2019"
+    ],
+    "traits": [],
+    "role": "major character",
+    "description": "Katharine is a character in George Orwell's \"1984\"."
+  },
+  {
+    "id": "201",
+    "name": "Charrington",
+    "aliases": [
+      "old Charrington",
       "Charrington",
-      "Mr. Charrington",
+      "Mr Charrington"
+    ],
+    "mention_count": 101,
+    "quote_count": 3,
+    "gender": "unknown",
+    "sample_quotes": [
+      "\u2018 Oranges and lemons , say the bells of St Clement \u2019s ! \u2019",
+      "\u2018 It just occurred to me you might be interested , \u2019",
+      "\u2018 Pick up those pieces , \u2019"
+    ],
+    "traits": [],
+    "role": "major character",
+    "description": "Charrington is a character in George Orwell's \"1984\"."
+  },
+  {
+    "id": "160",
+    "name": "Syme",
+    "aliases": [
+      "Syme"
+    ],
+    "mention_count": 81,
+    "quote_count": 9,
+    "gender": "unknown",
+    "sample_quotes": [
+      "\u2018 I wanted to ask you whether you \u2019d got any razor blades , \u2019",
+      "\u2018 It was a good hanging , \u2019",
+      "\u2018 I think it spoils it when they tie their feet together . I like to see them kicking . And above all , at the end , the tongue sticking right out , and blue \u2014 a quite bright blue . That \u2019s the detail that ap - peals to me . \u2019",
+      "\u2018 There is a word in Newspeak , \u2019",
+      "\u2018 I do n\u2019t know whether you know it : DUCKSPEAK , to quack like a duck . It is one of those interesting words that have two contradic - tory meanings . Applied to an opponent , it is abuse , applied to someone you agree with , it is praise . \u2019",
+      "\u2018 Did I ever tell you , old boy , \u2019",
+      "\u2018 about the time when those two nippers of mine set fire to the old market - woman \u2019s skirt because they saw her wrapping up sausages in a poster of B.B. ? Sneaked up behind her and set fire to it with a box of match- es . Burned her quite badly , I believe . Little beggars , eh ? But"
+    ],
+    "traits": [],
+    "role": "supporting character",
+    "description": "Syme is a character in George Orwell's \"1984\"."
+  },
+  {
+    "id": "418",
+    "name": "the Party",
+    "aliases": [
+      "the Party"
+    ],
+    "mention_count": 80,
+    "quote_count": 3,
+    "gender": "unknown",
+    "sample_quotes": [
+      "\u2018 Who controls the past , \u2019",
+      "\u2018 controls the future : who controls the present controls the past . \u2019"
+    ],
+    "traits": [],
+    "role": "supporting character",
+    "description": "the Party is a character in George Orwell's \"1984\"."
+  },
+  {
+    "id": "665",
+    "name": "the old man",
+    "aliases": [
       "the old man"
     ],
-    "quote_count": 18,
-    "mention_count": 42,
+    "mention_count": 77,
+    "quote_count": 15,
+    "gender": "unknown",
     "sample_quotes": [
-      "You are the dead.",
-      "It's beautiful, that is, I mean the steel is beautiful.",
-      "There's another room upstairs that you might care to take a look at."
+      "\u2019 We did n\u2019t ought to \u2018",
+      "\u2018 I arst you civil enough , did n\u2019t I ? \u2019",
+      "\u2018 You telling me you ai n\u2019t got a pint mug in the \u2018",
+      "\u2019 said the barman , lean- ing forward with the tips of his fingers on the counter . \u2018",
+      "\u2018 isself a barman and do n\u2019t know what a pint is ! Why , a pint \u2019s the \u2018",
+      "\u2018 Ave to teach you the A , B , C next . \u2019",
+      "\u2018 It \u2019s all wars , \u2019",
+      "\u2018 em pushed me once , \u2019",
+      "\u2018 We lived here till my wife died , \u2019",
+      "\u2019 There was a small bookcase in the other corner , and Winston had already gravitated towards it . It contained nothing but rubbish . The hunting - down and destruction of books had been done with the same thoroughness in the prole quarters as everywhere else . It was very unlikely that there existed anywhere in Oceania a copy of a book printed earlier than 1960 . The old man , still carrying the lamp , was standing in front of a picture in a rosewood frame which hung on the other side of the fireplace , opposite the bed . \u2018"
     ],
-    "gender": "male",
-    "traits": [
-      "deceptive",
-      "patient",
-      "observant"
+    "traits": [],
+    "role": "supporting character",
+    "description": "the old man is a character in George Orwell's \"1984\"."
+  },
+  {
+    "id": "602",
+    "name": "his mother",
+    "aliases": [
+      "his mother"
     ],
-    "role": "hidden antagonist",
-    "description": "Mr. Charrington appears to be an elderly shopkeeper in the prole district who rents a room above his shop to Winston and Julia for their secret meetings. He presents himself as a sympathetic figure interested in antiques and the past, but is ultimately revealed to be a member of the Thought Police who has been monitoring them."
+    "mention_count": 72,
+    "quote_count": 1,
+    "gender": "unknown",
+    "sample_quotes": [
+      "\u2018 Now be good , and I\u2019Il buy you a toy . A lovely toy \u2014 you \u2019ll love it \u2019"
+    ],
+    "traits": [],
+    "role": "supporting character",
+    "description": "his mother is a character in George Orwell's \"1984\"."
+  },
+  {
+    "id": "148",
+    "name": "W inston",
+    "aliases": [
+      "W inston"
+    ],
+    "mention_count": 63,
+    "quote_count": 5,
+    "gender": "unknown",
+    "sample_quotes": [
+      "\u2018 If you ever want to see me , this is where I can",
+      "\u2019 was what O\u2019Brien had been saying to him . Per - haps there would even be a message concealed somewhere in the dictionary . But at any rate , one thing was certain . The conspiracy that he had dreamed of did exist , and he had reached the outer edges of it . He knew that sooner or later he would obey O\u2019Brien \u2019s summons . Perhaps tomorrow , perhaps after a long de - lay \u2014 he was not certain . What was happening was only the working - out of a process that had started years ago . The first step had been a secret , involuntary thought , the sec - ond had been the opening of the diary . He had moved from thoughts to words , and now from words to actions . The last step was something that would happen in the Ministry of Love . He had accepted it . The end was contained in the be - ginning . But it was frightening : or , more exactly , it was like a foretaste of death , like being a little less alive . Even while he was speaking to O\u2019Brien , when the meaning of the words had sunk in , a chilly shuddering feeling had taken posses - sion of his body . He had the sensation of stepping into the dampness of a grave , and it was not much better because he had always known that the grave was there and waiting for him .",
+      "\u2018 Do you know , \u2019",
+      "\u2018 that until this moment I believed I had murdered my mother ? \u2019"
+    ],
+    "traits": [],
+    "role": "supporting character",
+    "description": "W inston is a character in George Orwell's \"1984\"."
+  },
+  {
+    "id": "423",
+    "name": "The other person",
+    "aliases": [
+      "The other person"
+    ],
+    "mention_count": 58,
+    "quote_count": 2,
+    "gender": "unknown",
+    "sample_quotes": [
+      "\u2018 At the time when it happens , \u2019",
+      "\u2018 you do mean it . \u2019"
+    ],
+    "traits": [],
+    "role": "supporting character",
+    "description": "The other person is a character in George Orwell's \"1984\"."
+  },
+  {
+    "id": "3553",
+    "name": "dear",
+    "aliases": [
+      "dear"
+    ],
+    "mention_count": 53,
+    "quote_count": 10,
+    "gender": "unknown",
+    "sample_quotes": [
+      "\u2019re young and fresh and healthy , you understand \u2014 I thought that probably \u2014 \u2014 \u2019",
+      "\u2018 You thought I was a good Party member . Pure in word and deed . Banners , processions , slogans , games , commu - nity hikes all that stuff . And you thought that if I had a quarter of a chance I \u2019d denounce you as a thought - criminal",
+      "\u2019 she said vaguely . \u2018",
+      "\u2019re not going to have the filthy brutes in here . I \u2019ll stuff the hole with a bit of sacking before we go . And next time we come here I \u2019ll bring some plaster and bung it up properly . \u2019"
+    ],
+    "traits": [],
+    "role": "supporting character",
+    "description": "dear is a character in George Orwell's \"1984\"."
+  },
+  {
+    "id": "386",
+    "name": "the woman",
+    "aliases": [
+      "the woman"
+    ],
+    "mention_count": 51,
+    "quote_count": 14,
+    "gender": "unknown",
+    "sample_quotes": [
+      "\u2018 I suppose we may as well say good - bye , \u2019",
+      "\u2018 You may as well say good - bye , \u2019",
+      "\u2018 F \u2014 \u2014 bastards ! \u2019",
+      "\u2018 Beg pardon , dearie , \u2019",
+      "\u2018 ow to treat a lady , do they ? \u2019",
+      "\u2018 Par - don , \u2019",
+      "\u2018 I ai n\u2019t meself , quite . \u2019",
+      "\u2018 Never keep it down , thass what I say . Get it up while it \u2019s fresh on your stomach , like . \u2019",
+      "\u2018 Wass your name , dearie ? \u2019",
+      "\u2018 Thass funny . My name \u2019s Smith too . Why , \u2019"
+    ],
+    "traits": [],
+    "role": "supporting character",
+    "description": "the woman is a character in George Orwell's \"1984\"."
+  },
+  {
+    "id": "134",
+    "name": "Newspeak",
+    "aliases": [
+      "Newspeak",
+      "Newspeak Newspeak"
+    ],
+    "mention_count": 51,
+    "quote_count": 10,
+    "gender": "unknown",
+    "sample_quotes": [
+      "\u2019re not far from that point . But the process will still be continuing long after you and I are dead . Every year fewer and fewer words , and the range of consciousness always a little smaller . Even now , of course , there \u2019s no reason or ex - cuse for committing thoughtcrime . It \u2019s merely a question of self - discipline , reality - control . But in the end there wo n\u2019t be any need even for that . The Revolution will be com - plete when the language is perfect . Newspeak is Ingsoc and Ingsoc is Newspeak , \u2019",
+      "\u2018 Has it ever occurred to you , Winston , that by the year 2050 , at the very latest , not a single human being will be alive who could understand such a conversation as we are having now ? \u2019",
+      "\u2018 Except the proles , \u2019",
+      "\u2018 The proles are not human beings , \u2019",
+      "\u2018 By 2050 \u2014 earlier , probably \u2014 all real knowledge of Oldspeak will have disappeared . The whole literature of the past will have been destroyed . Chaucer , Shakespeare , Milton , By - ron \u2014 they\u2019ll exist only in Newspeak versions , not merely changed into something different , but actually changed into something contradictory of what they used to be . Even the literature of the Party will change . Even the slogans will change . How could you have a slogan like \u2018",
+      "\u2019 when the concept of freedom has been abolished ? The whole climate of thought will be different . In fact there will be no thought , as we understand it now . Orthodoxy means not thinking \u2014 not needing to think . Orthodoxy is uncon - sciousness . \u2019",
+      "\u2018 This dog is free from lice \u2019",
+      "\u2018 This field is free from weeds \u2019"
+    ],
+    "traits": [],
+    "role": "supporting character",
+    "description": "Newspeak is a character in George Orwell's \"1984\"."
+  },
+  {
+    "id": "3412",
+    "name": "the man",
+    "aliases": [
+      "the man"
+    ],
+    "mention_count": 51,
+    "quote_count": 3,
+    "gender": "unknown",
+    "sample_quotes": [
+      "\u2018 You did n\u2019t hear him ! \u2019",
+      "\u2018 Something went wrong with the telescreen . HE \u2019S",
+      "\u2019 The two sturdy guards had stooped to take him by the arms . But just at this moment he flung himself across the floor of the cell and grabbed one of the iron legs that sup - ported the bench . He had set up a wordless howling , like an animal . The guards took hold of him to wrench him loose , but he clung on with astonishing strength . For perhaps twenty seconds they were hauling at him . The prisoners sat quiet , their hands crossed on their knees , looking straight in front of them . The howling stopped ; the man had no"
+    ],
+    "traits": [],
+    "role": "supporting character",
+    "description": "the man is a character in George Orwell's \"1984\"."
   }
 ]

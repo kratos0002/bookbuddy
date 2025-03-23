@@ -15,11 +15,12 @@ def process_book_with_booknlp(input_file, output_dir, book_id):
     """
     print(f"Processing {input_file} with BookNLP...")
     
-    # Initialize BookNLP
+    # Initialize BookNLP with correct configuration
     model_params = {
         "pipeline": "entity,quote,supersense,event,coref",
-        "model": "en_core_web_sm"
+        "model": "small"  # Using small model for better compatibility
     }
+    
     booknlp = BookNLP("en", model_params)
     
     # Process the book
@@ -47,48 +48,37 @@ def extract_characters(entities_file, tokens_file, quotes_file):
     with open(entities_file, 'r', encoding='utf-8') as f:
         next(f)  # Skip header
         for line in f:
-            parts = line.strip().split(',')
-            if len(parts) >= 7:
+            parts = line.strip().split('\t')
+            if len(parts) >= 6:
                 entity_id = parts[0]
-                entity_name = parts[1]
-                entity_type = parts[2]
-                count = int(parts[3])
+                start_token = parts[1]
+                end_token = parts[2]
+                entity_type = parts[3]
+                entity_category = parts[4]
+                text = parts[5]
                 
                 # Only process PER (person) entities
-                if entity_type == "PER" and count > 5:
-                    gender = parts[6] if len(parts) > 6 else "unknown"
-                    entity_data[entity_id] = {
-                        "id": entity_id,
-                        "name": entity_name,
-                        "mention_count": count,
-                        "gender": gender,
-                        "aliases": [entity_name],
-                        "mentions": [],
-                        "quote_count": 0,
-                        "sample_quotes": []
-                    }
-    
-    # Load token data to get mentions
-    with open(tokens_file, 'r', encoding='utf-8') as f:
-        next(f)  # Skip header
-        for line in f:
-            parts = line.strip().split('\t')
-            if len(parts) >= 8:
-                entity_id = parts[7]
-                if entity_id in entity_data and parts[4] in ["PROP", "NOM", "PRON"]:
-                    token_text = parts[3]
-                    token_type = parts[4]
-                    start_token = parts[0]
-                    end_token = parts[0]  # Assuming single-token mentions for simplicity
+                if entity_category == "PER":
+                    if entity_id not in entity_data:
+                        entity_data[entity_id] = {
+                            "id": entity_id,
+                            "name": text,
+                            "mention_count": 0,
+                            "gender": "unknown",
+                            "aliases": set([text]),
+                            "mentions": [],
+                            "quote_count": 0,
+                            "sample_quotes": []
+                        }
                     
-                    # Add to aliases if not already there
-                    if token_text not in entity_data[entity_id]["aliases"] and token_type != "PRON":
-                        entity_data[entity_id]["aliases"].append(token_text)
+                    entity_data[entity_id]["mention_count"] += 1
+                    if entity_type == "PROP" and text not in entity_data[entity_id]["aliases"]:
+                        entity_data[entity_id]["aliases"].add(text)
                     
                     # Add mention
                     mention = {
-                        "text": token_text,
-                        "type": token_type,
+                        "text": text,
+                        "type": entity_type,
                         "start_token": start_token,
                         "end_token": end_token
                     }
@@ -100,13 +90,15 @@ def extract_characters(entities_file, tokens_file, quotes_file):
         next(f)  # Skip header
         for line in f:
             parts = line.strip().split('\t')
-            if len(parts) >= 4:
-                entity_id = parts[1]
-                quote_text = parts[3]
+            if len(parts) >= 7:
+                quote_start = parts[0]
+                quote_end = parts[1]
+                speaker_id = parts[5]
+                quote_text = parts[6]
                 
-                if entity_id in entity_data:
-                    entity_data[entity_id]["quote_count"] += 1
-                    character_quotes[entity_id].append(quote_text)
+                if speaker_id in entity_data:
+                    entity_data[speaker_id]["quote_count"] += 1
+                    character_quotes[speaker_id].append(quote_text)
     
     # Add sample quotes (up to 10 per character)
     for entity_id, quotes in character_quotes.items():
@@ -116,7 +108,12 @@ def extract_characters(entities_file, tokens_file, quotes_file):
         entity_data[entity_id]["sample_quotes"] = sample_quotes
     
     # Convert to list and sort by mention count
-    characters = list(entity_data.values())
+    characters = []
+    for entity_id, data in entity_data.items():
+        # Convert set to list for JSON serialization
+        data["aliases"] = list(data["aliases"])
+        characters.append(data)
+    
     characters.sort(key=lambda x: x["mention_count"], reverse=True)
     
     # Keep only the top characters (those with significant presence)

@@ -1,47 +1,13 @@
 import os
-import requests
 import json
 from booknlp.booknlp import BookNLP
-
-def download_book():
-    """Downloads the text of 1984 from Project Gutenberg"""
-    url = "https://www.gutenberg.org/files/1984/1984-h/1984-h.htm"
-    input_dir = "book_processing/input"
-    output_path = os.path.join(input_dir, "1984.txt")
-    
-    if os.path.exists(output_path):
-        print(f"Book already downloaded at {output_path}")
-        return output_path
-    
-    print(f"Downloading 1984 from {url}")
-    response = requests.get(url)
-    
-    if response.status_code != 200:
-        # Try alternative URL if the first one fails
-        url = "https://www.gutenberg.org/cache/epub/1984/pg1984.txt"
-        response = requests.get(url)
-        
-    if response.status_code != 200:
-        print(f"Failed to download book: {response.status_code}")
-        return None
-    
-    # Extract the text (this is simplified and might need adjustments)
-    text = response.text
-    
-    # Save the text
-    os.makedirs(input_dir, exist_ok=True)
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write(text)
-    
-    print(f"Book downloaded and saved to {output_path}")
-    return output_path
 
 def process_book_with_booknlp(input_file, output_dir, book_id):
     """Process the book with BookNLP"""
     # Configure model parameters
     model_params = {
         "pipeline": "entity,quote,supersense,event,coref",
-        "model": "small"  # Using small model for faster processing
+        "model": "small"  # Using small model for better compatibility
     }
     
     # Initialize the BookNLP instance
@@ -125,20 +91,23 @@ def convert_to_structured_json(output_dir, book_id):
     return output_files
 
 def main():
-    # 1. Download book (or use local file if it exists)
-    input_file = download_book()
-    if not input_file:
-        print("Failed to obtain the book text.")
+    # Use the extracted text file
+    input_file = "book_processing/data/1984.txt"
+    if not os.path.exists(input_file):
+        print(f"Error: Input file {input_file} not found.")
         return
     
-    # 2. Set up paths
+    # Set up paths
     output_dir = "book_processing/output"
     book_id = "1984"
     
-    # 3. Process with BookNLP
+    # Create output directory if it doesn't exist
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Process with BookNLP
     process_book_with_booknlp(input_file, output_dir, book_id)
     
-    # 4. Convert to structured JSON
+    # Convert to structured JSON
     json_files = convert_to_structured_json(output_dir, book_id)
     
     print("Processing complete. JSON files created:")
