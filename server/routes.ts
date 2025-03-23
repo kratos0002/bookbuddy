@@ -14,6 +14,7 @@ import { ChatModes, InsertConversation, InsertMessage, Message, Theme, ThemeQuot
 import path from "path";
 import { db } from "./db";
 import { getLibrarianResponse } from "./services/simple-librarian";
+import { SuggestionCategory } from '../client/src/components/chat/suggestions/types';
 
 // Initialize OpenAI client
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -1007,6 +1008,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timestamp: new Date().toISOString() 
       });
     }
+  });
+
+  // Add the suggestionTracker object to store usage data
+  const suggestionTracker: Record<string, Record<SuggestionCategory, number>> = {};
+
+  // Add endpoint to track suggestion usage
+  app.post('/api/suggestions/track', async (req, res) => {
+    const { characterId, category, suggestionId } = req.body;
+    
+    if (!category) {
+      return res.status(400).json({ error: 'Missing required parameters' });
+    }
+    
+    // Use 'librarian' as the key for librarian suggestions, otherwise use the character ID
+    const charKey = characterId === null ? 'librarian' : characterId.toString();
+    
+    // Initialize tracking data if not exists
+    if (!suggestionTracker[charKey]) {
+      suggestionTracker[charKey] = {
+        experience: 0,
+        relationship: 0,
+        worldview: 0,
+        theme: 0,
+        emotional: 0,
+        analytical: 0
+      };
+    }
+    
+    // Increment the count for this category
+    suggestionTracker[charKey][category as SuggestionCategory]++;
+    
+    console.log(`Suggestion used - Character: ${charKey}, Category: ${category}, ID: ${suggestionId}`);
+    console.log(`Updated tracker:`, suggestionTracker[charKey]);
+    
+    return res.status(200).json({ 
+      success: true,
+      stats: suggestionTracker[charKey]
+    });
+  });
+
+  // Add endpoint to get suggestion usage stats
+  app.get('/api/suggestions/stats/:characterId', (req, res) => {
+    const { characterId } = req.params;
+    const charKey = characterId === 'librarian' ? 'librarian' : characterId;
+    
+    if (!suggestionTracker[charKey]) {
+      return res.status(200).json({
+        experience: 0,
+        relationship: 0,
+        worldview: 0,
+        theme: 0,
+        emotional: 0,
+        analytical: 0
+      });
+    }
+    
+    return res.status(200).json(suggestionTracker[charKey]);
   });
 
   const httpServer = createServer(app);

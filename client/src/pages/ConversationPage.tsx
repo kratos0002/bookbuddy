@@ -15,6 +15,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { EncyclopediaProvider, useEncyclopedia, EncyclopediaEntry } from '@/contexts/EncyclopediaContext';
 import EntryUnlockedNotification from '@/components/encyclopedia/EntryUnlockedNotification';
 import SimpleLibrarian from '@/components/SimpleLibrarian';
+import SuggestionPanel from '@/components/chat/suggestions/SuggestionPanel';
 
 interface Message {
   id: number;
@@ -247,7 +248,15 @@ const ConversationPageContent = () => {
       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
   }, [messages]);
-  
+
+  // Inside the ConversationPage component, add state for suggestions
+  const [suggestionsMinimized, setSuggestionsMinimized] = useState(false);
+
+  // Add this function to handle suggestion clicks
+  const handleSuggestionClick = (text: string) => {
+    setMessage(text);
+  };
+
   return (
     <Layout>
       <div className="h-full flex flex-col md:flex-row overflow-hidden relative">
@@ -415,6 +424,16 @@ const ConversationPageContent = () => {
                             </div>
                           ))}
                         </div>
+
+                        {/* Suggestion Panel */}
+                        <SuggestionPanel
+                          characterId={selectedChatCharacter}
+                          messageCount={messages?.length || 0}
+                          onSuggestionClick={handleSuggestionClick}
+                          minimized={suggestionsMinimized}
+                          onToggleMinimize={() => setSuggestionsMinimized(!suggestionsMinimized)}
+                          className="mt-auto"
+                        />
 
                         {/* Message input form */}
                         <form onSubmit={(e) => {
