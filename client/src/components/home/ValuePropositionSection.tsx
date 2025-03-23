@@ -1,82 +1,194 @@
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { BookOpen, GraduationCap, Heart, Coffee } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-import React from 'react';
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { BookOpen, GraduationCap, Users } from 'lucide-react';
+type PersonaType = 'students' | 'bookLovers' | 'casualReaders';
+
+interface Persona {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  transformation: string;
+  color: string;
+}
 
 const ValuePropositionSection = () => {
-  const valueProps = [
-    {
-      icon: <GraduationCap className="h-8 w-8 text-book-primary" />,
-      title: "For Students",
-      description: "Gain deeper insights for essays and analysis. Explore themes and character motivations directly from the source."
+  const [activePersona, setActivePersona] = useState<PersonaType>('students');
+
+  const personas: Record<PersonaType, Persona> = {
+    students: {
+      icon: <GraduationCap className="h-8 w-8" />,
+      title: "For Students & Educators",
+      description: "Turn passive study into active exploration with in-depth character conversations that illuminate themes, historical context, and literary elements.",
+      transformation: "From memorizing facts to meaningful understanding that leads to better essays, deeper analysis, and genuine appreciation of literature.",
+      color: "#1a3a5f"
     },
-    {
-      icon: <BookOpen className="h-8 w-8 text-book-primary" />,
-      title: "For Book Lovers",
-      description: "See your favorite books from new perspectives. Engage with characters in a way that brings stories to life."
+    bookLovers: {
+      icon: <Heart className="h-8 w-8" />,
+      title: "For Passionate Readers",
+      description: "Revisit your favorite books through fresh perspectives. Ask characters questions you've always wondered about and explore unresolved plot points.",
+      transformation: "From finishing the last page to continuing the journey with characters who become companions in your literary exploration.",
+      color: "#8b2439"
     },
-    {
-      icon: <Users className="h-8 w-8 text-book-primary" />,
-      title: "For Casual Readers",
-      description: "Make literature interactive and accessible. Discover classic works in a more engaging format."
+    casualReaders: {
+      icon: <Coffee className="h-8 w-8" />,
+      title: "For Curious Minds",
+      description: "Make classic literature accessible and engaging. Have natural conversations that break down complex themes into relatable discussions.",
+      transformation: "From intimidation to inspiration as the world's greatest books become approachable through personal dialogue.",
+      color: "#7d8c75"
     }
-  ];
+  };
 
   return (
-    <section className="px-4 py-16 relative">
+    <section className="py-20 px-4 bg-[#f8f0e3]/60 relative overflow-hidden">
       {/* Decorative elements */}
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-book-primary/20 to-transparent"></div>
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute w-full h-full bg-[url('/paper-texture.png')] opacity-5"></div>
+      </div>
       
-      <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-serif font-semibold text-center mb-4">Why BookBuddy?</h2>
-        <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-          BookBuddy offers a unique way to engage with literature for all types of readers.
+      <div className="max-w-6xl mx-auto relative z-10">
+        <h2 className="text-3xl md:text-4xl font-serif font-bold text-center mb-4 text-[#1a3a5f]">
+          Why BookBuddy?
+        </h2>
+        <p className="text-center text-gray-600 mb-16 max-w-2xl mx-auto">
+          Our interactive platform transforms how different readers experience and engage with literature.
         </p>
         
-        <Carousel className="w-full">
-          <CarouselContent>
-            {valueProps.map((item, index) => (
-              <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                <div className="p-2">
-                  <Card className="transition-all duration-300 hover:shadow-md h-full">
-                    <CardHeader className="pb-2 flex flex-col items-center">
-                      <div className="mb-4">{item.icon}</div>
-                      <CardTitle className="text-center">{item.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-center">
-                      <p>{item.description}</p>
-                    </CardContent>
-                  </Card>
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
+        {/* Personas tabs */}
+        <div className="flex flex-wrap justify-center gap-4 mb-12">
+          {(Object.keys(personas) as PersonaType[]).map((key) => (
+            <button
+              key={key}
+              onClick={() => setActivePersona(key)}
+              className={cn(
+                "px-6 py-3 rounded-full flex items-center gap-2 transition-all",
+                activePersona === key 
+                  ? `bg-[${personas[key].color}] text-white shadow-md` 
+                  : `bg-white text-[${personas[key].color}] hover:bg-[${personas[key].color}]/10`
+              )}
+            >
+              {React.cloneElement(personas[key].icon as React.ReactElement, { 
+                className: `h-5 w-5 ${activePersona === key ? 'text-white' : `text-[${personas[key].color}]`}` 
+              })}
+              <span className="font-medium">{personas[key].title}</span>
+            </button>
+          ))}
+        </div>
         
-        {/* Example conversation preview */}
-        <div className="mt-16 p-6 border border-dashed border-book-primary/30 rounded-lg bg-book-primary/5 relative">
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-background px-4 text-sm font-medium text-book-primary">
-            Sample Conversation
-          </div>
+        {/* Active persona content */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          <motion.div
+            key={activePersona}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-white p-8 rounded-xl shadow-md border border-[#f8f0e3]"
+          >
+            <div className={`w-16 h-16 rounded-full bg-[${personas[activePersona].color}]/10 flex items-center justify-center mb-6`}>
+              {React.cloneElement(personas[activePersona].icon as React.ReactElement, { 
+                className: `h-8 w-8 text-[${personas[activePersona].color}]` 
+              })}
+            </div>
+            
+            <h3 className={`text-2xl font-serif font-bold mb-4 text-[${personas[activePersona].color}]`}>
+              {personas[activePersona].title}
+            </h3>
+            
+            <p className="text-gray-700 mb-6 leading-relaxed">
+              {personas[activePersona].description}
+            </p>
+            
+            <div className="border-t border-gray-100 pt-6">
+              <h4 className="font-medium mb-2 text-gray-900">The Transformation:</h4>
+              <p className="text-gray-700 italic">
+                {personas[activePersona].transformation}
+              </p>
+            </div>
+          </motion.div>
           
-          <div className="flex flex-col gap-4 max-w-3xl mx-auto">
-            <div className="bg-background rounded-lg p-4 shadow-sm ml-auto max-w-[80%] md:max-w-[60%]">
-              <p className="text-sm font-medium">What did the glass paperweight symbolize for Winston?</p>
+          {/* Conversation preview */}
+          <motion.div
+            key={`preview-${activePersona}`}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-white rounded-xl shadow-md overflow-hidden border border-[#f8f0e3]"
+          >
+            <div className={`px-4 py-3 bg-[${personas[activePersona].color}] text-white flex items-center`}>
+              <BookOpen className="h-5 w-5 mr-2" />
+              <span className="font-medium">Conversation Preview</span>
             </div>
             
-            <div className="bg-book-primary/10 rounded-lg p-4 shadow-sm max-w-[80%] md:max-w-[60%]">
-              <p className="text-sm">The glass paperweight symbolized the past that Winston was trying to connect with, a world before the Party. It represented beauty, fragility, and a tangible connection to history that the Party was trying to erase.</p>
-            </div>
+            {activePersona === 'students' && (
+              <div className="p-4 space-y-4">
+                <div className="flex gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#1a3a5f] flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">W</div>
+                  <div className="bg-gray-100 rounded-lg p-3 max-w-[80%]">
+                    <p className="text-sm">The Party controls everything in Oceania - from our actions to our thoughts.</p>
+                  </div>
+                </div>
+                <div className="flex gap-3 justify-end">
+                  <div className="bg-[#1a3a5f]/10 rounded-lg p-3 max-w-[80%]">
+                    <p className="text-sm">How does this "thought control" work in practice? What techniques does the Party use?</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-[#f8f0e3] flex-shrink-0 flex items-center justify-center text-[#1a3a5f] text-xs font-bold">S</div>
+                </div>
+                <div className="flex gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#1a3a5f] flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">W</div>
+                  <div className="bg-gray-100 rounded-lg p-3 max-w-[80%]">
+                    <p className="text-sm">Through doublethink, thoughtcrime, and newspeak. They eliminate words so you can't even form rebellious thoughts...</p>
+                  </div>
+                </div>
+              </div>
+            )}
             
-            <div className="bg-background rounded-lg p-4 shadow-sm ml-auto max-w-[80%] md:max-w-[60%]">
-              <p className="text-sm font-medium">Why was it significant when it broke?</p>
-            </div>
+            {activePersona === 'bookLovers' && (
+              <div className="p-4 space-y-4">
+                <div className="flex gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#8b2439] flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">J</div>
+                  <div className="bg-gray-100 rounded-lg p-3 max-w-[80%]">
+                    <p className="text-sm">I've always wondered if our relationship was truly doomed from the start, or if in a different world...</p>
+                  </div>
+                </div>
+                <div className="flex gap-3 justify-end">
+                  <div className="bg-[#8b2439]/10 rounded-lg p-3 max-w-[80%]">
+                    <p className="text-sm">Did you ever genuinely love Winston, or was your relationship just an act of rebellion?</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-[#f8f0e3] flex-shrink-0 flex items-center justify-center text-[#8b2439] text-xs font-bold">R</div>
+                </div>
+                <div className="flex gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#8b2439] flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">J</div>
+                  <div className="bg-gray-100 rounded-lg p-3 max-w-[80%]">
+                    <p className="text-sm">It began as rebellion, yes. But with him, I felt truly alive for the first time. In that sense, it was love...</p>
+                  </div>
+                </div>
+              </div>
+            )}
             
-            <div className="bg-book-primary/10 rounded-lg p-4 shadow-sm max-w-[80%] md:max-w-[60%]">
-              <p className="text-sm">When the paperweight shattered during Winston and Julia's arrest, it symbolized the destruction of Winston's hope and connection to the past. Just as the paperweight was destroyed, so too was Winston's rebellion against the Party.</p>
-            </div>
-          </div>
+            {activePersona === 'casualReaders' && (
+              <div className="p-4 space-y-4">
+                <div className="flex gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#7d8c75] flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">L</div>
+                  <div className="bg-gray-100 rounded-lg p-3 max-w-[80%]">
+                    <p className="text-sm">I'm here to help you understand classic literature in simple, relatable terms.</p>
+                  </div>
+                </div>
+                <div className="flex gap-3 justify-end">
+                  <div className="bg-[#7d8c75]/10 rounded-lg p-3 max-w-[80%]">
+                    <p className="text-sm">I find 1984 intimidating. Can you explain what "doublethink" means in modern terms?</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-[#f8f0e3] flex-shrink-0 flex items-center justify-center text-[#7d8c75] text-xs font-bold">C</div>
+                </div>
+                <div className="flex gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#7d8c75] flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">L</div>
+                  <div className="bg-gray-100 rounded-lg p-3 max-w-[80%]">
+                    <p className="text-sm">Think of it like cognitive dissonance. It's holding two contradictory beliefs simultaneously...</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </motion.div>
         </div>
       </div>
     </section>

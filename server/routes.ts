@@ -944,7 +944,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = parseInt(req.params.userId);
       
       // In a real app, this would query a database
-      // For demo purposes, we'll return the initially unlocked entries
+      // For demo purposes, we'll return ALL entries as unlocked
       const fs = await import('fs/promises');
       const path = await import('path');
       
@@ -958,11 +958,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fileContent = await fs.readFile(filePath, 'utf-8');
       const entries = JSON.parse(fileContent);
       
-      const unlockedEntries = entries.filter((entry: any) => 
-        entry.unlockProgress === 'initial'
-      ).map((entry: any) => entry.id);
+      // Return ALL entry IDs instead of just initially unlocked ones
+      const allEntryIds = entries.map((entry: any) => entry.id);
       
-      res.json(unlockedEntries);
+      res.json(allEntryIds);
     } catch (error) {
       console.error('Error fetching unlocked encyclopedia entries:', error);
       res.status(500).json({ error: 'Failed to fetch unlocked encyclopedia entries' });

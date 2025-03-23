@@ -91,7 +91,7 @@ const ConversationPageContent = () => {
   const { data: messages, refetch: refetchMessages } = useQuery({
     queryKey: ['/api/conversations', conversationId, 'messages'],
     queryFn: () => apiRequest('GET', `/api/conversations/${conversationId}/messages`),
-    enabled: !!conversationId,
+    enabled: !!conversationId && conversationId !== "dummy",
     refetchInterval: 2000,
     refetchIntervalInBackground: true,
   });
@@ -206,13 +206,11 @@ const ConversationPageContent = () => {
 
   // Handler for selecting a character
   const handleCharacterSelect = async (characterId: number | null) => {
-    // When librarian is selected, set a dummy conversation id to trigger UI change
+    // When librarian is selected, clear conversationId but set librarian flag
     if (characterId === null) {
       setSelectedChatCharacter(null);
       setIsLibrarianSelected(true);
-      
-      // Use a dummy conversation ID for librarian mode
-      setConversationId("librarian_mode"); 
+      setConversationId(null); // No API calls with null conversationId
       return;
     }
     
@@ -290,7 +288,7 @@ const ConversationPageContent = () => {
                 </h2>
                 
                 {/* Chat interface */}
-                {!conversationId ? (
+                {!conversationId && !isLibrarianSelected ? (
                   <div className="p-6 border rounded-lg bg-white shadow-sm flex-1">
                     <h4 className="text-lg font-medium mb-4">Who would you like to chat with?</h4>
                     
