@@ -1,7 +1,7 @@
 import { 
   users, books, chapters, keyEvents, themes, themeQuotes, themeIntensities,
   characters, relationships, aiAnalyses, characterPersonas, librarianPersonas,
-  conversations, messages,
+  conversations, messages, quotes, quoteThemes, quoteAnnotations,
   type User, 
   type InsertUser, 
   type Book,
@@ -25,7 +25,15 @@ import {
   type InsertConversation,
   type Message,
   type InsertMessage,
-  type ChatMode
+  type ChatMode,
+  // Quote explorer types
+  type Quote,
+  type InsertQuote,
+  type QuoteTheme,
+  type InsertQuoteTheme,
+  type QuoteAnnotation,
+  type InsertQuoteAnnotation,
+  type QuoteExplorerData
 } from "@shared/schema";
 
 import { db } from "./db";

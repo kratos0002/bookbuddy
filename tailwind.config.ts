@@ -61,6 +61,16 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Book-specific colors
+        "book-primary": "#8B1E3F",      // Dark red
+        "book-secondary": "#F5F1E3",    // Light cream
+        "book-accent": "#4E6E8E",       // Blue-grey
+        "book-dark": "#2D2D2D",         // Dark grey/black
+        // Add additional book-theme colors as needed
+        "book-success": "#2E7D32",      // Dark green
+        "book-info": "#0288D1",         // Blue
+        "book-warning": "#F57C00",      // Orange
+        "book-danger": "#D32F2F",       // Red
       },
       keyframes: {
         "accordion-down": {

@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, jsonb, real, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, jsonb, real, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -353,3 +353,93 @@ export const ChatModes = {
 } as const;
 
 export type ChatMode = typeof ChatModes[keyof typeof ChatModes];
+
+// Quote Explorer schemas
+export const quotes = pgTable("quotes", {
+  id: serial("id").primaryKey(),
+  bookId: integer("book_id").notNull(),
+  characterId: integer("character_id"), // Optional, if quote is from a character
+  chapterId: integer("chapter_id").notNull(),
+  page: integer("page"), // Optional page number
+  text: text("text").notNull(),
+  context: text("context"), // Optional surrounding text for context
+  significance: integer("significance").notNull().default(1), // 1-5 rating of quote importance
+  extractionMethod: varchar("extraction_method", { length: 50 }).notNull().default("booknlp"), // How the quote was extracted
+});
+
+export const insertQuoteSchema = createInsertSchema(quotes).pick({
+  bookId: true,
+  characterId: true,
+  chapterId: true,
+  page: true,
+  text: true,
+  context: true,
+  significance: true,
+  extractionMethod: true,
+});
+
+export type InsertQuote = z.infer<typeof insertQuoteSchema>;
+export type Quote = typeof quotes.$inferSelect;
+
+// Quote-theme mapping table for categorizing quotes
+export const quoteThemes = pgTable("quote_themes", {
+  id: serial("id").primaryKey(),
+  quoteId: integer("quote_id").notNull(),
+  themeId: integer("theme_id").notNull(),
+  relevanceScore: real("relevance_score").notNull().default(1.0), // How relevant the quote is to this theme (0.0-1.0)
+});
+
+export const insertQuoteThemeSchema = createInsertSchema(quoteThemes).pick({
+  quoteId: true,
+  themeId: true,
+  relevanceScore: true,
+});
+
+export type InsertQuoteTheme = z.infer<typeof insertQuoteThemeSchema>;
+export type QuoteTheme = typeof quoteThemes.$inferSelect;
+
+// Quote annotations for additional analysis or user notes
+export const quoteAnnotations = pgTable("quote_annotations", {
+  id: serial("id").primaryKey(),
+  quoteId: integer("quote_id").notNull(),
+  userId: integer("user_id"), // Optional user association
+  annotationType: varchar("annotation_type", { length: 50 }).notNull(), // literary_device, historical_context, etc.
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertQuoteAnnotationSchema = createInsertSchema(quoteAnnotations).pick({
+  quoteId: true,
+  userId: true,
+  annotationType: true,
+  content: true,
+});
+
+export type InsertQuoteAnnotation = z.infer<typeof insertQuoteAnnotationSchema>;
+export type QuoteAnnotation = typeof quoteAnnotations.$inferSelect;
+
+// Interface for quote explorer data representation
+export interface QuoteExplorerData {
+  quotesByTheme: Record<string, Array<{
+    id: number;
+    text: string;
+    character?: string;
+    chapter: number;
+    significance: number;
+  }>>;
+  quotesByCharacter: Record<string, Array<{
+    id: number;
+    text: string;
+    themes: string[];
+    chapter: number;
+    significance: number;
+  }>>;
+  mostSignificantQuotes: Array<{
+    id: number;
+    text: string;
+    character?: string;
+    themes: string[];
+    chapter: number;
+    significance: number;
+  }>;
+}
