@@ -14,12 +14,88 @@ import { ChatModes, InsertConversation, InsertMessage, Message, Theme, ThemeQuot
 import path from "path";
 import { db } from "./db";
 import { getLibrarianResponse } from "./services/simple-librarian";
+import quoteExplorerService from "./services/quote-explorer-service";
 
 // Initialize OpenAI client
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // Add a simple librarian endpoint without complex dependencies
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Quote Explorer API routes
+  app.get("/api/quotes/explorer-data", (req, res) => {
+    try {
+      const explorerData = quoteExplorerService.getQuoteExplorerData();
+      res.json(explorerData);
+    } catch (error) {
+      console.error("[quote-explorer] Error getting explorer data:", error);
+      res.status(500).json({ 
+        message: "Failed to get quote explorer data",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+  
+  app.get("/api/quotes", (req, res) => {
+    try {
+      const quotes = quoteExplorerService.getAllQuotes();
+      res.json(quotes);
+    } catch (error) {
+      console.error("[quote-explorer] Error getting quotes:", error);
+      res.status(500).json({ 
+        message: "Failed to get quotes",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+  
+  app.get("/api/quotes/by-theme/:themeId", (req, res) => {
+    try {
+      const themeId = parseInt(req.params.themeId);
+      if (isNaN(themeId)) {
+        return res.status(400).json({ message: "Invalid theme ID" });
+      }
+      
+      const quotes = quoteExplorerService.getQuotesByThemeId(themeId);
+      res.json(quotes);
+    } catch (error) {
+      console.error("[quote-explorer] Error getting quotes by theme:", error);
+      res.status(500).json({ 
+        message: "Failed to get quotes by theme",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+  
+  app.get("/api/quotes/by-character/:characterId", (req, res) => {
+    try {
+      const characterId = parseInt(req.params.characterId);
+      if (isNaN(characterId)) {
+        return res.status(400).json({ message: "Invalid character ID" });
+      }
+      
+      const quotes = quoteExplorerService.getQuotesByCharacterId(characterId);
+      res.json(quotes);
+    } catch (error) {
+      console.error("[quote-explorer] Error getting quotes by character:", error);
+      res.status(500).json({ 
+        message: "Failed to get quotes by character",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+  
+  app.get("/api/quotes/significant", (req, res) => {
+    try {
+      const quotes = quoteExplorerService.getMostSignificantQuotes();
+      res.json(quotes);
+    } catch (error) {
+      console.error("[quote-explorer] Error getting significant quotes:", error);
+      res.status(500).json({ 
+        message: "Failed to get significant quotes",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
   // Simple Librarian API
   app.post("/api/simple-librarian", async (req, res) => {
     try {
