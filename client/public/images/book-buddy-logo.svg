@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+  <!-- Burgundy color palette -->
+  <defs>
+    <style>
+      .primary-color { fill: #9e3d4b; }
+      .light-color { fill: #f4efe9; }
+    </style>
+  </defs>
+  
+  <!-- Book -->
+  <g class="primary-color">
+    <!-- Book Pages -->
+    <path d="M110,150 C130,140 160,130 190,150 L190,220 C160,200 130,210 110,220 Z" />
+    <!-- Book Spine -->
+    <path d="M110,150 C110,150 100,155 100,165 L100,220 C100,230 110,235 110,220 Z" />
+    <!-- Book Lines -->
+    <path d="M115,170 L185,170" stroke="#9e3d4b" stroke-width="1.5" fill="none" />
+    <path d="M115,180 L185,180" stroke="#9e3d4b" stroke-width="1.5" fill="none" />
+    <path d="M115,190 L185,190" stroke="#9e3d4b" stroke-width="1.5" fill="none" />
+    <path d="M115,200 L185,200" stroke="#9e3d4b" stroke-width="1.5" fill="none" />
+    <path d="M115,210 L160,210" stroke="#9e3d4b" stroke-width="1.5" fill="none" />
+    
+    <!-- Elements coming out of the book -->
+    <!-- Paper plane -->
+    <path d="M150,145 L170,120 L140,130 Z" />
+    
+    <!-- Hearts -->
+    <path d="M125,125 C123,120 130,115 135,122 C140,115 147,120 145,125 L135,135 Z" />
+    <path d="M165,135 C163,132 168,128 172,133 C176,128 181,132 179,135 L172,142 Z" />
+    
+    <!-- Stars/sparkles -->
+    <path d="M180,125 L183,132 L190,132 L185,138 L187,145 L180,141 L173,145 L175,138 L170,132 L177,132 Z" />
+    <path d="M120,110 L122,117 L129,117 L124,123 L126,130 L120,126 L114,130 L116,123 L111,117 L118,117 Z" />
+    
+    <!-- Small dots -->
+    <circle cx="145" cy="115" r="3" />
+    <circle cx="160" cy="105" r="2" />
+    <circle cx="135" cy="100" r="2" />
+    <circle cx="195" cy="115" r="2" />
+  </g>
+  
+  <!-- Book Buddy Text -->
+  <text x="150" y="255" font-family="Georgia, serif" font-size="24" text-anchor="middle" class="primary-color">Book Buddy</text>
+  
+  <!-- Tagline -->
+  <text x="150" y="275" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" class="primary-color">Turn the Page. Start the Conversation</text>
+</svg> 

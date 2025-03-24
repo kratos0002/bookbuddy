@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useBook } from '../contexts/BookContext';
-import { BookOpen, MapPin, Clock, Tag, FileText, BookOpenCheck } from 'lucide-react';
+import { BookOpen, MapPin, Clock, Tag, FileText, BookOpenCheck, Quote } from 'lucide-react';
 import { EncyclopediaProvider } from '@/contexts/EncyclopediaContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import EncyclopediaTab from './encyclopedia/EncyclopediaTab';
+import QuoteExplorerTab from './quotes/QuoteExplorerTab';
 
 const ContextPanel: React.FC = () => {
   const { selectedBook } = useBook();
@@ -39,6 +40,10 @@ const ContextPanel: React.FC = () => {
             <TabsTrigger value="encyclopedia" className="flex items-center gap-1 data-[state=active]:bg-background/70">
               <BookOpenCheck className="h-4 w-4" />
               <span>Encyclopedia</span>
+            </TabsTrigger>
+            <TabsTrigger value="quotes" className="flex items-center gap-1 data-[state=active]:bg-background/70">
+              <Quote className="h-4 w-4" />
+              <span>Quotes</span>
             </TabsTrigger>
           </TabsList>
         </div>
@@ -111,6 +116,10 @@ const ContextPanel: React.FC = () => {
           <EncyclopediaProvider>
             <EncyclopediaTab />
           </EncyclopediaProvider>
+        </TabsContent>
+
+        <TabsContent value="quotes" className="flex-1 overflow-hidden">
+          <QuoteExplorerTab />
         </TabsContent>
       </Tabs>
     </div>

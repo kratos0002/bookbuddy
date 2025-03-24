@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useBook } from '../contexts/BookContext';
+import FeedbackChatbot from './feedback/FeedbackChatbot';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -23,9 +24,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       }}
     >
       <header className="border-b border-border/50 backdrop-blur-sm bg-background/80 py-3 px-4 sm:px-6 flex items-center justify-between z-50 sticky top-0">
-        <Link to="/" className="flex flex-col">
-          <h1 className="text-xl font-semibold tracking-tight text-book-primary">BookBuddy</h1>
-          <p className="text-xs text-muted-foreground">Talk to Your Books</p>
+        <Link to="/" className="flex items-center gap-3">
+          <img src="/images/book-buddy-logo.svg" alt="Book Buddy Logo" className="h-12 w-auto" />
+          <div className="flex flex-col">
+            <h1 className="text-xl font-semibold tracking-tight text-book-primary">BookBuddy</h1>
+            <p className="text-xs text-muted-foreground">Turn the Page. Start the Conversation</p>
+          </div>
         </Link>
         
         <nav>
@@ -68,6 +72,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <span>Exploring "1984" by George Orwell — BookBuddy Literary Companion</span>
         </footer>
       )}
+
+      {/* Feedback Chatbot */}
+      <FeedbackChatbot />
     </div>
   );
 };

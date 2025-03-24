@@ -21,11 +21,15 @@ const app = express();
 // Add CORS middleware to allow requests from the client
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin && ['http://localhost:8080', 'http://localhost:8085'].includes(origin)) {
+  
+  // Allow requests from any localhost port
+  if (origin && origin.match(/^http:\/\/localhost:\d+$/)) {
     res.header("Access-Control-Allow-Origin", origin);
   } else {
+    // Default fallback
     res.header("Access-Control-Allow-Origin", "http://localhost:8080");
   }
+  
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   

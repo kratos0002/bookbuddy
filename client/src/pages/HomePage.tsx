@@ -7,10 +7,11 @@ import ValuePropositionSection from '../components/home/ValuePropositionSection'
 import CombinedCTASection from '../components/home/CombinedCTASection';
 import TestimonialsSection from '../components/home/TestimonialsSection';
 import Footer from '../components/home/Footer';
+import FeedbackChatbot from '../components/feedback/FeedbackChatbot';
 
 const HomePage = () => {
   return (
-    <div className="bg-background min-h-screen">
+    <div className="bg-background min-h-screen relative">
       {/* Hero Section with new design */}
       <HeroSection />
       
@@ -34,6 +35,9 @@ const HomePage = () => {
       
       {/* Footer */}
       <Footer />
+      
+      {/* Add FeedbackChatbot directly to HomePage */}
+      <FeedbackChatbot />
     </div>
   );
 };
