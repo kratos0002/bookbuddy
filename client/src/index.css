@@ -248,4 +248,55 @@
     from, to { border-color: transparent }
     50% { border-color: currentColor; }
   }
+
+  /* Dot flashing animation for loading indicator */
+  .dot-flashing {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #9a3412;
+    color: #9a3412;
+    animation: dot-flashing 1s infinite alternate;
+    animation-delay: 0.5s;
+  }
+
+  .dot-flashing::before,
+  .dot-flashing::after {
+    content: "";
+    display: inline-block;
+    position: absolute;
+    top: 0;
+  }
+
+  .dot-flashing::before {
+    left: -15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #9a3412;
+    color: #9a3412;
+    animation: dot-flashing 1s infinite alternate;
+    animation-delay: 0s;
+  }
+
+  .dot-flashing::after {
+    left: 15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #9a3412;
+    color: #9a3412;
+    animation: dot-flashing 1s infinite alternate;
+    animation-delay: 1s;
+  }
+
+  @keyframes dot-flashing {
+    0% {
+      background-color: #9a3412;
+    }
+    50%, 100% {
+      background-color: rgba(154, 52, 18, 0.2);
+    }
+  }
 }

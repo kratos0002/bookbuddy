@@ -1,86 +1,116 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Separator,
-} from "@/components/ui/separator";
-import { 
-  Book, 
-  InfoIcon, 
-  Mail, 
-  MessageSquare,
-  Github,
-  Twitter
-} from 'lucide-react';
+import { Book, Github, Twitter, Linkedin, Mail } from 'lucide-react';
 
 const Footer = () => {
+  const currentYear = new Date().getFullYear();
+  
+  const links = {
+    product: [
+      { name: 'Features', href: '#' },
+      { name: 'FAQ', href: '#' },
+      { name: 'Pricing', href: '#' },
+      { name: 'Coming Soon', href: '#' },
+    ],
+    company: [
+      { name: 'About Us', href: '#' },
+      { name: 'Blog', href: '#' },
+      { name: 'Careers', href: '#' },
+      { name: 'Contact', href: '#' },
+    ],
+    legal: [
+      { name: 'Privacy Policy', href: '#' },
+      { name: 'Terms of Service', href: '#' },
+      { name: 'Cookie Policy', href: '#' },
+    ],
+    books: [
+      { name: '1984', href: '/book/1' },
+      { name: 'Coming Soon', href: '#' },
+    ],
+  };
+  
   return (
-    <footer className="bg-background border-t border-border/50 py-10 px-4 text-muted-foreground backdrop-blur-sm">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div>
-            <Link to="/" className="flex flex-col mb-4">
-              <h3 className="text-lg font-semibold tracking-tight text-book-primary">BookBuddy</h3>
-              <p className="text-xs">Talk to Your Books</p>
+    <footer className="border-t border-[#1a3a5f]/10 bg-[#1a3a5f]/5">
+      <div className="mx-auto max-w-6xl px-4 py-12 md:py-16">
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-5">
+          {/* Logo and info */}
+          <div className="col-span-2">
+            <Link to="/" className="inline-flex items-center gap-2 text-xl font-bold text-[#1a3a5f]">
+              <Book className="h-6 w-6 text-[#8b2439]" />
+              <span>BookBuddy</span>
             </Link>
-            <p className="text-sm mb-4">
-              An interactive platform where literature comes alive through conversation.
+            <p className="mt-4 text-sm text-gray-600 max-w-xs">
+              Transforming how readers experience literature through meaningful conversations with characters and literary experts.
             </p>
-          </div>
-          
-          <div>
-            <h4 className="font-medium mb-4 text-foreground">Quick Links</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/" className="text-sm flex items-center gap-2 hover:text-book-primary transition-colors">
-                  <Book className="h-4 w-4" />
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link to="/conversation" className="text-sm flex items-center gap-2 hover:text-book-primary transition-colors">
-                  <MessageSquare className="h-4 w-4" />
-                  Start Conversation
-                </Link>
-              </li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="font-medium mb-4 text-foreground">About</h4>
-            <ul className="space-y-2">
-              <li className="text-sm flex items-center gap-2">
-                <InfoIcon className="h-4 w-4" />
-                About BookBuddy
-              </li>
-              <li className="text-sm flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                Contact Us
-              </li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="font-medium mb-4 text-foreground">Connect</h4>
-            <div className="flex gap-4">
-              <a href="#" className="text-muted-foreground hover:text-book-primary transition-colors">
+            <div className="mt-6 flex space-x-4">
+              <a href="#" className="text-gray-500 hover:text-[#8b2439]">
                 <Github className="h-5 w-5" />
+                <span className="sr-only">GitHub</span>
               </a>
-              <a href="#" className="text-muted-foreground hover:text-book-primary transition-colors">
+              <a href="#" className="text-gray-500 hover:text-[#8b2439]">
                 <Twitter className="h-5 w-5" />
+                <span className="sr-only">Twitter</span>
+              </a>
+              <a href="#" className="text-gray-500 hover:text-[#8b2439]">
+                <Linkedin className="h-5 w-5" />
+                <span className="sr-only">LinkedIn</span>
+              </a>
+              <a href="#" className="text-gray-500 hover:text-[#8b2439]">
+                <Mail className="h-5 w-5" />
+                <span className="sr-only">Email</span>
               </a>
             </div>
           </div>
+          
+          {/* Product */}
+          <div>
+            <h3 className="text-sm font-medium text-[#1a3a5f] uppercase tracking-wider">Product</h3>
+            <ul className="mt-4 space-y-2">
+              {links.product.map((link) => (
+                <li key={link.name}>
+                  <a href={link.href} className="text-sm text-gray-600 hover:text-[#8b2439]">
+                    {link.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          {/* Company */}
+          <div>
+            <h3 className="text-sm font-medium text-[#1a3a5f] uppercase tracking-wider">Company</h3>
+            <ul className="mt-4 space-y-2">
+              {links.company.map((link) => (
+                <li key={link.name}>
+                  <a href={link.href} className="text-sm text-gray-600 hover:text-[#8b2439]">
+                    {link.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          {/* Legal */}
+          <div>
+            <h3 className="text-sm font-medium text-[#1a3a5f] uppercase tracking-wider">Legal</h3>
+            <ul className="mt-4 space-y-2">
+              {links.legal.map((link) => (
+                <li key={link.name}>
+                  <a href={link.href} className="text-sm text-gray-600 hover:text-[#8b2439]">
+                    {link.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
         
-        <Separator className="my-6" />
-        
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-xs">
-            Exploring literature through conversation — BookBuddy Literary Companion
+        <div className="mt-12 border-t border-[#1a3a5f]/10 pt-8 flex flex-col md:flex-row justify-between items-center">
+          <p className="text-sm text-gray-500">
+            &copy; {currentYear} BookBuddy. All rights reserved.
           </p>
-          <p className="text-xs">
-            © 2024 BookBuddy. All rights reserved.
+          <p className="text-sm text-gray-500 mt-4 md:mt-0">
+            Made with ❤️ for literary conversations
           </p>
         </div>
       </div>

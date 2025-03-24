@@ -1,12 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { BookOpen, Send } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Avatar } from '@/components/ui/avatar';
-import { AvatarImage } from '@/components/ui/avatar';
-import { AvatarFallback } from '@/components/ui/avatar';
-import { Card } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { BookOpen } from 'lucide-react';
+import SuggestionPanel from './chat/suggestions/SuggestionPanel';
 
 // Define a message interface
 interface Message {
@@ -21,15 +17,18 @@ const SimpleLibrarian: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [suggestionsMinimized, setSuggestionsMinimized] = useState(false);
 
   // Initial welcome message
   useEffect(() => {
-    setMessages([{
-      id: 'welcome',
-      content: 'Hello! I\'m Alexandria, the AI Librarian. I can answer your questions about George Orwell\'s "1984". What would you like to know?',
-      isUser: false,
-      timestamp: new Date()
-    }]);
+    setMessages([
+      {
+        id: 'welcome',
+        content: "Hello! I'm Alexandria, the AI Librarian. How can I help you with '1984' by George Orwell today?",
+        isUser: false,
+        timestamp: new Date()
+      }
+    ]);
   }, []);
 
   // Scroll to bottom when messages change
@@ -37,126 +36,123 @@ const SimpleLibrarian: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Handle sending a message
-  const handleSendMessage = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    
-    if (!input.trim() || isLoading) return;
-    
+  // Send message to the librarian
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (input.trim() === '') return;
+
     // Add user message
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: `user-${Date.now()}`,
       content: input,
       isUser: true,
       timestamp: new Date()
     };
-    
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
-    
+
     try {
-      // Call the simple librarian API
+      // Send to the simple librarian API
       const response = await fetch('/api/simple-librarian', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: input })
       });
-      
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
-      
+
       const data = await response.json();
-      
-      // Add librarian response
-      const librarianMessage: Message = {
-        id: Date.now().toString(),
-        content: data.response || "I apologize, but I'm unable to provide a response at this time.",
-        isUser: false,
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, librarianMessage]);
+
+      if (data.success) {
+        // Add librarian response
+        const librarianMessage: Message = {
+          id: `librarian-${Date.now()}`,
+          content: data.response,
+          isUser: false,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, librarianMessage]);
+      } else {
+        throw new Error(data.error || 'Failed to get response');
+      }
     } catch (error) {
-      console.error('Error calling librarian API:', error);
-      
-      // Add error message
-      const errorMessage: Message = {
-        id: Date.now().toString(),
-        content: "I apologize, but I'm having trouble connecting to my knowledge base. Please try again later.",
-        isUser: false,
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, errorMessage]);
+      console.error('Error getting librarian response:', error);
+      // Show error message
+      setMessages(prev => [
+        ...prev,
+        {
+          id: `error-${Date.now()}`,
+          content: "I'm sorry, I couldn't process your request. Please try again later.",
+          isUser: false,
+          timestamp: new Date()
+        }
+      ]);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Handle suggestion clicks
+  const handleSuggestionClick = (text: string) => {
+    setInput(text);
+  };
+
   return (
-    <div className="flex flex-col h-full border rounded-lg shadow-sm bg-card overflow-hidden">
-      {/* Header */}
-      <div className="p-3 border-b flex items-center bg-muted/30">
-        <Avatar className="h-8 w-8 mr-2">
-          <AvatarImage src="/librarian-avatar.png" alt="Alexandria" />
-          <AvatarFallback>A</AvatarFallback>
-        </Avatar>
-        <h2 className="font-medium">Alexandria, the AI Librarian</h2>
-      </div>
-      
-      {/* Messages */}
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
-          {messages.map((msg) => (
-            <Card
-              key={msg.id}
-              className={`p-4 max-w-[80%] ${
-                msg.isUser 
-                  ? 'ml-auto bg-primary text-primary-foreground' 
-                  : 'mr-auto'
+    <div className="flex flex-col h-full border rounded-md bg-background shadow">
+      <div className="p-4 flex flex-col h-full">
+        <div className="flex-1 overflow-y-auto mb-4">
+          {messages.map((msg, index) => (
+            <div
+              key={index}
+              className={`mb-4 flex ${
+                msg.isUser ? "justify-end" : "justify-start"
               }`}
             >
-              <div className="flex items-start gap-3">
-                {!msg.isUser && (
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src="/librarian-avatar.png" alt="Alexandria" />
-                    <AvatarFallback><BookOpen size={14} /></AvatarFallback>
-                  </Avatar>
-                )}
-                <div>
-                  <p className="whitespace-pre-wrap">{msg.content}</p>
-                  <small className="text-xs opacity-70">
-                    {msg.timestamp.toLocaleTimeString()}
-                  </small>
+              <div
+                className={`p-3 rounded-lg max-w-[80%] ${
+                  msg.isUser
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-amber-100 text-amber-900"
+                }`}
+              >
+                {msg.content}
+              </div>
+            </div>
+          ))}
+          {isLoading && (
+            <div className="flex justify-start mb-4">
+              <div className="bg-amber-100 text-amber-900 p-3 rounded-lg max-w-[80%]">
+                <div className="flex items-center">
+                  <div className="dot-flashing"></div>
                 </div>
               </div>
-            </Card>
-          ))}
+            </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
-      </ScrollArea>
-      
-      {/* Input */}
-      <form onSubmit={handleSendMessage} className="p-3 border-t flex gap-2">
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask Alexandria about 1984..."
-          disabled={isLoading}
-          className="flex-1"
+
+        {/* Suggestion Panel for Librarian */}
+        <SuggestionPanel
+          characterId={null} // null for librarian
+          messageCount={messages.length}
+          onSuggestionClick={handleSuggestionClick}
+          minimized={suggestionsMinimized}
+          onToggleMinimize={() => setSuggestionsMinimized(!suggestionsMinimized)}
+          className="mt-auto"
         />
-        <Button 
-          type="submit" 
-          disabled={!input.trim() || isLoading}
-          className="px-4 py-2 bg-book-primary text-white hover:bg-book-primary/90 transition-colors"
-        >
-          {isLoading ? 'Thinking...' : <Send size={16} />}
-        </Button>
-      </form>
+        
+        <form onSubmit={handleSendMessage} className="mt-2">
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Ask Alexandria about '1984'..."
+            className="w-full"
+            disabled={isLoading}
+          />
+          <Button type="submit" className="mt-2 w-full" disabled={isLoading}>
+            {isLoading ? 'Thinking...' : 'Send Message'}
+          </Button>
+        </form>
+      </div>
     </div>
   );
 };

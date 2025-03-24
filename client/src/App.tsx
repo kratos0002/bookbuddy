@@ -10,6 +10,8 @@ import NotFound from "./pages/NotFound";
 import LibrarianChat from "./pages/LibrarianChat";
 import { BookProvider } from "./contexts/BookContext";
 import { queryClient } from './lib/queryClient';
+import Layout from "./components/Layout";
+import FeedbackChatbot from "./components/feedback/FeedbackChatbot";
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -18,6 +20,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <FeedbackChatbot />
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/conversation" element={<ConversationPage />} />

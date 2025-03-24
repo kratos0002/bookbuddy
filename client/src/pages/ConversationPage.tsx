@@ -15,6 +15,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { EncyclopediaProvider, useEncyclopedia, EncyclopediaEntry } from '@/contexts/EncyclopediaContext';
 import EntryUnlockedNotification from '@/components/encyclopedia/EntryUnlockedNotification';
 import SimpleLibrarian from '@/components/SimpleLibrarian';
+import SuggestionPanel from '@/components/chat/suggestions/SuggestionPanel';
 
 interface Message {
   id: number;
@@ -90,7 +91,7 @@ const ConversationPageContent = () => {
   const { data: messages, refetch: refetchMessages } = useQuery({
     queryKey: ['/api/conversations', conversationId, 'messages'],
     queryFn: () => apiRequest('GET', `/api/conversations/${conversationId}/messages`),
-    enabled: !!conversationId,
+    enabled: !!conversationId && conversationId !== "dummy",
     refetchInterval: 2000,
     refetchIntervalInBackground: true,
   });
@@ -205,13 +206,11 @@ const ConversationPageContent = () => {
 
   // Handler for selecting a character
   const handleCharacterSelect = async (characterId: number | null) => {
-    // When librarian is selected, set a dummy conversation id to trigger UI change
+    // When librarian is selected, clear conversationId but set librarian flag
     if (characterId === null) {
       setSelectedChatCharacter(null);
       setIsLibrarianSelected(true);
-      
-      // Use a dummy conversation ID for librarian mode
-      setConversationId("librarian_mode"); 
+      setConversationId(null); // No API calls with null conversationId
       return;
     }
     
@@ -247,7 +246,15 @@ const ConversationPageContent = () => {
       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
   }, [messages]);
-  
+
+  // Inside the ConversationPage component, add state for suggestions
+  const [suggestionsMinimized, setSuggestionsMinimized] = useState(false);
+
+  // Add this function to handle suggestion clicks
+  const handleSuggestionClick = (text: string) => {
+    setMessage(text);
+  };
+
   return (
     <Layout>
       <div className="h-full flex flex-col md:flex-row overflow-hidden relative">
@@ -281,7 +288,7 @@ const ConversationPageContent = () => {
                 </h2>
                 
                 {/* Chat interface */}
-                {!conversationId ? (
+                {!conversationId && !isLibrarianSelected ? (
                   <div className="p-6 border rounded-lg bg-white shadow-sm flex-1">
                     <h4 className="text-lg font-medium mb-4">Who would you like to chat with?</h4>
                     
@@ -415,6 +422,16 @@ const ConversationPageContent = () => {
                             </div>
                           ))}
                         </div>
+
+                        {/* Suggestion Panel */}
+                        <SuggestionPanel
+                          characterId={selectedChatCharacter}
+                          messageCount={messages?.length || 0}
+                          onSuggestionClick={handleSuggestionClick}
+                          minimized={suggestionsMinimized}
+                          onToggleMinimize={() => setSuggestionsMinimized(!suggestionsMinimized)}
+                          className="mt-auto"
+                        />
 
                         {/* Message input form */}
                         <form onSubmit={(e) => {
