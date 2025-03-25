@@ -9,6 +9,7 @@ import ChatPage from "./pages/chat";
 import NotFound from "./pages/NotFound";
 import LibrarianChat from "./pages/LibrarianChat";
 import CareersPage from "./pages/CareersPage";
+import AdminDashboard from "./pages/AdminDashboard";
 import { BookProvider } from "./contexts/BookContext";
 import { queryClient } from './lib/queryClient';
 import Layout from "./components/Layout";
@@ -32,6 +33,7 @@ const App = () => (
               <Route path="/chat/:conversationId" element={<ChatPage />} />
               <Route path="/librarian" element={<LibrarianChat />} />
               <Route path="/careers" element={<CareersPage />} />
+              <Route path="/admin" element={<AdminDashboard />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
