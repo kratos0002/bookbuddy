@@ -10,93 +10,30 @@ import {
   isOpenAIConfigured
 } from "./services/openai-service";
 import OpenAI from "openai";
-import { ChatModes, InsertConversation, InsertMessage, Message, Theme, ThemeQuote } from "@shared/schema";
+import { ChatModes, InsertConversation, InsertMessage, Message, Theme, ThemeQuote, Character } from "@shared/schema";
 import path from "path";
 import { db } from "./db";
 import { getLibrarianResponse } from "./services/simple-librarian";
 import { SuggestionCategory } from '../client/src/components/chat/suggestions/types';
 import quoteExplorerService from "./services/quote-explorer-service";
+import feedbackRoutes from './routes/feedback';
+import adminRoutes from './routes/admin';
+import healthRoutes from './routes/health';
 
 // Initialize OpenAI client
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // Add a simple librarian endpoint without complex dependencies
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Quote Explorer API routes
-  app.get("/api/quotes/explorer-data", (req, res) => {
-    try {
-      const explorerData = quoteExplorerService.getQuoteExplorerData();
-      res.json(explorerData);
-    } catch (error) {
-      console.error("[quote-explorer] Error getting explorer data:", error);
-      res.status(500).json({ 
-        message: "Failed to get quote explorer data",
-        error: error instanceof Error ? error.message : "Unknown error"
-      });
-    }
-  });
+  // Register feedback routes
+  app.use('/api/feedback', feedbackRoutes);
   
-  app.get("/api/quotes", (req, res) => {
-    try {
-      const quotes = quoteExplorerService.getAllQuotes();
-      res.json(quotes);
-    } catch (error) {
-      console.error("[quote-explorer] Error getting quotes:", error);
-      res.status(500).json({ 
-        message: "Failed to get quotes",
-        error: error instanceof Error ? error.message : "Unknown error"
-      });
-    }
-  });
-  
-  app.get("/api/quotes/by-theme/:themeId", (req, res) => {
-    try {
-      const themeId = parseInt(req.params.themeId);
-      if (isNaN(themeId)) {
-        return res.status(400).json({ message: "Invalid theme ID" });
-      }
-      
-      const quotes = quoteExplorerService.getQuotesByThemeId(themeId);
-      res.json(quotes);
-    } catch (error) {
-      console.error("[quote-explorer] Error getting quotes by theme:", error);
-      res.status(500).json({ 
-        message: "Failed to get quotes by theme",
-        error: error instanceof Error ? error.message : "Unknown error"
-      });
-    }
-  });
-  
-  app.get("/api/quotes/by-character/:characterId", (req, res) => {
-    try {
-      const characterId = parseInt(req.params.characterId);
-      if (isNaN(characterId)) {
-        return res.status(400).json({ message: "Invalid character ID" });
-      }
-      
-      const quotes = quoteExplorerService.getQuotesByCharacterId(characterId);
-      res.json(quotes);
-    } catch (error) {
-      console.error("[quote-explorer] Error getting quotes by character:", error);
-      res.status(500).json({ 
-        message: "Failed to get quotes by character",
-        error: error instanceof Error ? error.message : "Unknown error"
-      });
-    }
-  });
-  
-  app.get("/api/quotes/significant", (req, res) => {
-    try {
-      const quotes = quoteExplorerService.getMostSignificantQuotes();
-      res.json(quotes);
-    } catch (error) {
-      console.error("[quote-explorer] Error getting significant quotes:", error);
-      res.status(500).json({ 
-        message: "Failed to get significant quotes",
-        error: error instanceof Error ? error.message : "Unknown error"
-      });
-    }
-  });
+  // Register admin routes
+  app.use('/api/admin', adminRoutes);
+
+  // Register health check route
+  app.use('/api/health', healthRoutes);
+
   // Simple Librarian API
   app.post("/api/simple-librarian", async (req, res) => {
     try {
@@ -225,6 +162,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     const characters = await storage.getCharactersByBookId(id);
     res.json(characters);
+  });
+  
+  // Add endpoint to get all characters
+  app.get("/api/characters", async (req, res) => {
+    try {
+      // Get all books
+      const books = await storage.getAllBooks();
+      
+      // Create an array to store all characters
+      let allCharacters: Character[] = [];
+      
+      // For each book, get its characters and add them to the array
+      for (const book of books) {
+        const bookCharacters = await storage.getCharactersByBookId(book.id);
+        allCharacters = [...allCharacters, ...bookCharacters];
+      }
+      
+      // Return all characters
+      res.json(allCharacters);
+    } catch (error) {
+      console.error("Error fetching all characters:", error);
+      res.status(500).json({ message: "Failed to fetch characters" });
+    }
   });
   
   app.get("/api/characters/:id", async (req, res) => {
@@ -1140,6 +1100,178 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     return res.status(200).json(suggestionTracker[charKey]);
+  });
+
+  // Create storage for book suggestions
+  const bookSuggestions: Array<{
+    title: string;
+    submittedAt: string;
+    votes: number;
+  }> = [];
+
+  // Endpoint to submit a book suggestion
+  app.post('/api/book-suggestions', (req, res) => {
+    const { title } = req.body;
+    
+    if (!title || typeof title !== 'string' || title.trim() === '') {
+      return res.status(400).json({ error: 'Valid book title is required' });
+    }
+    
+    // Check if this suggestion already exists
+    const existingSuggestion = bookSuggestions.find(
+      suggestion => suggestion.title.toLowerCase() === title.toLowerCase()
+    );
+    
+    if (existingSuggestion) {
+      // Increment votes if it exists
+      existingSuggestion.votes += 1;
+      console.log(`Vote added for book suggestion: ${title}`);
+      return res.status(200).json({ 
+        success: true,
+        suggestion: existingSuggestion
+      });
+    }
+    
+    // Add new suggestion
+    const newSuggestion = {
+      title: title.trim(),
+      submittedAt: new Date().toISOString(),
+      votes: 1
+    };
+    
+    bookSuggestions.push(newSuggestion);
+    console.log(`New book suggestion added: ${title}`);
+    
+    return res.status(201).json({ 
+      success: true,
+      suggestion: newSuggestion
+    });
+  });
+  
+  // Endpoint to get popular book suggestions
+  app.get('/api/book-suggestions', (req, res) => {
+    // Sort by votes (highest first)
+    const sortedSuggestions = [...bookSuggestions].sort((a, b) => b.votes - a.votes);
+    
+    // Return top 10 or all if less than 10
+    const topSuggestions = sortedSuggestions.slice(0, 10);
+    
+    return res.status(200).json(topSuggestions);
+  });
+
+  // Add character chat endpoint
+  app.post("/api/chat", async (req, res) => {
+    try {
+      const { message, characterId } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Missing required field: message" 
+        });
+      }
+      
+      if (!characterId) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Missing required field: characterId" 
+        });
+      }
+      
+      // Get character
+      const character = await storage.getCharacterById(characterId);
+      if (!character) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Invalid character ID" 
+        });
+      }
+      
+      console.log(`[character-chat] Request for character ${character.name} with message: "${message.substring(0, 30)}..."`);
+      
+      // Get character persona if available
+      const persona = await storage.getCharacterPersonaByCharacterId(characterId);
+      
+      // Generate character response
+      let response;
+      if (isOpenAIConfigured()) {
+        // Create a default persona if none exists
+        const defaultPersona = persona || {
+          id: character.id,
+          characterId: character.id,
+          voiceDescription: `Speaks in a manner typical of a character from the book`,
+          backgroundKnowledge: `Has knowledge of events and concepts from the book they appear in`,
+          personalityTraits: character.psychologicalProfile || "No specific personality traits defined",
+          biases: "No specific biases defined",
+          promptInstructions: "Respond as this character would based on their profile",
+          avatarUrl: null
+        };
+        
+        response = await generateCharacterResponse(character, defaultPersona, message, []);
+      } else {
+        // Fallback response if OpenAI is not configured
+        response = `[Character ${character.name}] I'm sorry, I cannot respond properly right now as the AI service is not available.`;
+      }
+      
+      return res.json({
+        success: true,
+        character: {
+          id: character.id,
+          name: character.name
+        },
+        message: message,
+        response: response
+      });
+    } catch (error) {
+      console.error("[character-chat] API error:", error);
+      return res.status(500).json({ 
+        success: false, 
+        message: "Failed to generate character response", 
+        error: error instanceof Error ? error.message : "Unknown error" 
+      });
+    }
+  });
+
+  // Add librarian chat endpoint
+  app.post("/api/librarian", async (req, res) => {
+    try {
+      const { message } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Missing required field: message" 
+        });
+      }
+      
+      console.log(`[librarian] API request received for message: "${message.substring(0, 30)}..."`);
+      
+      // Get a generic librarian persona
+      const librarianPersonas = await storage.getLibrarianPersonas();
+      const persona = librarianPersonas.length > 0 ? librarianPersonas[0] : null;
+      
+      // Generate librarian response
+      let response;
+      if (isOpenAIConfigured() && persona) {
+        response = await generateLibrarianResponse(persona, message, []);
+      } else {
+        // Fallback to simple librarian if OpenAI is not configured
+        response = await getLibrarianResponse(message);
+      }
+      
+      return res.json({
+        success: true,
+        message: message,
+        response: response
+      });
+    } catch (error) {
+      console.error("[librarian] API error:", error);
+      return res.status(500).json({ 
+        success: false, 
+        message: "Failed to generate librarian response", 
+        error: error instanceof Error ? error.message : "Unknown error" 
+      });
+    }
   });
 
   const httpServer = createServer(app);

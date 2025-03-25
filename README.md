@@ -1,198 +1,220 @@
-# BookBuddy: Talk to Your Books
+# BookBuddy Testing Suite
 
-BookBuddy is an AI-powered conversational interface that allows you to engage with literary works through character simulations and literary analysis. The current implementation focuses on George Orwell's "1984" but is designed to be extensible to other works.
+This directory contains comprehensive tests for the BookBuddy application. The tests are designed to verify both technical integrations and user flows.
 
-## 🌟 Features
+## Test Structure
 
-### Character Conversations
-- **Character Simulation**: Chat with key characters from "1984" including:
-  - Winston Smith: The protagonist, a thoughtful but fearful dissident
-  - Julia: A rebellious Party member who becomes Winston's lover
-  - O'Brien: A mysterious Inner Party member with complex motives
-  - Big Brother: The omnipresent figurehead of the totalitarian regime
-  - Emmanuel Goldstein: The alleged leader of the resistance movement
+The test suite is divided into two main categories:
 
-### Literary Analysis
-- **Alexandria the Librarian**: Get expert literary analysis on various aspects of the book, including:
-  - Thematic exploration
-  - Character motivations
-  - Historical context
-  - Narrative techniques
-  - Contemporary relevance
+1. **API Tests** (`api.test.js`): These tests verify backend functionality by directly calling API endpoints.
+2. **E2E Tests** (`e2e.test.js`): These tests simulate user interactions with the application using Playwright.
 
-### Advanced Literary Processing
-- **BookNLP Integration**: Leverages computational linguistics to extract:
-  - Character networks and relationships
-  - Thematic elements and their distribution across the text
-  - Character mentions and appearances
-  - Dialogue attribution and analysis
+## Setup and Configuration
 
-### AI-Enhanced Understanding
-- **Context-Enriched Responses**: Character and librarian responses are augmented with:
-  - Theme-specific knowledge extracted from the text
-  - Character relationship awareness
-  - Quote-based authenticity
-  - Sentiment analysis for tone-appropriate responses
+### Prerequisites
 
-## 🛠️ Technical Implementation
+- Node.js 16+ installed
+- BookBuddy API running (locally or in production)
+- BookBuddy frontend running (locally or in production)
 
-### Chat System Architecture
+### Environment Variables
 
-The chat system implements a sophisticated pipeline:
-
-1. **Message Analysis**:
-   - User messages are analyzed for relevant themes and character references
-   - Sentiment scoring provides emotional context (-1 to 1 scale)
-
-2. **Context Enrichment**:
-   - Character responses are enriched with relationship data and authentic traits
-   - Librarian responses are augmented with thematic connections
-
-3. **Conversation Management**:
-   - Conversations maintain context through persistent storage
-   - Character-based and analysis-based conversation modes
-   - Support for multi-character conversations
-
-### API Endpoints
-
-#### Chat Endpoints
-- `POST /api/chat/test`: Test the chat system with a message
-- `POST /api/conversations`: Create a new conversation
-- `GET /api/conversations`: Get all conversations
-- `GET /api/conversations/:id`: Get a specific conversation
-- `POST /api/conversations/:id/messages`: Add a message to a conversation
-
-#### Literary Data Endpoints
-- `GET /api/books`: Get all books
-- `GET /api/books/:id`: Get a specific book
-- `GET /api/books/:id/chapters`: Get chapters of a book
-- `GET /api/books/:id/themes`: Get themes in a book
-- `GET /api/books/:id/characters`: Get characters in a book
-- `GET /api/books/:id/relationships`: Get character relationships
-- `GET /api/books/:id/character-network`: Get visual character network data
-- `GET /api/books/:id/narrative-data`: Get narrative arc data
-- `GET /api/books/:id/theme-heatmap`: Get theme distribution data
-
-## 🧠 BookNLP Processing
-
-BookBuddy leverages BookNLP for deep literary analysis:
-
-### Current Implementation
-- Sample data mimicking BookNLP output structure
-- Character information and relationships
-- Thematic elements and their occurrences
-- Sample quotes and character attributes
-
-### Full Processing (Available Offline)
-Instructions for running complete BookNLP processing:
-1. Install BookNLP: `pip install booknlp`
-2. Process text using `process_1984.py`
-3. Convert output to structured JSON using `convert_to_structured_json()`
-4. Place JSON files in the `book_processing/data` directory
-
-## 📋 Project Structure
+Create a `.env` file in the project root with the following variables:
 
 ```
-.
-├── book_processing/              # BookNLP and text processing scripts
-│   ├── data/                     # Processed book data
-│   ├── output/                   # BookNLP output files
-│   ├── analyze_data.py           # Data analysis utilities
-│   ├── extract_pdf_text.py       # PDF text extraction
-│   ├── process_1984.py           # BookNLP processing for 1984
-│   └── generate_sample_data.py   # Sample data generation
-├── server/
-│   ├── services/
-│   │   ├── book-context-service.ts  # Literary context service
-│   │   └── openai-service.ts        # OpenAI integration
-│   ├── routes.ts                 # API endpoints
-│   └── storage.ts                # Data storage interface
-├── shared/
-│   └── schema.ts                 # Data models and schemas
-└── client/                       # Frontend React application
+# API and Frontend URLs
+API_URL=http://localhost:3001
+FRONTEND_URL=http://localhost:5173
+
+# For production testing
+# API_URL=https://bookbuddy-api.onrender.com
+# FRONTEND_URL=https://bookbuddy.netlify.app
+
+# Test Configuration
+TEST_TIMEOUT=30000
+HEADLESS=true
+SLOW_MO=0
 ```
 
-## 🚀 Getting Started
+### Installing Dependencies
 
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Set up environment variables:
-   ```
-   DATABASE_URL=<your-database-url>
-   OPENAI_API_KEY=<your-openai-key>
-   ```
-4. Start the application: `npm run dev`
+```bash
+npm install
+```
 
-## 📚 Using the Chat Interface
+## Running Tests
 
-### Character Mode
-- Select a character to chat with from the character selection menu
-- Message the character with questions about their experiences, thoughts, or the world of the book
-- Characters will respond in their authentic voice, maintaining consistency with their personality in the book
+### All Tests
 
-### Librarian Mode
-- Select "Alexandria" the librarian for literary analysis
-- Ask about themes, writing techniques, historical context, or interpretations
-- Get detailed, educational responses about literary elements
+```bash
+npm test
+```
 
-## 🔮 Future Enhancements
+### API Tests Only
 
-- Support for additional literary works
-- Character memory for longer conversations
-- Multi-book comparative analysis
-- Custom character creation
-- Audio narration for character responses
-- Visual scene recreation from text descriptions
-- User-uploaded book processing
+```bash
+npm run test:api
+```
 
-## 📄 License
+### E2E Tests Only
 
-MIT
+```bash
+npm run test:e2e
+```
 
-## Deployment Instructions
+### Watch Mode (Development)
 
-### Deploying to Render
+```bash
+npm run test:watch
+```
 
-Follow these steps to deploy the BookBuddy backend to Render:
+## Debugging Tests
 
-1. **Create a new Web Service on Render**
-   - Go to [dashboard.render.com](https://dashboard.render.com/)
-   - Click "New +" and select "Web Service"
-   - Connect your GitHub repository or use the public GitHub URL
+### Viewing Browser Interactions
 
-2. **Configure the Web Service**
-   - Name: `bookbuddy-api` (or your preferred name)
-   - Environment: `Node`
-   - Region: Choose the closest to your users
-   - Branch: `main` (or your deployment branch)
-   - Build Command: `npm install && npm run build`
-   - Start Command: `npm run start`
-   - Plan: Select the appropriate plan (Free tier works for testing)
+To run E2E tests with a visible browser:
 
-3. **Set Environment Variables**
-   - OPENAI_API_KEY: Your OpenAI API key
-   - DATABASE_URL: Your database connection URL
-   - ADMIN_TOKEN: A secure token for admin access
-   - NODE_ENV: `production`
+```bash
+HEADLESS=false npm run test:e2e
+```
 
-4. **Create the Web Service**
-   - Click "Create Web Service"
-   - Wait for the deployment to complete
+To slow down browser interactions (useful for debugging):
 
-5. **Update Client Configuration**
-   - Once deployed, update the client's `.env` file with the new API URL:
-   ```
-   VITE_API_URL=https://your-render-service-url.onrender.com
-   ```
+```bash
+HEADLESS=false SLOW_MO=100 npm run test:e2e
+```
 
-### Backend Environment Variables
+### Troubleshooting
 
-The backend requires the following environment variables:
+**Tests failing due to timeouts?**
+- Increase the timeout by setting `TEST_TIMEOUT=60000` in your `.env` file
 
-- `OPENAI_API_KEY`: Your OpenAI API key for AI functionality
-- `DATABASE_URL`: Connection URL for your database
-- `ADMIN_TOKEN`: Secure token for admin access
-- `NODE_ENV`: Set to `production` for deployment
-- `PORT`: (Optional) Port to run the server on (defaults to 3000)
+**Health checks failing?**
+- Ensure both API and frontend are running
+- Check the URLs in your `.env` file are correct
+- Verify the API's `/health` endpoint is responding
 
-Set these in your Render dashboard under the "Environment" section of your web service.
+## Adding New Tests
+
+### API Tests
+
+Add new API tests by extending the test suites in `api.test.js`. Example:
+
+```javascript
+describe('New Feature API', () => {
+  it('Should return expected data', async () => {
+    const response = await apiClient.get('/api/new-feature');
+    expect(response.status).toBe(200);
+    expect(response.data).toHaveProperty('key');
+  });
+});
+```
+
+### E2E Tests
+
+Add new E2E tests by extending the test suites in `e2e.test.js`. Example:
+
+```javascript
+describe('New User Flow', () => {
+  it('Should complete the new user flow', async () => {
+    // Navigate to the starting page
+    await page.goto(`${FRONTEND_URL}/new-feature`);
+    
+    // Interact with the page
+    await page.click('button:has-text("Start")');
+    
+    // Verify the outcome
+    const successMessage = await page.locator('.success-message');
+    expect(await successMessage.isVisible()).toBe(true);
+  });
+});
+```
+
+## CI/CD Integration
+
+These tests are designed to be run in CI/CD pipelines. Add the following steps to your pipeline:
+
+```yaml
+- name: Install dependencies
+  run: npm install
+
+- name: Run tests
+  run: npm test
+  env:
+    API_URL: ${{ secrets.API_URL }}
+    FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+    HEADLESS: true
+```
+
+## Testing
+
+BookBuddy includes a comprehensive testing suite for both API and E2E testing.
+
+### Running Tests
+
+Make sure to set the correct environment variables before running tests:
+
+```bash
+# Set the environment variables for testing
+export API_URL=https://bookbuddy-qpi.onrender.com
+export FRONTEND_URL=https://bookbuddy.netlify.app
+```
+
+To run all tests:
+
+```bash
+npm test
+```
+
+To run API tests only:
+
+```bash
+npm run test:api
+```
+
+To run E2E tests only:
+
+```bash
+npm run test:e2e
+```
+
+To run chat tests only:
+
+```bash
+npm run test:chat
+```
+
+### Local Testing
+
+We've added scripts to run tests against a local development server:
+
+```bash
+# Run all tests against local servers
+npm run test:local
+
+# Run API tests against local server
+npm run test:api:local
+
+# Run E2E tests against local server
+npm run test:e2e:local
+
+# Run chat tests against local server
+npm run test:chat:local
+```
+
+### Error Handling in Tests
+
+The test suite includes robust error handling to accommodate different scenarios:
+
+1. **API Health Checks**: Tests automatically check if the API is healthy before attempting to run tests
+2. **404 Page Handling**: E2E tests can handle 404 pages and skip relevant tests when necessary
+3. **HTML Response Detection**: Tests detect when the API returns HTML instead of JSON and adjust accordingly
+4. **Graceful Degradation**: Tests will skip rather than fail when services are unavailable, providing useful feedback
+
+### Test Structure
+
+- **API Tests** (`api.test.js`): Tests the backend API functionality
+- **E2E Tests** (`e2e.test.js`): Tests the frontend user flows using Playwright
+- **Chat Tests** (`chat.test.js`): Tests specifically for the chat functionality
+
+For more details on testing, see the [tests README](./tests/README.md). 

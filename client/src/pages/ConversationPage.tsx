@@ -254,7 +254,7 @@ const ConversationPageContent = () => {
   const handleSuggestionClick = (text: string) => {
     setMessage(text);
   };
-
+  
   return (
     <Layout>
       <div className="h-full flex flex-col md:flex-row overflow-hidden relative">
@@ -480,7 +480,7 @@ const ConversationPageContent = () => {
             <X size={16} />
           </Button>
         </div>
-
+        
         {/* Button to open context panel on mobile */}
         <Button
           className={`fixed bottom-4 right-4 md:hidden z-30 ${contextOpen ? 'hidden' : ''}`}
