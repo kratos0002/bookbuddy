@@ -1,7 +1,7 @@
 import React from 'react';
 import HeroSection from '../components/home/HeroSection';
 import FeaturedBookSection from '../components/home/FeaturedBookSection';
-import ComingSoonBooksSection from '../components/home/ComingSoonBooksSection';
+import BookSuggestionSection from '../components/home/BookSuggestionSection';
 import HowItWorksSection from '../components/home/HowItWorksSection';
 import ValuePropositionSection from '../components/home/ValuePropositionSection';
 import CombinedCTASection from '../components/home/CombinedCTASection';
@@ -30,8 +30,8 @@ const HomePage = () => {
       {/* CTA Section - for conversions */}
       <CombinedCTASection />
       
-      {/* Coming Soon - showing future catalog */}
-      <ComingSoonBooksSection />
+      {/* Book Suggestion Section - replaces Coming Soon */}
+      <BookSuggestionSection />
       
       {/* Footer */}
       <Footer />

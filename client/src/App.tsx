@@ -8,6 +8,7 @@ import ConversationPage from "./pages/ConversationPage";
 import ChatPage from "./pages/chat";
 import NotFound from "./pages/NotFound";
 import LibrarianChat from "./pages/LibrarianChat";
+import CareersPage from "./pages/CareersPage";
 import { BookProvider } from "./contexts/BookContext";
 import { queryClient } from './lib/queryClient';
 import Layout from "./components/Layout";
@@ -21,16 +22,20 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <FeedbackChatbot />
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/conversation" element={<ConversationPage />} />
-            <Route path="/book/:bookId" element={<ConversationPage />} />
-            <Route path="/chat" element={<ChatPage />} />
-            <Route path="/chat/:conversationId" element={<ChatPage />} />
-            <Route path="/librarian" element={<LibrarianChat />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="chat" element={<ConversationPage />} />
+              <Route path="/conversation" element={<ConversationPage />} />
+              <Route path="/book/:bookId" element={<ConversationPage />} />
+              <Route path="/chat" element={<ChatPage />} />
+              <Route path="/chat/:conversationId" element={<ChatPage />} />
+              <Route path="/librarian" element={<LibrarianChat />} />
+              <Route path="/careers" element={<CareersPage />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Layout>
         </BrowserRouter>
       </TooltipProvider>
     </BookProvider>

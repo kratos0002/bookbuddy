@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Book, Github, Twitter, Linkedin, Mail } from 'lucide-react';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -36,30 +35,15 @@ const Footer = () => {
           {/* Logo and info */}
           <div className="col-span-2">
             <Link to="/" className="inline-flex items-center gap-2 text-xl font-bold text-[#1a3a5f]">
-              <Book className="h-6 w-6 text-[#8b2439]" />
-              <span>BookBuddy</span>
+              <img 
+                src="/images/Book Buddy Logo.svg" 
+                alt="Book Buddy Logo" 
+                className="h-8 w-auto" 
+              />
             </Link>
             <p className="mt-4 text-sm text-gray-600 max-w-xs">
               Transforming how readers experience literature through meaningful conversations with characters and literary experts.
             </p>
-            <div className="mt-6 flex space-x-4">
-              <a href="#" className="text-gray-500 hover:text-[#8b2439]">
-                <Github className="h-5 w-5" />
-                <span className="sr-only">GitHub</span>
-              </a>
-              <a href="#" className="text-gray-500 hover:text-[#8b2439]">
-                <Twitter className="h-5 w-5" />
-                <span className="sr-only">Twitter</span>
-              </a>
-              <a href="#" className="text-gray-500 hover:text-[#8b2439]">
-                <Linkedin className="h-5 w-5" />
-                <span className="sr-only">LinkedIn</span>
-              </a>
-              <a href="#" className="text-gray-500 hover:text-[#8b2439]">
-                <Mail className="h-5 w-5" />
-                <span className="sr-only">Email</span>
-              </a>
-            </div>
           </div>
           
           {/* Product */}

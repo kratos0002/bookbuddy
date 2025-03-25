@@ -57,23 +57,45 @@ const ValuePropositionSection = () => {
         
         {/* Personas tabs */}
         <div className="flex flex-wrap justify-center gap-4 mb-12">
-          {(Object.keys(personas) as PersonaType[]).map((key) => (
-            <button
-              key={key}
-              onClick={() => setActivePersona(key)}
-              className={cn(
-                "px-6 py-3 rounded-full flex items-center gap-2 transition-all",
-                activePersona === key 
-                  ? `bg-[${personas[key].color}] text-white shadow-md` 
-                  : `bg-white text-[${personas[key].color}] hover:bg-[${personas[key].color}]/10`
-              )}
-            >
-              {React.cloneElement(personas[key].icon as React.ReactElement, { 
-                className: `h-5 w-5 ${activePersona === key ? 'text-white' : `text-[${personas[key].color}]`}` 
-              })}
-              <span className="font-medium">{personas[key].title}</span>
-            </button>
-          ))}
+          {(Object.keys(personas) as PersonaType[]).map((key) => {
+            const persona = personas[key];
+            const isActive = activePersona === key;
+            
+            // Determine button styles based on persona type
+            let buttonClasses = "px-6 py-3 rounded-full flex items-center gap-2 transition-all ";
+            
+            if (key === 'students') {
+              buttonClasses += isActive 
+                ? "bg-[#1a3a5f] text-white shadow-md font-bold text-base" 
+                : "bg-white text-[#1a3a5f] hover:bg-[#1a3a5f]/20 border-2 border-[#1a3a5f]";
+            } else if (key === 'bookLovers') {
+              buttonClasses += isActive 
+                ? "bg-[#8b2439] text-white shadow-md font-bold text-base" 
+                : "bg-white text-[#8b2439] hover:bg-[#8b2439]/20 border-2 border-[#8b2439]";
+            } else {
+              buttonClasses += isActive 
+                ? "bg-[#7d8c75] text-white shadow-md font-bold text-base" 
+                : "bg-white text-[#7d8c75] hover:bg-[#7d8c75]/20 border-2 border-[#7d8c75]";
+            }
+            
+            return (
+              <button
+                key={key}
+                onClick={() => setActivePersona(key)}
+                className={buttonClasses}
+              >
+                {React.cloneElement(persona.icon as React.ReactElement, { 
+                  className: `h-5 w-5 ${
+                    isActive ? 'text-white' : 
+                    key === 'students' ? 'text-[#1a3a5f]' : 
+                    key === 'bookLovers' ? 'text-[#8b2439]' : 
+                    'text-[#7d8c75]'
+                  }` 
+                })}
+                <span className="font-medium">{persona.title}</span>
+              </button>
+            );
+          })}
         </div>
         
         {/* Active persona content */}
@@ -85,13 +107,31 @@ const ValuePropositionSection = () => {
             transition={{ duration: 0.5 }}
             className="bg-white p-8 rounded-xl shadow-md border border-[#f8f0e3]"
           >
-            <div className={`w-16 h-16 rounded-full bg-[${personas[activePersona].color}]/10 flex items-center justify-center mb-6`}>
+            <div className={`w-16 h-16 rounded-full ${
+              activePersona === 'students' 
+                ? 'bg-[#1a3a5f]/10' 
+                : activePersona === 'bookLovers' 
+                  ? 'bg-[#8b2439]/10' 
+                  : 'bg-[#7d8c75]/10'
+            } flex items-center justify-center mb-6`}>
               {React.cloneElement(personas[activePersona].icon as React.ReactElement, { 
-                className: `h-8 w-8 text-[${personas[activePersona].color}]` 
+                className: `h-8 w-8 ${
+                  activePersona === 'students' 
+                    ? 'text-[#1a3a5f]' 
+                    : activePersona === 'bookLovers' 
+                      ? 'text-[#8b2439]' 
+                      : 'text-[#7d8c75]'
+                }` 
               })}
             </div>
             
-            <h3 className={`text-2xl font-serif font-bold mb-4 text-[${personas[activePersona].color}]`}>
+            <h3 className={`text-2xl font-serif font-bold mb-4 ${
+              activePersona === 'students' 
+                ? 'text-[#1a3a5f]' 
+                : activePersona === 'bookLovers' 
+                  ? 'text-[#8b2439]' 
+                  : 'text-[#7d8c75]'
+            }`}>
               {personas[activePersona].title}
             </h3>
             
@@ -115,29 +155,36 @@ const ValuePropositionSection = () => {
             transition={{ duration: 0.5 }}
             className="bg-white rounded-xl shadow-md overflow-hidden border border-[#f8f0e3]"
           >
-            <div className={`px-4 py-3 bg-[${personas[activePersona].color}] text-white flex items-center`}>
+            <div className={`px-4 py-3 ${
+              activePersona === 'students' 
+                ? 'bg-[#1a3a5f]' 
+                : activePersona === 'bookLovers' 
+                  ? 'bg-[#8b2439]' 
+                  : 'bg-[#7d8c75]'
+            } text-white flex items-center`}>
               <BookOpen className="h-5 w-5 mr-2" />
               <span className="font-medium">Conversation Preview</span>
             </div>
             
+            {/* Conversation previews */}
             {activePersona === 'students' && (
               <div className="p-4 space-y-4">
                 <div className="flex gap-3">
                   <div className="w-8 h-8 rounded-full bg-[#1a3a5f] flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">W</div>
                   <div className="bg-gray-100 rounded-lg p-3 max-w-[80%]">
-                    <p className="text-sm">The Party controls everything in Oceania - from our actions to our thoughts.</p>
+                    <p className="text-sm text-gray-800">The Party controls everything in Oceania - from our actions to our thoughts.</p>
                   </div>
                 </div>
                 <div className="flex gap-3 justify-end">
-                  <div className="bg-[#1a3a5f]/10 rounded-lg p-3 max-w-[80%]">
-                    <p className="text-sm">How does this "thought control" work in practice? What techniques does the Party use?</p>
+                  <div className="bg-[#1a3a5f]/20 rounded-lg p-3 max-w-[80%]">
+                    <p className="text-sm text-gray-800">How does this "thought control" work in practice? What techniques does the Party use?</p>
                   </div>
                   <div className="w-8 h-8 rounded-full bg-[#f8f0e3] flex-shrink-0 flex items-center justify-center text-[#1a3a5f] text-xs font-bold">S</div>
                 </div>
                 <div className="flex gap-3">
                   <div className="w-8 h-8 rounded-full bg-[#1a3a5f] flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">W</div>
                   <div className="bg-gray-100 rounded-lg p-3 max-w-[80%]">
-                    <p className="text-sm">Through doublethink, thoughtcrime, and newspeak. They eliminate words so you can't even form rebellious thoughts...</p>
+                    <p className="text-sm text-gray-800">Through doublethink, thoughtcrime, and newspeak. They eliminate words so you can't even form rebellious thoughts...</p>
                   </div>
                 </div>
               </div>
@@ -148,19 +195,19 @@ const ValuePropositionSection = () => {
                 <div className="flex gap-3">
                   <div className="w-8 h-8 rounded-full bg-[#8b2439] flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">J</div>
                   <div className="bg-gray-100 rounded-lg p-3 max-w-[80%]">
-                    <p className="text-sm">I've always wondered if our relationship was truly doomed from the start, or if in a different world...</p>
+                    <p className="text-sm text-gray-800">I've always wondered if our relationship was truly doomed from the start, or if in a different world...</p>
                   </div>
                 </div>
                 <div className="flex gap-3 justify-end">
-                  <div className="bg-[#8b2439]/10 rounded-lg p-3 max-w-[80%]">
-                    <p className="text-sm">Did you ever genuinely love Winston, or was your relationship just an act of rebellion?</p>
+                  <div className="bg-[#8b2439]/20 rounded-lg p-3 max-w-[80%]">
+                    <p className="text-sm text-gray-800">Did you ever genuinely love Winston, or was your relationship just an act of rebellion?</p>
                   </div>
                   <div className="w-8 h-8 rounded-full bg-[#f8f0e3] flex-shrink-0 flex items-center justify-center text-[#8b2439] text-xs font-bold">R</div>
                 </div>
                 <div className="flex gap-3">
                   <div className="w-8 h-8 rounded-full bg-[#8b2439] flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">J</div>
                   <div className="bg-gray-100 rounded-lg p-3 max-w-[80%]">
-                    <p className="text-sm">It began as rebellion, yes. But with him, I felt truly alive for the first time. In that sense, it was love...</p>
+                    <p className="text-sm text-gray-800">It began as rebellion, yes. But with him, I felt truly alive for the first time. In that sense, it was love...</p>
                   </div>
                 </div>
               </div>
@@ -171,19 +218,19 @@ const ValuePropositionSection = () => {
                 <div className="flex gap-3">
                   <div className="w-8 h-8 rounded-full bg-[#7d8c75] flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">L</div>
                   <div className="bg-gray-100 rounded-lg p-3 max-w-[80%]">
-                    <p className="text-sm">I'm here to help you understand classic literature in simple, relatable terms.</p>
+                    <p className="text-sm text-gray-800">I'm here to help you understand classic literature in simple, relatable terms.</p>
                   </div>
                 </div>
                 <div className="flex gap-3 justify-end">
-                  <div className="bg-[#7d8c75]/10 rounded-lg p-3 max-w-[80%]">
-                    <p className="text-sm">I find 1984 intimidating. Can you explain what "doublethink" means in modern terms?</p>
+                  <div className="bg-[#7d8c75]/20 rounded-lg p-3 max-w-[80%]">
+                    <p className="text-sm text-gray-800">I find 1984 intimidating. Can you explain what "doublethink" means in modern terms?</p>
                   </div>
                   <div className="w-8 h-8 rounded-full bg-[#f8f0e3] flex-shrink-0 flex items-center justify-center text-[#7d8c75] text-xs font-bold">C</div>
                 </div>
                 <div className="flex gap-3">
                   <div className="w-8 h-8 rounded-full bg-[#7d8c75] flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">L</div>
                   <div className="bg-gray-100 rounded-lg p-3 max-w-[80%]">
-                    <p className="text-sm">Think of it like cognitive dissonance. It's holding two contradictory beliefs simultaneously...</p>
+                    <p className="text-sm text-gray-800">Think of it like cognitive dissonance. It's holding two contradictory beliefs simultaneously...</p>
                   </div>
                 </div>
               </div>

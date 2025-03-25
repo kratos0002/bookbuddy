@@ -261,9 +261,9 @@ const ConversationPageContent = () => {
         {/* Big Brother watching overlay effect - appears briefly */}
         {showEye && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 animate-fade-out pointer-events-none">
-            <div className="text-book-primary text-center">
+            <div className="text-[#8b2439] text-center">
               <Eye size={60} className="mx-auto mb-4 animate-pulse-subtle" />
-              <p className="text-xl text-book-secondary typewriter">Big Brother is watching you...</p>
+              <p className="text-xl text-[#8b2439] typewriter">Big Brother is watching you...</p>
             </div>
           </div>
         )}
@@ -282,8 +282,8 @@ const ConversationPageContent = () => {
           <div className="flex-1 flex flex-col p-4 overflow-hidden">
             <div className="flex-1 mt-12 relative z-0 big-brother-watching">
               <div className="w-full h-full flex flex-col">
-                <h2 className="text-2xl font-bold tracking-tight mb-4 text-book-primary flex items-center gap-2">
-                  <MessageCircle size={20} className="text-book-primary/70" />
+                <h2 className="text-2xl font-bold tracking-tight mb-4 text-[#8b2439] flex items-center gap-2">
+                  <MessageCircle size={20} className="text-[#8b2439]/70" />
                   Chat with {selectedBook.title} Characters
                 </h2>
                 
@@ -296,7 +296,7 @@ const ConversationPageContent = () => {
                     <div className="mb-4">
                       <Button
                         variant={isLibrarianSelected ? "default" : "outline"}
-                        className="w-full justify-start bg-gradient-to-r from-amber-100 to-amber-50 border-amber-200 hover:from-amber-200 hover:to-amber-100 text-amber-900"
+                        className="w-full justify-start bg-gradient-to-r from-[#8b2439]/10 to-[#8b2439]/5 border-[#8b2439]/20 hover:from-[#8b2439]/20 hover:to-[#8b2439]/10 text-[#8b2439]"
                         onClick={() => handleCharacterSelect(null)}
                         disabled={isCreatingConversation}
                       >
@@ -323,7 +323,11 @@ const ConversationPageContent = () => {
                           <Button
                             key={char.id}
                             variant={selectedChatCharacter === char.id ? "default" : "outline"}
-                            className="w-full justify-start"
+                            className={`w-full justify-start ${
+                              selectedChatCharacter === char.id 
+                                ? 'bg-[#8b2439] hover:bg-[#8b2439]/90 text-white' 
+                                : 'border-[#8b2439]/20 text-[#8b2439] hover:bg-[#8b2439]/10'
+                            }`}
                             onClick={() => handleCharacterSelect(char.id)}
                             disabled={isCreatingConversation}
                           >
@@ -413,8 +417,8 @@ const ConversationPageContent = () => {
                               <div
                                 className={`rounded-lg p-3 max-w-[80%] ${
                                   message.isUserMessage
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-muted"
+                                    ? "bg-[#8b2439] text-white"
+                                    : "bg-[#8b2439]/10 text-[#8b2439]"
                                 }`}
                               >
                                 {message.content}

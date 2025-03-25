@@ -125,7 +125,7 @@ const FeaturedBookSection = () => {
   };
   
   return (
-    <section className="bg-[#f8f0e3]/30 px-4 py-16 relative overflow-hidden">
+    <section id="featured-books-section" className="bg-[#f8f0e3]/30 px-4 py-16 relative overflow-hidden">
       {/* Decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#7d8c75]/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
@@ -180,8 +180,7 @@ const FeaturedBookSection = () => {
             
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="mb-4 bg-[#f8f0e3]/50">
-                <TabsTrigger value="details" className="data-[state=active]:bg-[#1a3a5f] data-[state=active]:text-white">Book Details</TabsTrigger>
-                <TabsTrigger value="chat" className="data-[state=active]:bg-[#1a3a5f] data-[state=active]:text-white">Chat with Characters</TabsTrigger>
+                <TabsTrigger value="chat" className="data-[state=active]:bg-[#8b2439] data-[state=active]:text-white w-full">Chat with Characters</TabsTrigger>
               </TabsList>
               
               <TabsContent value="details">
@@ -199,10 +198,10 @@ const FeaturedBookSection = () => {
                         <Tooltip key={character.id}>
                           <TooltipTrigger asChild>
                             <div 
-                              className="w-10 h-10 rounded-full bg-[#1a3a5f]/10 flex items-center justify-center hover:bg-[#1a3a5f]/20 transition-colors cursor-pointer"
+                              className="w-10 h-10 rounded-full bg-[#8b2439]/10 flex items-center justify-center hover:bg-[#8b2439]/20 transition-colors cursor-pointer"
                               onClick={() => handleCharacterSelect(Number(character.id))}
                             >
-                              <User className="h-5 w-5 text-[#1a3a5f]" />
+                              <User className="h-5 w-5 text-[#8b2439]" />
                             </div>
                           </TooltipTrigger>
                           <TooltipContent side="bottom">
@@ -225,16 +224,12 @@ const FeaturedBookSection = () => {
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <Button 
-                    className="gap-2 bg-[#8b2439] hover:bg-[#8b2439]/90"
-                    onClick={() => setActiveTab("chat")}
+                    asChild
+                    className="gap-2 bg-[#8b2439] hover:bg-[#8b2439]/90 w-full sm:w-auto"
                   >
-                    Talk to 1984 Characters
-                    <MessageCircle className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" asChild className="gap-2 border-[#1a3a5f] text-[#1a3a5f] hover:bg-[#1a3a5f]/10">
                     <Link to={`/book/${selectedBook.id}`}>
-                      View Book Details
-                      <ArrowRight className="h-4 w-4" />
+                      Chat with Characters
+                      <MessageCircle className="h-4 w-4" />
                     </Link>
                   </Button>
                 </div>
@@ -243,7 +238,7 @@ const FeaturedBookSection = () => {
               <TabsContent value="chat" className="space-y-4">
                 {!conversationId ? (
                   <div className="p-6 border rounded-lg bg-white shadow-sm">
-                    <h4 className="text-lg font-medium mb-4 text-[#1a3a5f]">Who would you like to chat with?</h4>
+                    <h4 className="text-lg font-medium mb-4 text-[#8b2439]">Who would you like to chat with?</h4>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {Array.isArray(characters) && characters.length > 0 ? (
                         characters.map((char: Character) => (
@@ -254,7 +249,7 @@ const FeaturedBookSection = () => {
                             disabled={isCreatingConversation}
                             onClick={() => handleCharacterSelect(char.id)}
                           >
-                            <div className="w-12 h-12 rounded-full bg-[#1a3a5f]/10 flex items-center justify-center mb-2">
+                            <div className="w-12 h-12 rounded-full bg-[#8b2439]/10 flex items-center justify-center mb-2">
                               {char.avatarUrl ? (
                                 <img 
                                   src={char.avatarUrl} 
@@ -262,10 +257,10 @@ const FeaturedBookSection = () => {
                                   className="w-10 h-10 rounded-full"
                                 />
                               ) : (
-                                <User className="h-6 w-6 text-[#1a3a5f]" />
+                                <User className="h-6 w-6 text-[#8b2439]" />
                               )}
                             </div>
-                            <span className="text-sm font-medium text-[#1a3a5f]">{char.name}</span>
+                            <span className="text-sm font-medium text-[#8b2439]">{char.name}</span>
                           </Button>
                         ))
                       ) : (
@@ -277,7 +272,7 @@ const FeaturedBookSection = () => {
                   </div>
                 ) : (
                   <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
-                    <div className="px-4 py-3 bg-[#1a3a5f] text-white">
+                    <div className="px-4 py-3 bg-[#8b2439] text-white">
                       <div className="flex items-center">
                         <User className="h-5 w-5 mr-2" />
                         <span>Chat with {characters?.find(c => c.id === selectedCharacter)?.name || 'Character'}</span>
@@ -295,7 +290,7 @@ const FeaturedBookSection = () => {
                               <div className={`max-w-[80%] p-3 rounded-lg ${
                                 message.isUserMessage 
                                   ? 'bg-[#8b2439]/10 text-[#8b2439]' 
-                                  : 'bg-[#1a3a5f]/10 text-[#1a3a5f]'
+                                  : 'bg-[#8b2439]/10 text-[#8b2439]'
                               }`}>
                                 <p className="text-sm">{message.content}</p>
                                 <p className="text-xs opacity-70 mt-1">
@@ -324,7 +319,7 @@ const FeaturedBookSection = () => {
                           value={message} 
                           onChange={(e) => setMessage(e.target.value)} 
                           placeholder="Type your message..." 
-                          className="border-[#1a3a5f]/20 focus-visible:ring-[#1a3a5f]/30"
+                          className="border-[#8b2439]/20 focus-visible:ring-[#8b2439]/30"
                         />
                         <Button 
                           type="submit"
@@ -341,13 +336,12 @@ const FeaturedBookSection = () => {
                 
                 {/* Note: This is just a preview, suggest checking full experience */}
                 <div className="text-center mt-8">
-                  <p className="text-sm text-[#1a3a5f]/70 mb-3">
+                  <p className="text-sm text-[#8b2439]/70 mb-3">
                     This is just a preview of the conversation experience.
                   </p>
                   <Link to="/conversation">
-                    <Button variant="outline" size="sm" className="gap-2 border-[#1a3a5f]/20 text-[#1a3a5f] hover:bg-[#1a3a5f]/5">
+                    <Button variant="outline" size="sm" className="gap-2 border-[#8b2439]/20 text-[#8b2439] hover:bg-[#8b2439]/5">
                       Go to full conversation page
-                      <ArrowRight className="h-3 w-3" />
                     </Button>
                   </Link>
                 </div>

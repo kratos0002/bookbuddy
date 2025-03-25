@@ -244,7 +244,7 @@ export const FeedbackChatbot: React.FC = () => {
           key={option.value}
           variant="outline"
           size="sm"
-          className="flex items-center gap-2 mb-2"
+          className="flex items-center gap-2 mb-2 w-full justify-start text-left"
           onClick={() => handleOptionSelected(option.value)}
         >
           {option.icon}
@@ -253,17 +253,16 @@ export const FeedbackChatbot: React.FC = () => {
       ));
     }
     
-    if (messages.length > 0 && messages[messages.length - 1].type === 'bot' && 
-        messages[messages.length - 1].content === THANK_YOU_MESSAGE.content) {
+    // Check if we're at the thank you stage
+    if (currentFeedbackType && feedbackStage === FEEDBACK_FOLLOW_UP[currentFeedbackType].length - 1) {
       return THANK_YOU_MESSAGE.options?.map((option) => (
         <Button
           key={option.value}
           variant="outline"
           size="sm"
-          className="flex items-center gap-2 mb-2"
+          className="flex items-center gap-2 mb-2 w-full justify-start text-left"
           onClick={() => handleOptionSelected(option.value)}
         >
-          {option.icon}
           {option.label}
         </Button>
       ));
@@ -274,125 +273,124 @@ export const FeedbackChatbot: React.FC = () => {
 
   return (
     <>
-      {/* Floating chat button */}
-      <Button
-        className="fixed right-4 bottom-4 rounded-full p-4 bg-book-primary hover:bg-book-primary/80 shadow-lg z-[9999]"
+      {/* Chat Button */}
+      <motion.button
+        className="fixed bottom-5 right-5 w-14 h-14 md:w-16 md:h-16 bg-[#8b2439] rounded-full shadow-lg flex items-center justify-center z-[9999] text-white"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
         onClick={toggleChat}
-        aria-label={isOpen ? "Close feedback chat" : "Open feedback chat"}
+        aria-label="Toggle feedback chat"
       >
         {isOpen ? (
-          <X className="h-7 w-7 text-white" />
+          <X className="h-6 w-6 md:h-7 md:w-7" />
         ) : (
           <div className="relative">
-            <MessageSquare className="h-7 w-7 text-white" />
-            <span className="absolute -top-1 -right-1 flex h-4 w-4">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-4 w-4 bg-white"></span>
-            </span>
+            <MessageSquare className="h-6 w-6 md:h-7 md:w-7" />
+            {/* Notification dot */}
+            <motion.div 
+              className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-white"
+              animate={{ 
+                scale: [1, 1.2, 1],
+                opacity: [0.8, 1, 0.8]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                repeatType: "loop"
+              }}
+            />
           </div>
         )}
-      </Button>
+      </motion.button>
 
-      {/* Chat window */}
+      {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="fixed bottom-6 right-6 w-[90vw] sm:w-96 h-[70vh] sm:h-[500px] bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col z-[9990]"
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className="fixed bottom-20 right-4 w-80 sm:w-96 h-[500px] max-h-[calc(100vh-120px)] bg-card rounded-lg shadow-xl flex flex-col overflow-hidden border border-border z-50"
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
           >
-            {/* Chat header */}
-            <div className="p-3 bg-book-primary text-white flex items-center justify-between">
+            {/* Header */}
+            <div className="bg-[#8b2439] text-white p-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5" />
-                <div>
-                  <h3 className="font-medium">Book Buddy Feedback</h3>
-                  <p className="text-xs opacity-80">We'd love to hear from you!</p>
-                </div>
+                <h3 className="font-medium">Book Buddy Feedback</h3>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-white hover:bg-white/20 h-8 w-8 p-0"
-                onClick={() => setIsOpen(false)}
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 text-white hover:bg-white/20"
+                onClick={toggleChat}
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </Button>
             </div>
-
-            {/* Chat messages */}
+            
+            {/* Messages */}
             <ScrollArea className="flex-1 p-4">
               <div className="space-y-4">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                {messages.map((msg) => (
+                  <div 
+                    key={msg.id} 
+                    className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
-                    <div
-                      className={`max-w-[80%] rounded-lg p-3 ${
-                        message.type === 'user'
-                          ? 'bg-book-primary text-white'
-                          : 'bg-muted'
-                      }`}
+                    <div 
+                      className={`
+                        p-3 rounded-lg max-w-[80%] break-words text-sm
+                        ${msg.type === 'user' 
+                          ? 'bg-[#8b2439] text-white' 
+                          : 'bg-gray-100 text-gray-800 border border-gray-200'
+                        }
+                      `}
                     >
-                      <p className="text-sm">{message.content}</p>
-                      <p className="text-xs mt-1 opacity-70">
-                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </p>
+                      {msg.content}
                     </div>
                   </div>
                 ))}
                 
-                {/* Options buttons if applicable */}
-                <div className="flex flex-col items-start gap-2 mt-2">
-                  {renderCurrentOptions()}
-                </div>
-
-                {/* Invisible element to scroll to */}
+                {/* Options */}
+                {messages.length > 0 && (
+                  <div className="flex justify-start mt-2">
+                    <div className="space-y-2 w-full">
+                      {renderCurrentOptions()}
+                    </div>
+                  </div>
+                )}
+                
                 <div ref={endOfMessagesRef} />
               </div>
             </ScrollArea>
-
-            {/* Chat input */}
-            <div className="p-3 border-t border-border bg-card">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSendMessage();
-                }}
-                className="flex items-center gap-2"
-              >
-                <Textarea
-                  value={currentInput}
-                  onChange={(e) => setCurrentInput(e.target.value)}
-                  placeholder="Type your message..."
-                  className="min-h-[40px] max-h-[120px] resize-none"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
-                />
-                <Button
-                  type="submit"
-                  size="icon"
-                  className="h-10 w-10 rounded-full bg-book-primary hover:bg-book-primary/80"
-                  disabled={!currentInput.trim() || submitting}
-                >
-                  <Send className="h-4 w-4 text-white" />
-                </Button>
-              </form>
-              
-              {/* Shows when feedback is being submitted */}
-              {submitting && (
-                <p className="text-xs text-muted-foreground mt-1 animate-pulse">
-                  Saving your valuable feedback...
-                </p>
-              )}
-            </div>
+            
+            {/* Input */}
+            {currentFeedbackType && !FEEDBACK_FOLLOW_UP[currentFeedbackType][feedbackStage]?.options && (
+              <div className="p-3 border-t bg-gray-50">
+                <div className="flex items-end gap-2">
+                  <Textarea
+                    placeholder="Type your response..."
+                    value={currentInput}
+                    onChange={(e) => setCurrentInput(e.target.value)}
+                    className="resize-none rounded-md text-sm flex-1 min-h-[60px]"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                  />
+                  <Button 
+                    size="icon" 
+                    className="bg-[#8b2439] text-white h-10 w-10"
+                    onClick={handleSendMessage}
+                    disabled={!currentInput.trim() || submitting}
+                  >
+                    <Send className="h-5 w-5" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
