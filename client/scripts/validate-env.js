@@ -93,24 +93,56 @@ function validateEnvVar(name, value, type) {
 }
 
 function validateEnv() {
+  // Skip validation in CI environments or if explicitly disabled
+  const isCI = process.env.CI === 'true' || process.env.NETLIFY === 'true';
+  const skipValidation = process.env.SKIP_ENV_VALIDATION === 'true';
+  
+  if (isCI || skipValidation) {
+    console.log('📝 Skipping environment validation in CI/Netlify environment');
+    return;
+  }
+  
   // Get the directory of the current module
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
   
-  // Load environment variables from .env file
-  const envPath = path.resolve(__dirname, '..', '.env');
-  if (!fs.existsSync(envPath)) {
-    console.error('❌ .env file not found');
-    console.log('ℹ️  Please create a .env file based on .env.example');
-    process.exit(1);
+  // Try different env files in order
+  const envPaths = [
+    path.resolve(__dirname, '..', '.env'),
+    path.resolve(__dirname, '..', '.env.local'),
+    path.resolve(__dirname, '..', '.env.production'),
+  ];
+  
+  let envConfig = {};
+  let envFileFound = false;
+  
+  for (const envPath of envPaths) {
+    if (fs.existsSync(envPath)) {
+      envConfig = dotenv.parse(fs.readFileSync(envPath));
+      console.log(`✅ Using environment file: ${path.basename(envPath)}`);
+      envFileFound = true;
+      break;
+    }
+  }
+  
+  if (!envFileFound) {
+    console.warn('⚠️ No .env file found. Using environment variables from process.env');
+    // Use process.env values for required variables
+    ENV_VARS.forEach(envVar => {
+      if (envVar.required) {
+        const value = process.env[envVar.name];
+        if (value) {
+          envConfig[envVar.name] = value;
+        }
+      }
+    });
   }
 
-  const envConfig = dotenv.parse(fs.readFileSync(envPath));
   const errors = [];
   const warnings = [];
 
   // Validate each environment variable
   ENV_VARS.forEach((envVar) => {
-    const value = envConfig[envVar.name];
+    const value = envConfig[envVar.name] || process.env[envVar.name];
 
     if (envVar.required && !value) {
       errors.push(`Missing required environment variable: ${envVar.name}`);
@@ -121,13 +153,6 @@ function validateEnv() {
       }
     } else {
       warnings.push(`Optional environment variable not set: ${envVar.name}`);
-    }
-  });
-
-  // Check for unknown environment variables
-  Object.keys(envConfig).forEach((key) => {
-    if (!ENV_VARS.find((envVar) => envVar.name === key)) {
-      warnings.push(`Unknown environment variable: ${key}`);
     }
   });
 

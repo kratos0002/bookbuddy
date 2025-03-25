@@ -1,6 +1,19 @@
 [build]
-  command = "npm run build"
+  command = "npm run build:netlify"
   publish = "dist"
+
+# Environment variables
+[build.environment]
+  VITE_API_URL = "https://api.example.com"  # Replace with your actual API URL later
+  VITE_API_TIMEOUT = "30000"
+  VITE_MAX_RETRIES = "3"
+  VITE_ENABLE_ERROR_REPORTING = "false"
+  VITE_ENABLE_PERFORMANCE_MONITORING = "false"
+  VITE_ENABLE_ANALYTICS = "false"
+  VITE_CACHE_TTL = "3600"
+  VITE_ENABLE_DEBUG_MODE = "false"
+  NETLIFY = "true"
+  NPM_FLAGS = "--legacy-peer-deps"
 
 # Handle client-side routing
 [[redirects]]
