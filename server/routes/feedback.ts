@@ -1,9 +1,15 @@
 import { Router } from 'express';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
 const router = Router();
+
+// Get the directory path for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Path to the feedback storage file
 const FEEDBACK_FILE_PATH = path.join(__dirname, '../data/feedback.json');
