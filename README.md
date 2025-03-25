@@ -9,6 +9,25 @@ The test suite is divided into two main categories:
 1. **API Tests** (`api.test.js`): These tests verify backend functionality by directly calling API endpoints.
 2. **E2E Tests** (`e2e.test.js`): These tests simulate user interactions with the application using Playwright.
 
+## Build and Deployment
+
+The application is built with Vite for the frontend and esbuild for the server. The deployment process has been optimized to:
+
+1. Handle external dependencies properly
+2. Implement code splitting with manual chunks
+3. Provide zero-downtime deployments
+
+### Testing Builds Locally
+
+To avoid unexpected build failures in production, we've created a local testing process:
+
+```bash
+# Test your build before deploying to catch dependency issues
+./test-build.sh
+```
+
+This script will identify common build issues such as unresolved dependencies or missing assets before you deploy to production. For more details, see [BUILD_TESTING.md](./BUILD_TESTING.md).
+
 ## Setup and Configuration
 
 ### Prerequisites

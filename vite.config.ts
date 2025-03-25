@@ -43,7 +43,8 @@ export default defineConfig({
         'react',
         'react-dom',
         'framer-motion',
-        'next-themes'
+        'next-themes',
+        'sonner'
       ],
       output: {
         manualChunks: (id) => {
