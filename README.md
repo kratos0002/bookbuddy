@@ -148,3 +148,51 @@ Instructions for running complete BookNLP processing:
 ## 📄 License
 
 MIT
+
+## Deployment Instructions
+
+### Deploying to Render
+
+Follow these steps to deploy the BookBuddy backend to Render:
+
+1. **Create a new Web Service on Render**
+   - Go to [dashboard.render.com](https://dashboard.render.com/)
+   - Click "New +" and select "Web Service"
+   - Connect your GitHub repository or use the public GitHub URL
+
+2. **Configure the Web Service**
+   - Name: `bookbuddy-api` (or your preferred name)
+   - Environment: `Node`
+   - Region: Choose the closest to your users
+   - Branch: `main` (or your deployment branch)
+   - Build Command: `npm install && npm run build`
+   - Start Command: `npm run start`
+   - Plan: Select the appropriate plan (Free tier works for testing)
+
+3. **Set Environment Variables**
+   - OPENAI_API_KEY: Your OpenAI API key
+   - DATABASE_URL: Your database connection URL
+   - ADMIN_TOKEN: A secure token for admin access
+   - NODE_ENV: `production`
+
+4. **Create the Web Service**
+   - Click "Create Web Service"
+   - Wait for the deployment to complete
+
+5. **Update Client Configuration**
+   - Once deployed, update the client's `.env` file with the new API URL:
+   ```
+   VITE_API_URL=https://your-render-service-url.onrender.com
+   ```
+
+### Backend Environment Variables
+
+The backend requires the following environment variables:
+
+- `OPENAI_API_KEY`: Your OpenAI API key for AI functionality
+- `DATABASE_URL`: Connection URL for your database
+- `ADMIN_TOKEN`: Secure token for admin access
+- `NODE_ENV`: Set to `production` for deployment
+- `PORT`: (Optional) Port to run the server on (defaults to 3000)
+
+Set these in your Render dashboard under the "Environment" section of your web service.
