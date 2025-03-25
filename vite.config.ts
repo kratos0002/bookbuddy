@@ -42,7 +42,8 @@ export default defineConfig({
         /^@radix-ui\/.*/,
         'react',
         'react-dom',
-        'framer-motion'
+        'framer-motion',
+        'next-themes'
       ],
       output: {
         manualChunks: (id) => {
