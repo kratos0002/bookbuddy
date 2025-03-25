@@ -4,7 +4,7 @@
 
 # Environment variables
 [build.environment]
-  VITE_API_URL = "https://api.example.com"  # Replace with your actual API URL later
+  VITE_API_URL = "https://bookbuddy-qpi.onrender.com"
   VITE_API_TIMEOUT = "30000"
   VITE_MAX_RETRIES = "3"
   VITE_ENABLE_ERROR_REPORTING = "false"
@@ -14,6 +14,13 @@
   VITE_ENABLE_DEBUG_MODE = "false"
   NETLIFY = "true"
   NPM_FLAGS = "--legacy-peer-deps"
+
+# Proxy API requests to the backend
+[[redirects]]
+  from = "/api/*"
+  to = "https://bookbuddy-qpi.onrender.com/api/:splat"
+  status = 200
+  force = true
 
 # Handle client-side routing
 [[redirects]]
@@ -30,4 +37,4 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.openai.com;" 
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.openai.com https://bookbuddy-qpi.onrender.com;" 
