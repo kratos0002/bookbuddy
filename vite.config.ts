@@ -26,7 +26,7 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "client", "src"),
       "@shared": path.resolve(__dirname, "shared"),
-    },
+    }
   },
   root: path.resolve(__dirname, "client"),
   build: {
@@ -38,8 +38,24 @@ export default defineConfig({
         'wouter',
         'axios',
         'react-query',
-        '@tanstack/react-query'
-      ]
+        '@tanstack/react-query',
+        /^@radix-ui\/.*/,
+        'react',
+        'react-dom',
+        'framer-motion'
+      ],
+      output: {
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('framer-motion')) {
+              return 'vendor';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'ui';
+            }
+          }
+        }
+      }
     }
   },
 });
