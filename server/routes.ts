@@ -914,9 +914,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Try multiple possible paths for the data file
       const possiblePaths = [
-        path.join(__dirname, '../data/encyclopedia/entries.json'),
+        path.join(__dirname, 'data/encyclopedia/entries.json'),
+        path.join(__dirname, '../server/data/encyclopedia/entries.json'),
+        path.join(process.cwd(), 'server/data/encyclopedia/entries.json'),
         path.join(process.cwd(), 'data/encyclopedia/entries.json'),
-        path.join(process.cwd(), 'dist/data/encyclopedia/entries.json')
+        path.join(__dirname, '../data/encyclopedia/entries.json'),
+        path.join(process.cwd(), 'dist/data/encyclopedia/entries.json'),
+        path.join(process.cwd(), 'dist/server/data/encyclopedia/entries.json')
       ];
 
       let fileContent;
@@ -924,17 +928,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       for (const filePath of possiblePaths) {
         try {
+          console.log(`Attempting to read encyclopedia entries from: ${filePath}`);
           fileContent = await fs.readFile(filePath, 'utf-8');
           usedPath = filePath;
           console.log(`Successfully read encyclopedia entries from: ${filePath}`);
           break;
         } catch (err) {
-          console.log(`Could not read from ${filePath}`);
+          console.log(`Could not read from ${filePath}: ${err.message}`);
           continue;
         }
       }
 
       if (!fileContent) {
+        console.error('All file paths failed. Paths attempted:', possiblePaths);
         throw new Error('Could not find encyclopedia entries file in any expected location');
       }
 
@@ -942,7 +948,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(entries);
     } catch (error) {
       console.error('Error fetching encyclopedia entries:', error);
-      res.status(500).json({ error: 'Failed to fetch encyclopedia entries' });
+      res.status(500).json({ 
+        error: 'Failed to fetch encyclopedia entries',
+        details: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
     }
   });
 
@@ -954,10 +964,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const __filename = fileURLToPath(import.meta.url);
       const __dirname = dirname(__filename);
       
+      // Try multiple possible paths for the data file
       const possiblePaths = [
-        path.join(__dirname, '../data/encyclopedia/entries.json'),
+        path.join(__dirname, 'data/encyclopedia/entries.json'),
+        path.join(__dirname, '../server/data/encyclopedia/entries.json'),
+        path.join(process.cwd(), 'server/data/encyclopedia/entries.json'),
         path.join(process.cwd(), 'data/encyclopedia/entries.json'),
-        path.join(process.cwd(), 'dist/data/encyclopedia/entries.json')
+        path.join(__dirname, '../data/encyclopedia/entries.json'),
+        path.join(process.cwd(), 'dist/data/encyclopedia/entries.json'),
+        path.join(process.cwd(), 'dist/server/data/encyclopedia/entries.json')
       ];
 
       let fileContent;
@@ -970,7 +985,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`Successfully read encyclopedia entries from: ${filePath}`);
           break;
         } catch (err) {
-          console.log(`Could not read from ${filePath}`);
           continue;
         }
       }
@@ -1001,10 +1015,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const __filename = fileURLToPath(import.meta.url);
       const __dirname = dirname(__filename);
       
+      // Try multiple possible paths for the data file
       const possiblePaths = [
-        path.join(__dirname, '../data/encyclopedia/entries.json'),
+        path.join(__dirname, 'data/encyclopedia/entries.json'),
+        path.join(__dirname, '../server/data/encyclopedia/entries.json'),
+        path.join(process.cwd(), 'server/data/encyclopedia/entries.json'),
         path.join(process.cwd(), 'data/encyclopedia/entries.json'),
-        path.join(process.cwd(), 'dist/data/encyclopedia/entries.json')
+        path.join(__dirname, '../data/encyclopedia/entries.json'),
+        path.join(process.cwd(), 'dist/data/encyclopedia/entries.json'),
+        path.join(process.cwd(), 'dist/server/data/encyclopedia/entries.json')
       ];
 
       let fileContent;
@@ -1017,7 +1036,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`Successfully read encyclopedia entries from: ${filePath}`);
           break;
         } catch (err) {
-          console.log(`Could not read from ${filePath}`);
           continue;
         }
       }
@@ -1066,10 +1084,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const __filename = fileURLToPath(import.meta.url);
       const __dirname = dirname(__filename);
       
+      // Try multiple possible paths for the data file
       const possiblePaths = [
-        path.join(__dirname, '../data/encyclopedia/entries.json'),
+        path.join(__dirname, 'data/encyclopedia/entries.json'),
+        path.join(__dirname, '../server/data/encyclopedia/entries.json'),
+        path.join(process.cwd(), 'server/data/encyclopedia/entries.json'),
         path.join(process.cwd(), 'data/encyclopedia/entries.json'),
-        path.join(process.cwd(), 'dist/data/encyclopedia/entries.json')
+        path.join(__dirname, '../data/encyclopedia/entries.json'),
+        path.join(process.cwd(), 'dist/data/encyclopedia/entries.json'),
+        path.join(process.cwd(), 'dist/server/data/encyclopedia/entries.json')
       ];
 
       let fileContent;
@@ -1082,7 +1105,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`Successfully read encyclopedia entries from: ${filePath}`);
           break;
         } catch (err) {
-          console.log(`Could not read from ${filePath}`);
           continue;
         }
       }
