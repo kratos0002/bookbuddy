@@ -1,16 +1,22 @@
 services:
   - type: web
-    name: bookbuddy-api
+    name: bookbuddy-qpi
     env: node
-    buildCommand: npm install && npm run build
-    startCommand: npm run start
+    plan: free
+    buildCommand: npm install && npm run build:render
+    startCommand: npm start
     envVars:
-      - key: NODE_ENV
-        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: bookbuddy-db
+          property: connectionString
       - key: OPENAI_API_KEY
         sync: false
-      - key: DATABASE_URL
-        sync: false
-      - key: ADMIN_TOKEN
-        sync: false
-    healthCheckPath: /api/health 
+      - key: PORT
+        value: 3000
+      - key: NODE_ENV
+        value: production
+
+databases:
+  - name: bookbuddy-db
+    plan: free 

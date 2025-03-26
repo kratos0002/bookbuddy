@@ -177,50 +177,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Character routes
   app.get("/api/books/:id/characters", async (req, res) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return res.status(400).json({ message: "Invalid book ID" });
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid book ID" });
+      }
+      
+      console.log(`Fetching characters for book ID: ${id}`);
+      const characters = await storage.getCharactersByBookId(id);
+      console.log(`Retrieved ${characters.length} characters for book ID: ${id}`);
+      
+      res.json(characters);
+    } catch (error) {
+      console.error(`Error fetching characters for book ID ${req.params.id}:`, error);
+      res.status(500).json({ 
+        message: "Failed to fetch characters",
+        details: error instanceof Error ? error.message : "Unknown error",
+        timestamp: new Date().toISOString()
+      });
     }
-    
-    const characters = await storage.getCharactersByBookId(id);
-    res.json(characters);
   });
   
   // Add endpoint to get all characters
   app.get("/api/characters", async (req, res) => {
     try {
+      console.log("Fetching all characters from all books");
       // Get all books
       const books = await storage.getAllBooks();
+      console.log(`Retrieved ${books.length} books for character lookup`);
       
       // Create an array to store all characters
       let allCharacters: Character[] = [];
       
       // For each book, get its characters and add them to the array
       for (const book of books) {
+        console.log(`Fetching characters for book ID: ${book.id}`);
         const bookCharacters = await storage.getCharactersByBookId(book.id);
+        console.log(`Retrieved ${bookCharacters.length} characters for book ID: ${book.id}`);
         allCharacters = [...allCharacters, ...bookCharacters];
       }
       
+      console.log(`Total characters retrieved: ${allCharacters.length}`);
       // Return all characters
       res.json(allCharacters);
     } catch (error) {
       console.error("Error fetching all characters:", error);
-      res.status(500).json({ message: "Failed to fetch characters" });
+      res.status(500).json({ 
+        message: "Failed to fetch characters",
+        details: error instanceof Error ? error.message : "Unknown error",
+        timestamp: new Date().toISOString()
+      });
     }
   });
   
   app.get("/api/characters/:id", async (req, res) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return res.status(400).json({ message: "Invalid character ID" });
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid character ID" });
+      }
+      
+      console.log(`Fetching character with ID: ${id}`);
+      const character = await storage.getCharacterById(id);
+      
+      if (!character) {
+        console.log(`Character with ID ${id} not found`);
+        return res.status(404).json({ message: "Character not found" });
+      }
+      
+      console.log(`Retrieved character: ${character.name}`);
+      res.json(character);
+    } catch (error) {
+      console.error(`Error fetching character with ID ${req.params.id}:`, error);
+      res.status(500).json({ 
+        message: "Failed to fetch character",
+        details: error instanceof Error ? error.message : "Unknown error",
+        timestamp: new Date().toISOString()
+      });
     }
-    
-    const character = await storage.getCharacterById(id);
-    if (!character) {
-      return res.status(404).json({ message: "Character not found" });
-    }
-    
-    res.json(character);
   });
   
   // Relationship routes
