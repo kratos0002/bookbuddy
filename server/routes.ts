@@ -1043,13 +1043,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fs = await import('fs/promises');
       const path = await import('path');
       
-      // Use __dirname equivalent in ESM
       const __filename = fileURLToPath(import.meta.url);
       const __dirname = dirname(__filename);
       
-      // Use an absolute path to the entries.json file
-      const filePath = path.join(__dirname, '../data/encyclopedia/entries.json');
-      const fileContent = await fs.readFile(filePath, 'utf-8');
+      const possiblePaths = [
+        path.join(__dirname, '../data/encyclopedia/entries.json'),
+        path.join(process.cwd(), 'data/encyclopedia/entries.json'),
+        path.join(process.cwd(), 'dist/data/encyclopedia/entries.json')
+      ];
+
+      let fileContent;
+      let usedPath;
+
+      for (const filePath of possiblePaths) {
+        try {
+          fileContent = await fs.readFile(filePath, 'utf-8');
+          usedPath = filePath;
+          console.log(`Successfully read encyclopedia entries from: ${filePath}`);
+          break;
+        } catch (err) {
+          console.log(`Could not read from ${filePath}`);
+          continue;
+        }
+      }
+
+      if (!fileContent) {
+        throw new Error('Could not find encyclopedia entries file in any expected location');
+      }
+      
       const entries = JSON.parse(fileContent);
       
       // Return ALL entry IDs instead of just initially unlocked ones
