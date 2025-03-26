@@ -19,6 +19,8 @@ import quoteExplorerService from "./services/quote-explorer-service";
 import feedbackRoutes from './routes/feedback';
 import adminRoutes from './routes/admin';
 import healthRoutes from './routes/health';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 // Initialize OpenAI client
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -887,12 +889,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const path = await import('path');
       
       // Use __dirname equivalent in ESM
-      const { fileURLToPath } = await import('url');
       const __filename = fileURLToPath(import.meta.url);
-      const __dirname = path.dirname(__filename);
+      const __dirname = dirname(__filename);
       
       // Use an absolute path to the entries.json file
-      const filePath = path.join(__dirname, './data/encyclopedia/entries.json');
+      const filePath = path.join(__dirname, '../data/encyclopedia/entries.json');
       const fileContent = await fs.readFile(filePath, 'utf-8');
       const entries = JSON.parse(fileContent);
       
@@ -910,12 +911,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const path = await import('path');
       
       // Use __dirname equivalent in ESM
-      const { fileURLToPath } = await import('url');
       const __filename = fileURLToPath(import.meta.url);
-      const __dirname = path.dirname(__filename);
+      const __dirname = dirname(__filename);
       
       // Use an absolute path to the entries.json file
-      const filePath = path.join(__dirname, './data/encyclopedia/entries.json');
+      const filePath = path.join(__dirname, '../data/encyclopedia/entries.json');
       const fileContent = await fs.readFile(filePath, 'utf-8');
       const entries = JSON.parse(fileContent);
       
@@ -939,12 +939,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const path = await import('path');
       
       // Use __dirname equivalent in ESM
-      const { fileURLToPath } = await import('url');
       const __filename = fileURLToPath(import.meta.url);
-      const __dirname = path.dirname(__filename);
+      const __dirname = dirname(__filename);
       
       // Use an absolute path to the entries.json file
-      const filePath = path.join(__dirname, './data/encyclopedia/entries.json');
+      const filePath = path.join(__dirname, '../data/encyclopedia/entries.json');
       const fileContent = await fs.readFile(filePath, 'utf-8');
       const entries = JSON.parse(fileContent);
       
@@ -985,12 +984,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const path = await import('path');
       
       // Use __dirname equivalent in ESM
-      const { fileURLToPath } = await import('url');
       const __filename = fileURLToPath(import.meta.url);
-      const __dirname = path.dirname(__filename);
+      const __dirname = dirname(__filename);
       
       // Use an absolute path to the entries.json file
-      const filePath = path.join(__dirname, './data/encyclopedia/entries.json');
+      const filePath = path.join(__dirname, '../data/encyclopedia/entries.json');
       const fileContent = await fs.readFile(filePath, 'utf-8');
       const entries = JSON.parse(fileContent);
       
