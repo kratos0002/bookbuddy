@@ -1,5 +1,7 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import type { Quote, QuoteTheme, QuoteExplorerData } from '@shared/schema';
 
 // Define interfaces for themeQuoteData to avoid using 'any'
@@ -48,28 +50,45 @@ class QuoteExplorerService {
    */
   private loadQuoteData(): void {
     try {
-      // Try to load from processed output file
-      const quoteExplorerPath = path.resolve('book_processing/output/1984_quote_explorer.json');
+      // Get the directory of the current module
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = dirname(__filename);
       
-      if (fs.existsSync(quoteExplorerPath)) {
-        const data = JSON.parse(fs.readFileSync(quoteExplorerPath, 'utf-8'));
-        this.processExplorerData(data);
-        this.initialized = true;
-        console.log(`[quote-explorer] Loaded quote explorer data with quotes for ${Object.keys(data.quotesByTheme).length} themes and ${Object.keys(data.quotesByCharacter).length} characters`);
-      } else {
-        // Load from raw quotes file if explorer data doesn't exist
-        const quotesPath = path.resolve('book_processing/output/1984_quotes.json');
-        
-        if (fs.existsSync(quotesPath)) {
-          const quotes = JSON.parse(fs.readFileSync(quotesPath, 'utf-8'));
-          this.quoteData = quotes;
-          this.initialized = true;
-          console.log(`[quote-explorer] Loaded ${quotes.length} raw quotes from BookNLP data`);
-        } else {
-          // Fall back to static sample data
-          this.loadSampleData();
-          console.log('[quote-explorer] Using sample quote data as BookNLP data files not found');
+      // Try multiple possible paths for the quote explorer data
+      const possiblePaths = [
+        // Development paths
+        path.resolve('book_processing/output/1984_quote_explorer.json'),
+        path.resolve(__dirname, '../../book_processing/output/1984_quote_explorer.json'),
+        // Production paths
+        path.resolve(__dirname, '../data/1984_quote_explorer.json'),
+        path.resolve(process.cwd(), 'data/1984_quote_explorer.json'),
+        path.resolve(process.cwd(), 'dist/data/1984_quote_explorer.json')
+      ];
+      
+      let quoteExplorerData = null;
+      let usedPath = '';
+      
+      // Try each path until we find the file
+      for (const filePath of possiblePaths) {
+        try {
+          if (fs.existsSync(filePath)) {
+            quoteExplorerData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+            usedPath = filePath;
+            console.log(`[quote-explorer] Successfully loaded data from: ${filePath}`);
+            break;
+          }
+        } catch (err) {
+          console.log(`[quote-explorer] Could not load from ${filePath}`);
         }
+      }
+      
+      if (quoteExplorerData) {
+        this.processExplorerData(quoteExplorerData);
+        this.initialized = true;
+        console.log(`[quote-explorer] Loaded quote explorer data with quotes for ${Object.keys(quoteExplorerData.quotesByTheme).length} themes and ${Object.keys(quoteExplorerData.quotesByCharacter).length} characters`);
+      } else {
+        console.log('[quote-explorer] No quote explorer data found, falling back to sample data');
+        this.loadSampleData();
       }
     } catch (error) {
       console.error('[quote-explorer] Error loading quote data:', error);

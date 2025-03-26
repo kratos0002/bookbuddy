@@ -11,6 +11,7 @@ import { useBook } from '@/contexts/BookContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { env } from '@/config/environment';
 
 // Types for the Quote Explorer data
 interface Quote {
@@ -150,7 +151,7 @@ const QuoteExplorerTab: React.FC = () => {
     queryFn: async () => {
       try {
         console.log('Fetching quotes explorer data from API...');
-        const data = await apiRequest('GET', 'http://localhost:3000/api/quotes/explorer-data');
+        const data = await apiRequest('GET', '/api/quotes/explorer-data');
         console.log('Successfully retrieved quotes explorer data:', data);
         return data;
       } catch (err) {
