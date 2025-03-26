@@ -288,11 +288,11 @@ const ConversationPageContent = () => {
               
               {/* Chat interface */}
               {!conversationId && !isLibrarianSelected ? (
-                <div className="p-6 border rounded-lg bg-white shadow-sm flex-1">
+                <div className="p-6 border rounded-lg bg-white shadow-sm flex-1 overflow-y-auto mb-20">
                   <h4 className="text-lg font-medium mb-4">Who would you like to chat with?</h4>
                   
                   {/* Librarian option */}
-                  <div className="mb-4">
+                  <div className="mb-6">
                     <Button
                       variant={isLibrarianSelected ? "default" : "outline"}
                       className="w-full justify-start bg-gradient-to-r from-amber-100 to-amber-50 border-amber-200 hover:from-amber-200 hover:to-amber-100 text-amber-900"
@@ -307,7 +307,7 @@ const ConversationPageContent = () => {
                     </p>
                   </div>
                   
-                  <div className="relative mb-4">
+                  <div className="relative mb-6">
                     <div className="absolute inset-0 flex items-center">
                       <span className="w-full border-t" />
                     </div>
@@ -317,13 +317,13 @@ const ConversationPageContent = () => {
                   </div>
                   
                   {/* Character grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
                     {Array.isArray(characters) && characters.length > 0 ? (
                       characters.map((char: Character) => (
                         <Button
                           key={char.id}
                           variant={selectedChatCharacter === char.id ? "default" : "outline"}
-                          className="w-full justify-start py-3"
+                          className="w-full justify-start py-4"
                           onClick={() => handleCharacterSelect(char.id)}
                           disabled={isCreatingConversation}
                         >
