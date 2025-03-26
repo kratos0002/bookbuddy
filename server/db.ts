@@ -1,26 +1,43 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
-import * as schema from "@shared/schema";
-import * as dotenv from 'dotenv';
-import * as fs from 'fs';
-import * as path from 'path';
+import { Sequelize } from 'sequelize';
+import { config } from './config';
 
-// Try to load environment variables from .env file
-const envPath = path.resolve(process.cwd(), '.env');
-if (fs.existsSync(envPath)) {
-  dotenv.config({ path: envPath });
-}
+// Create Sequelize instance based on environment
+export const sequelize = config.db.url && config.env === 'production'
+  ? new Sequelize(config.db.url, {
+      dialect: 'postgres',
+      dialectModule: require('pg'),
+      ssl: true,
+      logging: false,
+      pool: {
+        max: 5,
+        min: 0,
+        acquire: 30000,
+        idle: 10000
+      }
+    })
+  : new Sequelize({
+      dialect: 'postgres',
+      host: config.db.host,
+      port: config.db.port,
+      database: config.db.name,
+      username: config.db.user,
+      password: config.db.password,
+      logging: config.env === 'development' ? console.log : false,
+      pool: {
+        max: 5,
+        min: 0,
+        acquire: 30000,
+        idle: 10000
+      }
+    });
 
-neonConfig.webSocketConstructor = ws;
-
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?\n" +
-    "Make sure you have a .env file in the project root with DATABASE_URL defined.\n" +
-    "Current working directory: " + process.cwd()
-  );
-}
-
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle({ client: pool, schema });
+// Test the connection
+export const testConnection = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log('Database connection established successfully.');
+  } catch (error) {
+    console.error('Unable to connect to the database:', error);
+    process.exit(1);
+  }
+};
