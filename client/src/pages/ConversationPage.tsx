@@ -256,258 +256,248 @@ const ConversationPageContent = () => {
   };
 
   return (
-    <Layout>
-      <div className="h-full flex flex-col md:flex-row overflow-hidden relative">
-        {/* Big Brother watching overlay effect - appears briefly */}
-        {showEye && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 animate-fade-out pointer-events-none">
-            <div className="text-book-primary text-center">
-              <Eye size={60} className="mx-auto mb-4 animate-pulse-subtle" />
-              <p className="text-xl text-book-secondary typewriter">Big Brother is watching you...</p>
-            </div>
+    <div className="h-full flex flex-col md:flex-row overflow-hidden relative">
+      {/* Big Brother watching overlay effect - appears briefly */}
+      {showEye && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 animate-fade-out pointer-events-none">
+          <div className="text-book-primary text-center">
+            <Eye size={60} className="mx-auto mb-4 animate-pulse-subtle" />
+            <p className="text-xl text-book-secondary typewriter">Big Brother is watching you...</p>
           </div>
-        )}
+        </div>
+      )}
+    
+      {/* Left section - Book Cover (visible on mobile, hidden on larger screens) */}
+      <div className="md:hidden p-4 bg-gradient-to-b from-background to-muted/30">
+        <BookCover />
+      </div>
       
-        {/* Left section - Book Cover (visible on mobile, hidden on larger screens) */}
-        <div className="md:hidden p-4 bg-gradient-to-b from-background to-muted/30">
+      {/* Middle section - Chat interface (main content) */}
+      <div className="flex-1 flex flex-col overflow-hidden relative">
+        <div className="hidden md:block absolute top-0 left-0 m-6 z-10">
           <BookCover />
         </div>
         
-        {/* Middle section - Chat interface (main content) */}
-        <div className="flex-1 flex flex-col overflow-hidden relative">
-          <div className="hidden md:block absolute top-0 left-0 m-6 z-10">
-            <BookCover />
-          </div>
-          
-          <div className="flex-1 flex flex-col p-4 overflow-hidden">
-            <div className="flex-1 mt-12 relative z-0 big-brother-watching">
-              <div className="w-full h-full flex flex-col">
-                <h2 className="text-2xl font-bold tracking-tight mb-4 text-[#8b2439] flex items-center gap-2">
-                  <MessageCircle size={20} className="text-[#8b2439]/70" />
-                  1984 Characters
-                </h2>
-                
-                {/* Chat interface */}
-                {!conversationId && !isLibrarianSelected ? (
-                  <div className="p-6 border rounded-lg bg-white/90 shadow-md flex-1">
-                    <h4 className="text-lg font-medium mb-4">Who would you like to chat with?</h4>
-                    
-                    {/* Librarian option */}
-                    <div className="mb-6">
-                      <Button
-                        variant={isLibrarianSelected ? "default" : "outline"}
-                        className="w-full justify-start bg-gradient-to-r from-[#8b2439]/10 to-[#8b2439]/5 border-[#8b2439]/20 hover:from-[#8b2439]/20 hover:to-[#8b2439]/10 text-[#8b2439] py-6"
-                        onClick={() => handleCharacterSelect(null)}
-                        disabled={isCreatingConversation}
-                      >
-                        <BookText className="mr-3 h-5 w-5" />
-                        <span className="text-base">AI Librarian</span>
-                      </Button>
-                      <p className="text-xs text-muted-foreground mt-2 ml-1">
-                        Chat with a knowledgeable librarian about themes, analysis, and literary context
-                      </p>
+        <div className="flex-1 flex flex-col p-4 overflow-hidden">
+          <div className="flex-1 mt-12 relative z-0 big-brother-watching">
+            <div className="w-full h-full flex flex-col">
+              <h2 className="text-2xl font-bold tracking-tight mb-4 text-book-primary flex items-center gap-2">
+                <MessageCircle size={20} className="text-book-primary/70" />
+                Chat with {selectedBook.title} Characters
+              </h2>
+              
+              {/* Chat interface */}
+              {!conversationId && !isLibrarianSelected ? (
+                <div className="p-6 border rounded-lg bg-white shadow-sm flex-1">
+                  <h4 className="text-lg font-medium mb-4">Who would you like to chat with?</h4>
+                  
+                  {/* Librarian option */}
+                  <div className="mb-4">
+                    <Button
+                      variant={isLibrarianSelected ? "default" : "outline"}
+                      className="w-full justify-start bg-gradient-to-r from-amber-100 to-amber-50 border-amber-200 hover:from-amber-200 hover:to-amber-100 text-amber-900"
+                      onClick={() => handleCharacterSelect(null)}
+                      disabled={isCreatingConversation}
+                    >
+                      <BookText className="mr-2 h-4 w-4" />
+                      Alexandria, the AI Librarian
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-1 ml-1">
+                      Chat with a knowledgeable librarian about themes, analysis, and literary context
+                    </p>
+                  </div>
+                  
+                  <div className="relative mb-4">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t" />
                     </div>
-                    
-                    <div className="relative mb-6">
-                      <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t" />
-                      </div>
-                      <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-white px-2 text-muted-foreground">or select a character</span>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {Array.isArray(characters) && characters.length > 0 ? (
-                        characters.map((char: Character) => (
-                          <Button
-                            key={char.id}
-                            variant={selectedChatCharacter === char.id ? "default" : "outline"}
-                            className={`w-full justify-start py-5 ${
-                              selectedChatCharacter === char.id 
-                                ? 'bg-[#8b2439] hover:bg-[#8b2439]/90 text-white' 
-                                : 'border-[#8b2439]/20 text-[#8b2439] hover:bg-[#8b2439]/10'
-                            }`}
-                            onClick={() => handleCharacterSelect(char.id)}
-                            disabled={isCreatingConversation}
-                          >
-                            <User className="mr-3 h-5 w-5" />
-                            <span className="text-base">{char.name || `Character ${char.id}`}</span>
-                          </Button>
-                        ))
-                      ) : (
-                        <div className="col-span-full text-center p-6 border rounded bg-white/80">
-                          {isLoadingCharacters ? (
-                            <div className="flex flex-col items-center justify-center space-y-2">
-                              <div className="w-6 h-6 border-2 border-[#8b2439] border-t-transparent rounded-full animate-spin"></div>
-                              <p>Loading characters...</p>
-                            </div>
-                          ) : (
-                            <div>
-                              <p className="mb-2">No characters found. API call information:</p>
-                              <code className="bg-muted p-1 rounded text-xs block mb-2">GET /api/books/{apiBookId}/characters</code>
-                              <p className="text-sm text-muted-foreground mb-2">Attempting to fetch characters...</p>
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => {
-                                  queryClient.invalidateQueries({ queryKey: [`/api/books/${apiBookId}/characters`] });
-                                }}
-                              >
-                                Retry
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      )}
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-white px-2 text-muted-foreground">or select a character</span>
                     </div>
                   </div>
-                ) : (
-                  <>
-                    {/* If librarian is selected, use the SimpleLibrarian component */}
-                    {isLibrarianSelected ? (
-                      <div className="flex flex-col h-full">
-                        <div className="p-2 bg-muted border mb-4 rounded-md flex items-center">
-                          <h4 className="font-medium">
-                            Chatting with Alexandria, the AI Librarian
-                          </h4>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="ml-auto"
-                            onClick={() => {
-                              setConversationId(null);
-                              setIsLibrarianSelected(false);
-                            }}
-                          >
-                            New Chat
-                          </Button>
-                        </div>
-                        <div className="flex-1">
-                          <SimpleLibrarian />
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col h-full">
-                        {/* Character chat header */}
-                        <div className="p-2 bg-muted border mb-4 rounded-md flex items-center">
-                          <h4 className="font-medium">
-                            {selectedChatCharacter
-                              ? `Chatting with ${characters?.find(c => c.id === selectedChatCharacter)?.name || "Character"}`
-                              : "Select a character to chat with"}
-                          </h4>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="ml-auto"
-                            onClick={() => setConversationId(null)}
-                          >
-                            New Chat
-                          </Button>
-                        </div>
-
-                        {/* Messages display */}
-                        <div 
-                          className="flex-1 overflow-y-auto mb-4"
-                          ref={messagesContainerRef}
+                  
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {Array.isArray(characters) && characters.length > 0 ? (
+                      characters.map((char: Character) => (
+                        <Button
+                          key={char.id}
+                          variant={selectedChatCharacter === char.id ? "default" : "outline"}
+                          className="w-full justify-start"
+                          onClick={() => handleCharacterSelect(char.id)}
+                          disabled={isCreatingConversation}
                         >
-                          {messages?.map((message, i) => (
-                            <div
-                              key={i}
-                              className={`mb-4 flex items-start ${
-                                message.isUserMessage ? "justify-end" : "justify-start"
-                              }`}
+                          {char.name || `Character ${char.id}`}
+                        </Button>
+                      ))
+                    ) : (
+                      <div className="col-span-full text-center p-4 border rounded">
+                        {isLoadingCharacters ? (
+                          "Loading characters..."
+                        ) : (
+                          <div>
+                            <p className="mb-2">No characters found. API call information:</p>
+                            <code className="bg-muted p-1 rounded text-xs block mb-2">GET /api/books/{apiBookId}/characters</code>
+                            <p className="text-sm text-muted-foreground mb-2">Attempting to fetch characters...</p>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => {
+                                queryClient.invalidateQueries({ queryKey: [`/api/books/${apiBookId}/characters`] });
+                              }}
                             >
-                              <div
-                                className={`rounded-lg p-3 max-w-[80%] ${
-                                  message.isUserMessage
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-muted"
-                                }`}
-                              >
-                                {message.content}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Suggestion Panel */}
-                        <SuggestionPanel
-                          characterId={selectedChatCharacter}
-                          messageCount={messages?.length || 0}
-                          onSuggestionClick={handleSuggestionClick}
-                          minimized={suggestionsMinimized}
-                          onToggleMinimize={() => setSuggestionsMinimized(!suggestionsMinimized)}
-                          className="mt-auto"
-                        />
-
-                        {/* Message input form */}
-                        <form onSubmit={(e) => {
-                          e.preventDefault();
-                          console.log("Form submitted, sending message");
-                          sendMessage();
-                        }} className="mt-auto">
-                          <div className="flex gap-2">
-                            <Input
-                              value={message}
-                              onChange={(e) => setMessage(e.target.value)}
-                              placeholder="Type your message..."
-                              className="flex-1"
-                            />
-                            <Button type="submit" disabled={isCreatingConversation}>
-                              {isCreatingConversation ? "Loading..." : "Send"}
+                              Retry
                             </Button>
                           </div>
-                        </form>
+                        )}
                       </div>
                     )}
-                  </>
-                )}
-              </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* If librarian is selected, use the SimpleLibrarian component */}
+                  {isLibrarianSelected ? (
+                    <div className="flex flex-col h-full">
+                      <div className="p-2 bg-muted border mb-4 rounded-md flex items-center">
+                        <h4 className="font-medium">
+                          Chatting with Alexandria, the AI Librarian
+                        </h4>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="ml-auto"
+                          onClick={() => {
+                            setConversationId(null);
+                            setIsLibrarianSelected(false);
+                          }}
+                        >
+                          New Chat
+                        </Button>
+                      </div>
+                      <div className="flex-1">
+                        <SimpleLibrarian />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col h-full">
+                      {/* Character chat header */}
+                      <div className="p-2 bg-muted border mb-4 rounded-md flex items-center">
+                        <h4 className="font-medium">
+                          {selectedChatCharacter
+                            ? `Chatting with ${characters?.find(c => c.id === selectedChatCharacter)?.name || "Character"}`
+                            : "Select a character to chat with"}
+                        </h4>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="ml-auto"
+                          onClick={() => setConversationId(null)}
+                        >
+                          New Chat
+                        </Button>
+                      </div>
+
+                      {/* Messages display */}
+                      <div 
+                        className="flex-1 overflow-y-auto mb-4"
+                        ref={messagesContainerRef}
+                      >
+                        {messages?.map((message, i) => (
+                          <div
+                            key={i}
+                            className={`mb-4 flex items-start ${
+                              message.isUserMessage ? "justify-end" : "justify-start"
+                            }`}
+                          >
+                            <div
+                              className={`rounded-lg p-3 max-w-[80%] ${
+                                message.isUserMessage
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-muted"
+                              }`}
+                            >
+                              {message.content}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Suggestion Panel */}
+                      <SuggestionPanel
+                        characterId={selectedChatCharacter}
+                        messageCount={messages?.length || 0}
+                        onSuggestionClick={handleSuggestionClick}
+                        minimized={suggestionsMinimized}
+                        onToggleMinimize={() => setSuggestionsMinimized(!suggestionsMinimized)}
+                        className="mt-auto"
+                      />
+
+                      {/* Message input form */}
+                      <form onSubmit={(e) => {
+                        e.preventDefault();
+                        console.log("Form submitted, sending message");
+                        sendMessage();
+                      }} className="mt-auto">
+                        <div className="flex gap-2">
+                          <Input
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            placeholder="Type your message..."
+                            className="flex-1"
+                          />
+                          <Button type="submit" disabled={isCreatingConversation}>
+                            {isCreatingConversation ? "Loading..." : "Send"}
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
-        
-        {/* Right section - Context panel (hidden on mobile) */}
-        <div 
-          className={`fixed inset-y-0 right-0 transform transition-transform duration-300 ease-in-out md:relative z-40 w-full md:w-96 md:translate-x-0 ${
-            contextOpen ? 'translate-x-0' : 'translate-x-full'
-          }`}
-        >
-          <ContextPanel />
-          <Button
-            className="absolute top-2 left-2 md:hidden z-50"
-            size="sm"
-            variant="outline"
-            onClick={() => setContextOpen(false)}
-          >
-            <X size={16} />
-          </Button>
-        </div>
-
-        {/* Button to open context panel on mobile */}
-        <Button
-          className={`fixed bottom-4 right-4 md:hidden z-30 ${contextOpen ? 'hidden' : ''}`}
-          size="sm"
-          onClick={() => setContextOpen(true)}
-        >
-          <BookText size={16} className="mr-1" /> Context
-        </Button>
-        
-        {/* Encyclopedia unlocked notification */}
-        {recentlyUnlocked && (
-          <EntryUnlockedNotification 
-            entry={recentlyUnlocked}
-            onView={() => {
-              setContextOpen(true);
-              selectEntry(recentlyUnlocked.id);
-              setRecentlyUnlocked(null);
-            }}
-            onDismiss={() => setRecentlyUnlocked(null)}
-          />
-        )}
       </div>
-    </Layout>
+      
+      {/* Right section - Context panel (hidden on mobile) */}
+      <div 
+        className={`fixed inset-y-0 right-0 transform transition-transform duration-300 ease-in-out md:relative z-40 w-full md:w-96 md:translate-x-0 ${
+          contextOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <ContextPanel />
+        <Button
+          className="absolute top-2 left-2 md:hidden z-50"
+          size="sm"
+          variant="outline"
+          onClick={() => setContextOpen(false)}
+        >
+          <X size={16} />
+        </Button>
+      </div>
+
+      {/* Button to open context panel on mobile */}
+      <Button
+        className={`fixed bottom-4 right-4 md:hidden z-30 ${contextOpen ? 'hidden' : ''}`}
+        size="sm"
+        onClick={() => setContextOpen(true)}
+      >
+        <BookText size={16} className="mr-1" /> Context
+      </Button>
+      
+      {/* Encyclopedia unlocked notification */}
+      {recentlyUnlocked && (
+        <EntryUnlockedNotification 
+          entry={recentlyUnlocked}
+          onView={() => {
+            setContextOpen(true);
+            selectEntry(recentlyUnlocked.id);
+            setRecentlyUnlocked(null);
+          }}
+          onDismiss={() => setRecentlyUnlocked(null)}
+        />
+      )}
+    </div>
   );
 };
 
