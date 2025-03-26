@@ -36,6 +36,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register health check route
   app.use('/api/health', healthRoutes);
 
+  // Quote Explorer API
+  app.get("/api/quotes/explorer-data", async (req, res) => {
+    try {
+      if (!quoteExplorerService.isInitialized()) {
+        return res.status(503).json({ 
+          error: "Quote explorer service is not initialized" 
+        });
+      }
+      
+      const explorerData = quoteExplorerService.getQuoteExplorerData();
+      res.json(explorerData);
+    } catch (error) {
+      console.error("[quote-explorer] API error:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch quote explorer data",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
   // Simple Librarian API
   app.post("/api/simple-librarian", async (req, res) => {
     try {
