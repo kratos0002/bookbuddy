@@ -36,8 +36,9 @@ import {
   type QuoteExplorerData
 } from "@shared/schema";
 
-import { db } from "./db";
+import { sequelize } from "./db";
 import { eq, and, inArray } from "drizzle-orm";
+import { Sequelize, QueryTypes } from 'sequelize';
 
 import {
   bookData,
@@ -123,408 +124,151 @@ export interface IStorage {
   createMessage(message: InsertMessage): Promise<Message>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private books: Map<number, Book>;
-  private chapters: Map<number, Chapter[]>;
-  private keyEvents: Map<number, KeyEvent[]>;
-  private themes: Map<number, Theme[]>;
-  private themeQuotes: Map<number, ThemeQuote[]>;
-  private themeIntensities: Map<number, ThemeIntensity[]>;
-  private characters: Map<number, Character[]>;
-  private relationships: Map<number, Relationship[]>;
-  private aiAnalyses: Map<number, AiAnalysis[]>;
-  private characterNetworks: Map<number, GraphData>;
-  private narrativeDataMap: Map<number, NarrativeData>;
-  private themeHeatmaps: Map<number, ThemeHeatmapData>;
-  
-  // New conversation-related maps
-  private characterPersonas: Map<number, CharacterPersona>;
-  private librarianPersonas: Map<number, LibrarianPersona>;
-  private conversations: Map<number, Conversation>;
-  private messages: Map<number, Message[]>;
-  
-  currentId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.books = new Map();
-    this.chapters = new Map();
-    this.keyEvents = new Map();
-    this.themes = new Map();
-    this.themeQuotes = new Map();
-    this.themeIntensities = new Map();
-    this.characters = new Map();
-    this.relationships = new Map();
-    this.aiAnalyses = new Map();
-    this.characterNetworks = new Map();
-    this.narrativeDataMap = new Map();
-    this.themeHeatmaps = new Map();
-    
-    // Initialize conversation-related maps
-    this.characterPersonas = new Map();
-    this.librarianPersonas = new Map();
-    this.conversations = new Map();
-    this.messages = new Map();
-    
-    this.currentId = 1;
-    
-    // Initialize with mock data
-    this.initializeWithMockData();
-  }
-  
-  private initializeWithMockData(): void {
-    // Add book data
-    this.books.set(bookData.id, bookData);
-    
-    // Add chapter data
-    this.chapters.set(bookData.id, chapterData);
-    
-    // Add key events
-    this.keyEvents.set(bookData.id, keyEventData);
-    
-    // Add themes
-    this.themes.set(bookData.id, themeData);
-    
-    // Add theme quotes
-    themeData.forEach(theme => {
-      const quotes = themeQuoteData.filter(quote => quote.themeId === theme.id);
-      this.themeQuotes.set(theme.id, quotes);
-    });
-    
-    // Add theme intensities
-    this.themeIntensities.set(bookData.id, themeIntensityData);
-    
-    // Add characters
-    this.characters.set(bookData.id, characterData);
-    
-    // Add relationships
-    this.relationships.set(bookData.id, relationshipData);
-    
-    // Add AI analyses
-    this.aiAnalyses.set(bookData.id, aiAnalysisData);
-    
-    // Add character network data
-    this.characterNetworks.set(bookData.id, characterNetworkData);
-    
-    // Add narrative data
-    this.narrativeDataMap.set(bookData.id, narrativeData);
-    
-    // Add theme heatmap data
-    this.themeHeatmaps.set(bookData.id, themeHeatmapData);
-    
-    // Add character personas
-    if (characterPersonaData) {
-      characterPersonaData.forEach(persona => {
-        this.characterPersonas.set(persona.id, persona);
-      });
-    }
-    
-    // Add librarian personas
-    if (librarianPersonaData) {
-      librarianPersonaData.forEach(persona => {
-        this.librarianPersonas.set(persona.id, persona);
-      });
-    }
-    
-    // Add conversations and messages
-    if (conversationData) {
-      conversationData.forEach(conversation => {
-        this.conversations.set(conversation.id, conversation);
-      });
-    }
-    
-    if (messageData) {
-      const messagesByConversation = messageData.reduce((acc, message) => {
-        if (!acc.has(message.conversationId)) {
-          acc.set(message.conversationId, []);
-        }
-        acc.get(message.conversationId)?.push(message);
-        return acc;
-      }, new Map<number, Message[]>());
-      
-      messagesByConversation.forEach((messages, conversationId) => {
-        this.messages.set(conversationId, messages);
-      });
-    }
-  }
-
+export class DatabaseStorage implements IStorage {
   // User methods
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const rows = await sequelize.query<User>(
+      `SELECT * FROM users WHERE id = ${id};`,
+      { type: QueryTypes.SELECT }
+    );
+    return rows[0] as User | undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
+    const rows = await sequelize.query<User>(
+      `SELECT * FROM users WHERE username = '${username}';`,
+      { type: QueryTypes.SELECT }
     );
+    return rows[0] as User | undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+    const rows = await sequelize.query<User>(
+      `INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *;`,
+      {
+        type: QueryTypes.SELECT,
+        bind: [insertUser.username, insertUser.password]
+      }
+    );
+    if (!rows[0]) throw new Error('Failed to create user');
+    return rows[0] as User;
   }
   
   // Book methods
   async getBook(id: number): Promise<Book | undefined> {
-    return this.books.get(id);
+    const rows = await sequelize.query<Book>(
+      `SELECT * FROM books WHERE id = ${id};`,
+      { type: QueryTypes.SELECT }
+    );
+    return rows[0] as Book | undefined;
   }
   
   async getAllBooks(): Promise<Book[]> {
-    return Array.from(this.books.values());
+    const rows = await sequelize.query<Book>(
+      `SELECT * FROM books;`,
+      { type: QueryTypes.SELECT }
+    );
+    return rows as Book[];
   }
   
   // Chapter methods
   async getChaptersByBookId(bookId: number): Promise<Chapter[]> {
-    return this.chapters.get(bookId) || [];
+    const rows = await sequelize.query<Chapter>(
+      `SELECT * FROM chapters WHERE bookId = ${bookId};`,
+      { type: QueryTypes.SELECT }
+    );
+    return rows as Chapter[];
   }
   
   // KeyEvent methods
   async getKeyEventsByBookId(bookId: number): Promise<KeyEvent[]> {
-    return this.keyEvents.get(bookId) || [];
+    const rows = await sequelize.query<KeyEvent>(
+      `SELECT * FROM keyEvents WHERE bookId = ${bookId};`,
+      { type: QueryTypes.SELECT }
+    );
+    return rows as KeyEvent[];
   }
   
   // Theme methods
   async getThemesByBookId(bookId: number): Promise<Theme[]> {
-    return this.themes.get(bookId) || [];
+    const rows = await sequelize.query<Theme>(
+      `SELECT * FROM themes WHERE bookId = ${bookId};`,
+      { type: QueryTypes.SELECT }
+    );
+    return rows as Theme[];
   }
   
   async getThemeById(id: number): Promise<Theme | undefined> {
-    for (const themes of Array.from(this.themes.values())) {
-      const theme = themes.find((t: Theme) => t.id === id);
-      if (theme) return theme;
-    }
-    return undefined;
+    const rows = await sequelize.query<Theme>(
+      `SELECT * FROM themes WHERE id = ${id};`,
+      { type: QueryTypes.SELECT }
+    );
+    return rows[0] as Theme | undefined;
   }
   
   // ThemeQuote methods
   async getQuotesByThemeId(themeId: number): Promise<ThemeQuote[]> {
-    return this.themeQuotes.get(themeId) || [];
+    const rows = await sequelize.query<ThemeQuote>(
+      `SELECT * FROM themeQuotes WHERE themeId = ${themeId};`,
+      { type: QueryTypes.SELECT }
+    );
+    return rows as ThemeQuote[];
   }
   
   // ThemeIntensity methods
   async getThemeIntensitiesByBookId(bookId: number): Promise<ThemeIntensity[]> {
-    return this.themeIntensities.get(bookId) || [];
+    const themeIds = await sequelize.query<{ id: number }>(
+      `SELECT id FROM themes WHERE bookId = ${bookId};`,
+      { type: QueryTypes.SELECT }
+    );
+    
+    if (themeIds.length === 0) return [];
+    
+    const rows = await sequelize.query<ThemeIntensity>(
+      `SELECT * FROM themeIntensities WHERE themeId IN (${themeIds.map(t => t.id).join(',')});`,
+      { type: QueryTypes.SELECT }
+    );
+    return rows as ThemeIntensity[];
   }
   
   // Character methods
   async getCharactersByBookId(bookId: number): Promise<Character[]> {
-    return this.characters.get(bookId) || [];
+    const rows = await sequelize.query<Character>(
+      `SELECT * FROM characters WHERE bookId = ${bookId};`,
+      { type: QueryTypes.SELECT }
+    );
+    return rows as Character[];
   }
   
   async getCharacterById(id: number): Promise<Character | undefined> {
-    for (const characters of Array.from(this.characters.values())) {
-      const character = characters.find((c: Character) => c.id === id);
-      if (character) return character;
-    }
-    return undefined;
+    const rows = await sequelize.query<Character>(
+      `SELECT * FROM characters WHERE id = ${id};`,
+      { type: QueryTypes.SELECT }
+    );
+    return rows[0] as Character | undefined;
   }
   
   // Relationship methods
   async getRelationshipsByBookId(bookId: number): Promise<Relationship[]> {
-    return this.relationships.get(bookId) || [];
+    const rows = await sequelize.query<Relationship>(
+      `SELECT * FROM relationships WHERE bookId = ${bookId};`,
+      { type: QueryTypes.SELECT }
+    );
+    return rows as Relationship[];
   }
   
   // AI Analysis methods
   async getAiAnalysisByBookId(bookId: number): Promise<AiAnalysis[]> {
-    return this.aiAnalyses.get(bookId) || [];
+    const rows = await sequelize.query<AiAnalysis>(
+      `SELECT * FROM aiAnalyses WHERE bookId = ${bookId};`,
+      { type: QueryTypes.SELECT }
+    );
+    return rows as AiAnalysis[];
   }
   
   async getAiAnalysisBySection(bookId: number, section: string): Promise<AiAnalysis | undefined> {
     const analyses = await this.getAiAnalysisByBookId(bookId);
     return analyses.find(a => a.sectionName === section);
-  }
-  
-  // Visualization data methods
-  async getCharacterNetworkData(bookId: number): Promise<GraphData> {
-    return this.characterNetworks.get(bookId) || { nodes: [], links: [] };
-  }
-  
-  async getNarrativeData(bookId: number): Promise<NarrativeData> {
-    return this.narrativeDataMap.get(bookId) || { chapters: [] };
-  }
-  
-  async getThemeHeatmapData(bookId: number): Promise<ThemeHeatmapData> {
-    return this.themeHeatmaps.get(bookId) || { themes: [], chapters: [], intensities: [] };
-  }
-  
-  // Character Persona methods
-  async getCharacterPersonas(): Promise<CharacterPersona[]> {
-    return Array.from(this.characterPersonas.values());
-  }
-  
-  async getCharacterPersonaById(id: number): Promise<CharacterPersona | undefined> {
-    return this.characterPersonas.get(id);
-  }
-  
-  async getCharacterPersonaByCharacterId(characterId: number): Promise<CharacterPersona | undefined> {
-    return Array.from(this.characterPersonas.values()).find(
-      (persona) => persona.characterId === characterId
-    );
-  }
-  
-  // Librarian Persona methods
-  async getLibrarianPersonas(): Promise<LibrarianPersona[]> {
-    return Array.from(this.librarianPersonas.values());
-  }
-  
-  async getLibrarianPersonaById(id: number): Promise<LibrarianPersona | undefined> {
-    return this.librarianPersonas.get(id);
-  }
-  
-  async getLibrarianPersonaByBookId(bookId: number): Promise<LibrarianPersona | undefined> {
-    return Array.from(this.librarianPersonas.values()).find(
-      (persona) => persona.bookId === bookId
-    );
-  }
-  
-  // Conversation methods
-  async getConversations(): Promise<Conversation[]> {
-    return Array.from(this.conversations.values());
-  }
-  
-  async getConversationById(id: number): Promise<Conversation | undefined> {
-    return this.conversations.get(id);
-  }
-  
-  async createConversation(insertConversation: InsertConversation): Promise<Conversation> {
-    const id = this.currentId++;
-    // Add current timestamp for timestamps
-    const now = new Date();
-    const conversation: Conversation = { 
-      ...insertConversation, 
-      id,
-      startedAt: now,
-      updatedAt: now,
-      isLibrarianPresent: insertConversation.isLibrarianPresent ?? false
-    };
-    this.conversations.set(id, conversation);
-    this.messages.set(id, []); // Initialize empty message array for this conversation
-    return conversation;
-  }
-  
-  // Message methods
-  async getMessagesByConversationId(conversationId: number): Promise<Message[]> {
-    return this.messages.get(conversationId) || [];
-  }
-  
-  async createMessage(insertMessage: InsertMessage): Promise<Message> {
-    const id = this.currentId++;
-    // Add current timestamp
-    const now = new Date();
-    const message: Message = { 
-      ...insertMessage, 
-      id,
-      sentAt: now,
-      sentimentScore: insertMessage.sentimentScore ?? null,
-      senderId: insertMessage.senderId ?? null,
-      relevantThemeIds: insertMessage.relevantThemeIds ?? [],
-      relevantQuoteIds: insertMessage.relevantQuoteIds ?? []
-    };
-    
-    // Add message to the conversation's message list
-    const conversationMessages = this.messages.get(message.conversationId) || [];
-    conversationMessages.push(message);
-    this.messages.set(message.conversationId, conversationMessages);
-    
-    return message;
-  }
-}
-
-export class DatabaseStorage implements IStorage {
-  // User methods
-  async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user || undefined;
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
-    return user;
-  }
-  
-  // Book methods
-  async getBook(id: number): Promise<Book | undefined> {
-    const [book] = await db.select().from(books).where(eq(books.id, id));
-    return book || undefined;
-  }
-  
-  async getAllBooks(): Promise<Book[]> {
-    return db.select().from(books);
-  }
-  
-  // Chapter methods
-  async getChaptersByBookId(bookId: number): Promise<Chapter[]> {
-    return db.select().from(chapters).where(eq(chapters.bookId, bookId));
-  }
-  
-  // KeyEvent methods
-  async getKeyEventsByBookId(bookId: number): Promise<KeyEvent[]> {
-    return db.select().from(keyEvents).where(eq(keyEvents.bookId, bookId));
-  }
-  
-  // Theme methods
-  async getThemesByBookId(bookId: number): Promise<Theme[]> {
-    return db.select().from(themes).where(eq(themes.bookId, bookId));
-  }
-  
-  async getThemeById(id: number): Promise<Theme | undefined> {
-    const [theme] = await db.select().from(themes).where(eq(themes.id, id));
-    return theme || undefined;
-  }
-  
-  // ThemeQuote methods
-  async getQuotesByThemeId(themeId: number): Promise<ThemeQuote[]> {
-    return db.select().from(themeQuotes).where(eq(themeQuotes.themeId, themeId));
-  }
-  
-  // ThemeIntensity methods
-  async getThemeIntensitiesByBookId(bookId: number): Promise<ThemeIntensity[]> {
-    // We need to join with themes to get intensities by book ID
-    const themeIds = await db.select({ id: themes.id })
-      .from(themes)
-      .where(eq(themes.bookId, bookId));
-    
-    if (themeIds.length === 0) return [];
-    
-    return db.select().from(themeIntensities)
-      .where(inArray(themeIntensities.themeId, themeIds.map((t: {id: number}) => t.id)));
-  }
-  
-  // Character methods
-  async getCharactersByBookId(bookId: number): Promise<Character[]> {
-    return db.select().from(characters).where(eq(characters.bookId, bookId));
-  }
-  
-  async getCharacterById(id: number): Promise<Character | undefined> {
-    const [character] = await db.select().from(characters).where(eq(characters.id, id));
-    return character || undefined;
-  }
-  
-  // Relationship methods
-  async getRelationshipsByBookId(bookId: number): Promise<Relationship[]> {
-    return db.select().from(relationships).where(eq(relationships.bookId, bookId));
-  }
-  
-  // AI Analysis methods
-  async getAiAnalysisByBookId(bookId: number): Promise<AiAnalysis[]> {
-    return db.select().from(aiAnalyses).where(eq(aiAnalyses.bookId, bookId));
-  }
-  
-  async getAiAnalysisBySection(bookId: number, section: string): Promise<AiAnalysis | undefined> {
-    const [analysis] = await db.select().from(aiAnalyses)
-      .where(and(
-        eq(aiAnalyses.bookId, bookId),
-        eq(aiAnalyses.sectionName, section)
-      ));
-    return analysis || undefined;
   }
   
   // Visualization data methods
@@ -551,61 +295,149 @@ export class DatabaseStorage implements IStorage {
   
   // Character Persona methods
   async getCharacterPersonas(): Promise<CharacterPersona[]> {
-    return db.select().from(characterPersonas);
+    const rows = await sequelize.query<CharacterPersona>(
+      `SELECT * FROM characterPersonas;`,
+      { type: QueryTypes.SELECT }
+    );
+    return rows as CharacterPersona[];
   }
   
   async getCharacterPersonaById(id: number): Promise<CharacterPersona | undefined> {
-    const [persona] = await db.select().from(characterPersonas).where(eq(characterPersonas.id, id));
-    return persona || undefined;
+    const rows = await sequelize.query<CharacterPersona>(
+      `SELECT * FROM characterPersonas WHERE id = ${id};`,
+      { type: QueryTypes.SELECT }
+    );
+    return rows[0] as CharacterPersona | undefined;
   }
   
   async getCharacterPersonaByCharacterId(characterId: number): Promise<CharacterPersona | undefined> {
-    const [persona] = await db.select().from(characterPersonas)
-      .where(eq(characterPersonas.characterId, characterId));
-    return persona || undefined;
+    const rows = await sequelize.query<CharacterPersona>(
+      `SELECT * FROM characterPersonas WHERE characterId = ${characterId};`,
+      { type: QueryTypes.SELECT }
+    );
+    return rows[0] as CharacterPersona | undefined;
   }
   
   // Librarian Persona methods
   async getLibrarianPersonas(): Promise<LibrarianPersona[]> {
-    return db.select().from(librarianPersonas);
+    const rows = await sequelize.query<LibrarianPersona>(
+      `SELECT * FROM librarianPersonas;`,
+      { type: QueryTypes.SELECT }
+    );
+    return rows as LibrarianPersona[];
   }
   
   async getLibrarianPersonaById(id: number): Promise<LibrarianPersona | undefined> {
-    const [persona] = await db.select().from(librarianPersonas).where(eq(librarianPersonas.id, id));
-    return persona || undefined;
+    const rows = await sequelize.query<LibrarianPersona>(
+      `SELECT * FROM librarianPersonas WHERE id = ${id};`,
+      { type: QueryTypes.SELECT }
+    );
+    return rows[0] as LibrarianPersona | undefined;
   }
   
   async getLibrarianPersonaByBookId(bookId: number): Promise<LibrarianPersona | undefined> {
-    const [persona] = await db.select().from(librarianPersonas)
-      .where(eq(librarianPersonas.bookId, bookId));
-    return persona || undefined;
+    const rows = await sequelize.query<LibrarianPersona>(
+      `SELECT * FROM librarianPersonas WHERE bookId = ${bookId};`,
+      { type: QueryTypes.SELECT }
+    );
+    return rows[0] as LibrarianPersona | undefined;
   }
   
   // Conversation methods
   async getConversations(): Promise<Conversation[]> {
-    return db.select().from(conversations);
+    const rows = await sequelize.query<Conversation>(
+      `SELECT * FROM conversations;`,
+      { type: QueryTypes.SELECT }
+    );
+    return rows.map(row => ({
+      ...row,
+      startedAt: new Date(row.startedAt),
+      updatedAt: new Date(row.updatedAt)
+    })) as Conversation[];
   }
   
   async getConversationById(id: number): Promise<Conversation | undefined> {
-    const [conversation] = await db.select().from(conversations).where(eq(conversations.id, id));
-    return conversation || undefined;
+    const rows = await sequelize.query<Conversation>(
+      `SELECT * FROM conversations WHERE id = ${id};`,
+      { type: QueryTypes.SELECT }
+    );
+    const row = rows[0];
+    if (!row) return undefined;
+    return {
+      ...row,
+      startedAt: new Date(row.startedAt),
+      updatedAt: new Date(row.updatedAt)
+    } as Conversation;
   }
   
-  async createConversation(insertConversation: InsertConversation): Promise<Conversation> {
-    const [conversation] = await db.insert(conversations).values(insertConversation).returning();
-    return conversation;
+  async createConversation(input: InsertConversation): Promise<Conversation> {
+    const now = new Date();
+    const rows = await sequelize.query<Conversation>(
+      `INSERT INTO conversations (
+        title, bookId, userId, characterIds, conversationMode, isLibrarianPresent, startedAt, updatedAt
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;`,
+      {
+        type: QueryTypes.SELECT,
+        bind: [
+          input.title,
+          input.bookId,
+          input.userId,
+          JSON.stringify(input.characterIds),
+          input.conversationMode,
+          input.isLibrarianPresent ?? false,
+          now.toISOString(),
+          now.toISOString()
+        ]
+      }
+    );
+    const row = rows[0];
+    if (!row) throw new Error('Failed to create conversation');
+    return {
+      ...row,
+      startedAt: new Date(row.startedAt),
+      updatedAt: new Date(row.updatedAt)
+    } as Conversation;
   }
   
   // Message methods
   async getMessagesByConversationId(conversationId: number): Promise<Message[]> {
-    return db.select().from(messages)
-      .where(eq(messages.conversationId, conversationId))
-      .orderBy(messages.sentAt);
+    const rows = await sequelize.query<Message>(
+      `SELECT * FROM messages WHERE conversationId = ${conversationId} ORDER BY sentAt;`,
+      { type: QueryTypes.SELECT }
+    );
+    return rows.map(row => ({
+      ...row,
+      sentAt: new Date(row.sentAt)
+    })) as Message[];
   }
   
-  async createMessage(insertMessage: InsertMessage): Promise<Message> {
-    const [message] = await db.insert(messages).values(insertMessage).returning();
-    return message;
+  async createMessage(input: InsertMessage): Promise<Message> {
+    const now = new Date();
+    const rows = await sequelize.query<Message>(
+      `INSERT INTO messages (
+        content, conversationId, isUserMessage, sentimentScore, senderId,
+        relevantThemeIds, relevantQuoteIds, sentAt
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;`,
+      {
+        type: QueryTypes.SELECT,
+        bind: [
+          input.content,
+          input.conversationId,
+          input.isUserMessage,
+          input.sentimentScore ?? null,
+          input.senderId ?? null,
+          JSON.stringify(input.relevantThemeIds ?? []),
+          JSON.stringify(input.relevantQuoteIds ?? []),
+          now.toISOString()
+        ]
+      }
+    );
+    const row = rows[0];
+    if (!row) throw new Error('Failed to create message');
+    return {
+      ...row,
+      sentAt: new Date(row.sentAt)
+    } as Message;
   }
 }
 
@@ -613,47 +445,55 @@ export class DatabaseStorage implements IStorage {
 async function initializeDatabase() {
   try {
     // Check if we have any books in the database
-    const existingBooks = await db.select().from(books);
+    const existingBooks = await sequelize.query<Book>(
+      `SELECT * FROM books;`,
+      { type: QueryTypes.SELECT }
+    );
     
     if (existingBooks.length === 0) {
       console.log("Seeding database with initial data...");
       
       // Insert mock data
-      await db.insert(books).values(bookData);
+      await sequelize.query(
+        `INSERT INTO books (title, author) VALUES ($1, $2);`,
+        {
+          type: QueryTypes.INSERT,
+          bind: [bookData.title, bookData.author]
+        }
+      );
       
       // Insert chapters
-      await db.insert(chapters).values(chapterData);
+      await sequelize.query(
+        `INSERT INTO chapters (bookId, title) VALUES ($1, $2);`,
+        {
+          type: QueryTypes.INSERT,
+          bind: [bookData.id, chapterData[0].title]
+        }
+      );
       
       // Insert key events
-      await db.insert(keyEvents).values(keyEventData);
+      await sequelize.query(
+        `INSERT INTO keyEvents (bookId, title, description) VALUES ($1, $2, $3);`,
+        {
+          type: QueryTypes.INSERT,
+          bind: [bookData.id, keyEventData[0].title, keyEventData[0].description]
+        }
+      );
       
       // Insert themes
-      await db.insert(themes).values(themeData);
-      
-      // Insert theme quotes
-      await db.insert(themeQuotes).values(themeQuoteData);
-      
-      // Insert character data
-      await db.insert(characters).values(characterData);
-      
-      // Insert relationship data
-      await db.insert(relationships).values(relationshipData);
-      
-      // Insert AI analysis data
-      await db.insert(aiAnalyses).values(aiAnalysisData);
-      
-      // Insert character personas
-      await db.insert(characterPersonas).values(characterPersonaData);
-      
-      // Insert librarian personas
-      await db.insert(librarianPersonas).values(librarianPersonaData);
+      await sequelize.query(
+        `INSERT INTO themes (bookId, name, description) VALUES ($1, $2, $3);`,
+        {
+          type: QueryTypes.INSERT,
+          bind: [bookData.id, themeData[0].name, themeData[0].description]
+        }
+      );
       
       console.log("Database seeded successfully");
-    } else {
-      console.log("Database already contains data, skipping seed");
     }
   } catch (error) {
-    console.error("Error initializing database:", error);
+    console.error("Error seeding database:", error);
+    throw error;
   }
 }
 
