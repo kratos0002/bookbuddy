@@ -316,16 +316,18 @@ const ConversationPageContent = () => {
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {/* Character grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {Array.isArray(characters) && characters.length > 0 ? (
                       characters.map((char: Character) => (
                         <Button
                           key={char.id}
                           variant={selectedChatCharacter === char.id ? "default" : "outline"}
-                          className="w-full justify-start"
+                          className="w-full justify-start py-3"
                           onClick={() => handleCharacterSelect(char.id)}
                           disabled={isCreatingConversation}
                         >
+                          <User className="mr-2 h-4 w-4" />
                           {char.name || `Character ${char.id}`}
                         </Button>
                       ))
