@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon server/index.js",
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist && cp -r server/data dist/",
-    "build:render": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist && mkdir -p dist/server/data/encyclopedia && cp -R server/data dist/ && cp -R server/data dist/server/",
+    "build:render": "vite build && esbuild server/index.ts --platform=node --bundle --format=esm --outdir=dist && mkdir -p dist/server/data/encyclopedia && cp -R server/data dist/ && cp -R server/data dist/server/",
     "build:test": "NODE_ENV=production vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist-test && cp -r server/data dist-test/",
     "start": "node dist/index.js",
     "check": "tsc",
@@ -19,7 +19,9 @@
     "test:local": "API_URL=http://localhost:3001 FRONTEND_URL=http://localhost:5173 vitest run --root .",
     "test:api:local": "API_URL=http://localhost:3001 FRONTEND_URL=http://localhost:5173 vitest run api.test.js --root .",
     "test:e2e:local": "API_URL=http://localhost:3001 FRONTEND_URL=http://localhost:5173 vitest run e2e.test.js --root .",
-    "test:chat:local": "API_URL=http://localhost:3001 FRONTEND_URL=http://localhost:5173 vitest run chat.test.js --root ."
+    "test:chat:local": "API_URL=http://localhost:3001 FRONTEND_URL=http://localhost:5173 vitest run chat.test.js --root .",
+    "db:migrate": "tsx server/scripts/migrate.ts",
+    "create-admin": "tsx server/scripts/create-admin.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -60,7 +62,7 @@
     "connect-pg-simple": "^10.0.0",
     "d3": "^7.9.0",
     "date-fns": "^3.6.0",
-    "dotenv": "^16.4.7",
+    "dotenv": "^16.3.1",
     "drizzle-orm": "^0.39.1",
     "drizzle-zod": "^0.7.0",
     "embla-carousel-react": "^8.3.0",
@@ -90,7 +92,15 @@
     "wouter": "^3.3.5",
     "ws": "^8.18.0",
     "zod": "^3.23.8",
-    "zod-validation-error": "^3.4.0"
+    "zod-validation-error": "^3.4.0",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.11.3",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.35.2",
+    "redis": "^4.6.13",
+    "prometheus-client": "^0.5.0",
+    "winston": "^3.11.0",
+    "bcryptjs": "^2.4.3"
   },
   "devDependencies": {
     "@replit/vite-plugin-cartographer": "^0.0.11",
@@ -118,7 +128,11 @@
     "tsx": "^4.19.1",
     "typescript": "5.6.3",
     "vite": "^5.4.14",
-    "vitest": "^0.34.6"
+    "vitest": "^0.34.6",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/pg": "^8.10.9",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/sequelize": "^4.28.20"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.8"
