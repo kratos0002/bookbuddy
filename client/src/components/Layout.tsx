@@ -124,10 +124,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {children}
       </main>
       
-      {/* Footer is now handled by the Footer component for the home page */}
-      {!isHomePage && (
+      {/* Only show footer on home page - remove the duplicate "Exploring 1984" text */}
+      {isHomePage && (
         <footer className="border-t border-border/50 py-2 px-4 text-xs text-center text-muted-foreground backdrop-blur-sm bg-background/80">
-          <span>Exploring "1984" by George Orwell — BookBuddy Literary Companion</span>
+          <span>© {new Date().getFullYear()} BookBuddy - A Literary Companion</span>
         </footer>
       )}
 

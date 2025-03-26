@@ -254,16 +254,16 @@ const ConversationPageContent = () => {
   const handleSuggestionClick = (text: string) => {
     setMessage(text);
   };
-  
+
   return (
     <Layout>
       <div className="h-full flex flex-col md:flex-row overflow-hidden relative">
         {/* Big Brother watching overlay effect - appears briefly */}
         {showEye && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 animate-fade-out pointer-events-none">
-            <div className="text-[#8b2439] text-center">
+            <div className="text-book-primary text-center">
               <Eye size={60} className="mx-auto mb-4 animate-pulse-subtle" />
-              <p className="text-xl text-[#8b2439] typewriter">Big Brother is watching you...</p>
+              <p className="text-xl text-book-secondary typewriter">Big Brother is watching you...</p>
             </div>
           </div>
         )}
@@ -284,31 +284,31 @@ const ConversationPageContent = () => {
               <div className="w-full h-full flex flex-col">
                 <h2 className="text-2xl font-bold tracking-tight mb-4 text-[#8b2439] flex items-center gap-2">
                   <MessageCircle size={20} className="text-[#8b2439]/70" />
-                  Chat with {selectedBook.title} Characters
+                  1984 Characters
                 </h2>
                 
                 {/* Chat interface */}
                 {!conversationId && !isLibrarianSelected ? (
-                  <div className="p-6 border rounded-lg bg-white shadow-sm flex-1">
+                  <div className="p-6 border rounded-lg bg-white/90 shadow-md flex-1">
                     <h4 className="text-lg font-medium mb-4">Who would you like to chat with?</h4>
                     
                     {/* Librarian option */}
-                    <div className="mb-4">
+                    <div className="mb-6">
                       <Button
                         variant={isLibrarianSelected ? "default" : "outline"}
-                        className="w-full justify-start bg-gradient-to-r from-[#8b2439]/10 to-[#8b2439]/5 border-[#8b2439]/20 hover:from-[#8b2439]/20 hover:to-[#8b2439]/10 text-[#8b2439]"
+                        className="w-full justify-start bg-gradient-to-r from-[#8b2439]/10 to-[#8b2439]/5 border-[#8b2439]/20 hover:from-[#8b2439]/20 hover:to-[#8b2439]/10 text-[#8b2439] py-6"
                         onClick={() => handleCharacterSelect(null)}
                         disabled={isCreatingConversation}
                       >
-                        <BookText className="mr-2 h-4 w-4" />
-                        Alexandria, the AI Librarian
+                        <BookText className="mr-3 h-5 w-5" />
+                        <span className="text-base">AI Librarian</span>
                       </Button>
-                      <p className="text-xs text-muted-foreground mt-1 ml-1">
+                      <p className="text-xs text-muted-foreground mt-2 ml-1">
                         Chat with a knowledgeable librarian about themes, analysis, and literary context
                       </p>
                     </div>
                     
-                    <div className="relative mb-4">
+                    <div className="relative mb-6">
                       <div className="absolute inset-0 flex items-center">
                         <span className="w-full border-t" />
                       </div>
@@ -317,13 +317,13 @@ const ConversationPageContent = () => {
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {Array.isArray(characters) && characters.length > 0 ? (
                         characters.map((char: Character) => (
                           <Button
                             key={char.id}
                             variant={selectedChatCharacter === char.id ? "default" : "outline"}
-                            className={`w-full justify-start ${
+                            className={`w-full justify-start py-5 ${
                               selectedChatCharacter === char.id 
                                 ? 'bg-[#8b2439] hover:bg-[#8b2439]/90 text-white' 
                                 : 'border-[#8b2439]/20 text-[#8b2439] hover:bg-[#8b2439]/10'
@@ -331,13 +331,17 @@ const ConversationPageContent = () => {
                             onClick={() => handleCharacterSelect(char.id)}
                             disabled={isCreatingConversation}
                           >
-                            {char.name || `Character ${char.id}`}
+                            <User className="mr-3 h-5 w-5" />
+                            <span className="text-base">{char.name || `Character ${char.id}`}</span>
                           </Button>
                         ))
                       ) : (
-                        <div className="col-span-full text-center p-4 border rounded">
+                        <div className="col-span-full text-center p-6 border rounded bg-white/80">
                           {isLoadingCharacters ? (
-                            "Loading characters..."
+                            <div className="flex flex-col items-center justify-center space-y-2">
+                              <div className="w-6 h-6 border-2 border-[#8b2439] border-t-transparent rounded-full animate-spin"></div>
+                              <p>Loading characters...</p>
+                            </div>
                           ) : (
                             <div>
                               <p className="mb-2">No characters found. API call information:</p>
@@ -417,8 +421,8 @@ const ConversationPageContent = () => {
                               <div
                                 className={`rounded-lg p-3 max-w-[80%] ${
                                   message.isUserMessage
-                                    ? "bg-[#8b2439] text-white"
-                                    : "bg-[#8b2439]/10 text-[#8b2439]"
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-muted"
                                 }`}
                               >
                                 {message.content}
@@ -480,7 +484,7 @@ const ConversationPageContent = () => {
             <X size={16} />
           </Button>
         </div>
-        
+
         {/* Button to open context panel on mobile */}
         <Button
           className={`fixed bottom-4 right-4 md:hidden z-30 ${contextOpen ? 'hidden' : ''}`}
