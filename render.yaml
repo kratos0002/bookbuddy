@@ -3,8 +3,8 @@ services:
     name: bookbuddy-qpi
     env: node
     plan: free
-    buildCommand: npm install && npm install sequelize && npm run build:render
-    startCommand: npm start
+    buildCommand: npm ci && npm run build:render
+    startCommand: NODE_OPTIONS='--experimental-specifier-resolution=node' npm start
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -16,6 +16,8 @@ services:
         value: 3000
       - key: NODE_ENV
         value: production
+      - key: NODE_VERSION
+        value: 18
 
 databases:
   - name: bookbuddy-db

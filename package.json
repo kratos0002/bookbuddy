@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "nodemon server/index.js",
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist && cp -r server/data dist/",
-    "build:render": "vite build && esbuild server/index.ts --platform=node --bundle --format=esm --outdir=dist && mkdir -p dist/server/data/encyclopedia && cp -R server/data dist/ && cp -R server/data dist/server/",
+    "build:render": "vite build && esbuild server/index.ts --platform=node --format=esm --bundle --packages=external --external:sequelize --external:pg --external:pg-hstore --outdir=dist && mkdir -p dist/server/data/encyclopedia && cp -R server/data dist/ && cp -R server/data dist/server/",
     "build:test": "NODE_ENV=production vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist-test && cp -r server/data dist-test/",
-    "start": "node dist/index.js",
+    "start": "NODE_OPTIONS='--experimental-specifier-resolution=node' node dist/index.js",
     "postinstall": "npm install sequelize",
     "check": "tsc",
     "db:push": "drizzle-kit push",
