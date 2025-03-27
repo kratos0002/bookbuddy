@@ -3,7 +3,7 @@ services:
     name: bookbuddy-qpi
     env: node
     plan: free
-    buildCommand: npm install && npm run build:render
+    buildCommand: npm install && npm install sequelize && npm run build:render
     startCommand: npm start
     envVars:
       - key: DATABASE_URL
