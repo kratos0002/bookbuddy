@@ -4,7 +4,7 @@ services:
     env: node
     plan: free
     buildCommand: npm ci && npm run build:render
-    startCommand: NODE_OPTIONS='--experimental-specifier-resolution=node' npm start
+    startCommand: cd dist && node index.js
     envVars:
       - key: DATABASE_URL
         fromDatabase:
