@@ -4,6 +4,9 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { config } from '../config';
 
+// Fallback secret for development/testing
+const JWT_SECRET = config.jwtSecret || 'dev-secret-key';
+
 const router = express.Router();
 
 // Register a new user
@@ -40,7 +43,7 @@ router.post('/register', async (req, res) => {
     // Generate JWT
     const token = jwt.sign(
       { id: user.id, username: user.username },
-      config.jwtSecret,
+      JWT_SECRET,
       { expiresIn: '1d' }
     );
     
@@ -96,7 +99,7 @@ router.post('/login', async (req, res) => {
     // Generate JWT
     const token = jwt.sign(
       { id: user.id, username: user.username },
-      config.jwtSecret,
+      JWT_SECRET,
       { expiresIn: '1d' }
     );
     
@@ -143,7 +146,7 @@ router.get('/me', async (req, res) => {
     }
     
     // Verify token
-    const decoded = jwt.verify(token, config.jwtSecret) as { id: number, username: string };
+    const decoded = jwt.verify(token, JWT_SECRET) as { id: number, username: string };
     const user = await storage.getUser(decoded.id);
     
     if (!user) {
