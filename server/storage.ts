@@ -30,40 +30,40 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   
   // Book methods
-  getBook(id: number): Promise<Book | undefined>;
+  getBook(id: string): Promise<Book | undefined>;
   getAllBooks(): Promise<Book[]>;
   
   // Chapter methods
-  getChaptersByBookId(bookId: number): Promise<Chapter[]>;
+  getChaptersByBookId(bookId: string): Promise<Chapter[]>;
   
   // KeyEvent methods
-  getKeyEventsByBookId(bookId: number): Promise<KeyEvent[]>;
+  getKeyEventsByBookId(bookId: string): Promise<KeyEvent[]>;
   
   // Theme methods
-  getThemesByBookId(bookId: number): Promise<Theme[]>;
+  getThemesByBookId(bookId: string): Promise<Theme[]>;
   getThemeById(id: number): Promise<Theme | undefined>;
   
   // ThemeQuote methods
   getQuotesByThemeId(themeId: number): Promise<ThemeQuote[]>;
   
   // ThemeIntensity methods
-  getThemeIntensitiesByBookId(bookId: number): Promise<ThemeIntensity[]>;
+  getThemeIntensitiesByBookId(bookId: string): Promise<ThemeIntensity[]>;
   
   // Character methods
   getCharactersByBookId(bookId: string): Promise<Character[]>;
   getCharacterById(id: string): Promise<Character | undefined>;
   
   // Relationship methods
-  getRelationshipsByBookId(bookId: number): Promise<Relationship[]>;
+  getRelationshipsByBookId(bookId: string): Promise<Relationship[]>;
   
   // AI Analysis methods
-  getAiAnalysisByBookId(bookId: number): Promise<AiAnalysis[]>;
-  getAiAnalysisBySection(bookId: number, section: string): Promise<AiAnalysis | undefined>;
+  getAiAnalysisByBookId(bookId: string): Promise<AiAnalysis[]>;
+  getAiAnalysisBySection(bookId: string, section: string): Promise<AiAnalysis | undefined>;
   
   // Visualization data methods
-  getCharacterNetworkData(bookId: number): Promise<GraphData>;
-  getNarrativeData(bookId: number): Promise<NarrativeData>;
-  getThemeHeatmapData(bookId: number): Promise<ThemeHeatmapData>;
+  getCharacterNetworkData(bookId: string): Promise<GraphData>;
+  getNarrativeData(bookId: string): Promise<NarrativeData>;
+  getThemeHeatmapData(bookId: string): Promise<ThemeHeatmapData>;
   
   // Character Persona methods
   getCharacterPersonas(): Promise<CharacterPersona[]>;
@@ -73,16 +73,16 @@ export interface IStorage {
   // Librarian Persona methods
   getLibrarianPersonas(): Promise<LibrarianPersona[]>;
   getLibrarianPersonaById(id: number): Promise<LibrarianPersona | undefined>;
-  getLibrarianPersonaByBookId(bookId: number): Promise<LibrarianPersona | undefined>;
+  getLibrarianPersonaByBookId(bookId: string): Promise<LibrarianPersona | undefined>;
   
   // Conversation methods
   getConversations(): Promise<Conversation[]>;
   getConversationById(id: number): Promise<Conversation | undefined>;
-  createConversation(conversation: InsertConversation): Promise<Conversation>;
+  createConversation(data: InsertConversation): Promise<Conversation>;
   
   // Message methods
   getMessagesByConversationId(conversationId: number): Promise<Message[]>;
-  createMessage(message: InsertMessage): Promise<Message>;
+  createMessage(data: InsertMessage): Promise<Message>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -108,7 +108,7 @@ export class DatabaseStorage implements IStorage {
   }
   
   // Book methods
-  async getBook(id: number): Promise<Book | undefined> {
+  async getBook(id: string): Promise<Book | undefined> {
     const rows = await db`SELECT * FROM books WHERE id = ${id}`;
     return rows[0] as Book | undefined;
   }
@@ -119,20 +119,20 @@ export class DatabaseStorage implements IStorage {
   }
   
   // Chapter methods
-  async getChaptersByBookId(bookId: number): Promise<Chapter[]> {
-    const rows = await db`SELECT * FROM chapters WHERE bookId = ${bookId}`;
+  async getChaptersByBookId(bookId: string): Promise<Chapter[]> {
+    const rows = await db`SELECT * FROM chapters WHERE book_id = ${bookId}`;
     return rows as Chapter[];
   }
   
   // KeyEvent methods
-  async getKeyEventsByBookId(bookId: number): Promise<KeyEvent[]> {
-    const rows = await db`SELECT * FROM keyEvents WHERE bookId = ${bookId}`;
+  async getKeyEventsByBookId(bookId: string): Promise<KeyEvent[]> {
+    const rows = await db`SELECT * FROM keyEvents WHERE book_id = ${bookId}`;
     return rows as KeyEvent[];
   }
   
   // Theme methods
-  async getThemesByBookId(bookId: number): Promise<Theme[]> {
-    const rows = await db`SELECT * FROM themes WHERE bookId = ${bookId}`;
+  async getThemesByBookId(bookId: string): Promise<Theme[]> {
+    const rows = await db`SELECT * FROM themes WHERE book_id = ${bookId}`;
     return rows as Theme[];
   }
   
@@ -148,7 +148,7 @@ export class DatabaseStorage implements IStorage {
   }
   
   // ThemeIntensity methods
-  async getThemeIntensitiesByBookId(bookId: number): Promise<ThemeIntensity[]> {
+  async getThemeIntensitiesByBookId(bookId: string): Promise<ThemeIntensity[]> {
     const themeIds = await db`SELECT id FROM themes WHERE bookId = ${bookId}`;
     
     if (themeIds.length === 0) return [];
@@ -169,38 +169,38 @@ export class DatabaseStorage implements IStorage {
   }
   
   // Relationship methods
-  async getRelationshipsByBookId(bookId: number): Promise<Relationship[]> {
+  async getRelationshipsByBookId(bookId: string): Promise<Relationship[]> {
     const rows = await db`SELECT * FROM relationships WHERE bookId = ${bookId}`;
     return rows as Relationship[];
   }
   
   // AI Analysis methods
-  async getAiAnalysisByBookId(bookId: number): Promise<AiAnalysis[]> {
+  async getAiAnalysisByBookId(bookId: string): Promise<AiAnalysis[]> {
     const rows = await db`SELECT * FROM aiAnalyses WHERE bookId = ${bookId}`;
     return rows as AiAnalysis[];
   }
   
-  async getAiAnalysisBySection(bookId: number, section: string): Promise<AiAnalysis | undefined> {
+  async getAiAnalysisBySection(bookId: string, section: string): Promise<AiAnalysis | undefined> {
     const analyses = await this.getAiAnalysisByBookId(bookId);
     return analyses.find(a => a.sectionName === section);
   }
   
   // Visualization data methods
-  async getCharacterNetworkData(bookId: number): Promise<GraphData> {
+  async getCharacterNetworkData(bookId: string): Promise<GraphData> {
     // This requires complex transformation and might depend on book data
     // For now, using mock data as placeholder
     const mockData = characterNetworkData;
     return mockData;
   }
   
-  async getNarrativeData(bookId: number): Promise<NarrativeData> {
+  async getNarrativeData(bookId: string): Promise<NarrativeData> {
     // This requires complex transformation and might depend on chapter/event data
     // For now, using mock data as placeholder
     const mockData = narrativeData;
     return mockData;
   }
   
-  async getThemeHeatmapData(bookId: number): Promise<ThemeHeatmapData> {
+  async getThemeHeatmapData(bookId: string): Promise<ThemeHeatmapData> {
     // This requires complex transformation and might depend on themes/intensity data
     // For now, using mock data as placeholder
     const mockData = themeHeatmapData;
@@ -234,7 +234,7 @@ export class DatabaseStorage implements IStorage {
     return rows[0] as LibrarianPersona | undefined;
   }
   
-  async getLibrarianPersonaByBookId(bookId: number): Promise<LibrarianPersona | undefined> {
+  async getLibrarianPersonaByBookId(bookId: string): Promise<LibrarianPersona | undefined> {
     const rows = await db`SELECT * FROM librarianPersonas WHERE bookId = ${bookId}`;
     return rows[0] as LibrarianPersona | undefined;
   }

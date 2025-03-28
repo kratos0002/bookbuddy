@@ -98,8 +98,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   app.get("/api/books/:id", async (req, res) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
+    const id = req.params.id;
+    if (!id || id.trim() === '') {
       return res.status(400).json({ message: "Invalid book ID" });
     }
     
@@ -113,8 +113,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Chapter routes
   app.get("/api/books/:id/chapters", async (req, res) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
+    const id = req.params.id;
+    if (!id || id.trim() === '') {
       return res.status(400).json({ message: "Invalid book ID" });
     }
     
@@ -124,8 +124,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Key event routes
   app.get("/api/books/:id/key-events", async (req, res) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
+    const id = req.params.id;
+    if (!id || id.trim() === '') {
       return res.status(400).json({ message: "Invalid book ID" });
     }
     
@@ -135,8 +135,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Theme routes
   app.get("/api/books/:id/themes", async (req, res) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
+    const id = req.params.id;
+    if (!id || id.trim() === '') {
       return res.status(400).json({ message: "Invalid book ID" });
     }
     
@@ -182,8 +182,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Character routes
   app.get("/api/books/:id/characters", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
+      const id = req.params.id;
+      if (!id || id.trim() === '') {
         return res.status(400).json({ message: "Invalid book ID" });
       }
       
@@ -236,8 +236,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/characters/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
+      const id = req.params.id;
+      if (!id || id.trim() === '') {
         return res.status(400).json({ message: "Invalid character ID" });
       }
       
@@ -301,8 +301,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Visualization data routes
   app.get("/api/books/:id/character-network", async (req, res) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
+    const id = req.params.id;
+    if (!id || id.trim() === '') {
       return res.status(400).json({ message: "Invalid book ID" });
     }
     
@@ -311,8 +311,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   app.get("/api/books/:id/narrative-data", async (req, res) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
+    const id = req.params.id;
+    if (!id || id.trim() === '') {
       return res.status(400).json({ message: "Invalid book ID" });
     }
     
@@ -321,8 +321,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   app.get("/api/books/:id/theme-heatmap", async (req, res) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
+    const id = req.params.id;
+    if (!id || id.trim() === '') {
       return res.status(400).json({ message: "Invalid book ID" });
     }
     
@@ -385,8 +385,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/books/:id/librarian", async (req, res) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
+    const id = req.params.id;
+    if (!id || id.trim() === '') {
       return res.status(400).json({ message: "Invalid book ID" });
     }
     

@@ -1,5 +1,5 @@
 export interface Book {
-  id: number;
+  id: string;
   title: string;
   author: string;
   coverImageUrl?: string;
@@ -9,50 +9,48 @@ export interface Book {
 }
 
 export interface Chapter {
-  id: number;
-  bookId: number;
+  id: string;
+  bookId: string;
   title: string;
   content?: string;
-  chapterNumber?: number;
+  order?: number;
 }
 
 export interface KeyEvent {
-  id: number;
-  bookId: number;
+  id: string;
+  bookId: string;
   title: string;
   description: string;
-  chapterId?: number;
-  chapter?: string;
-  impact?: string;
+  chapterIndex?: number;
+  timestamp?: string;
 }
 
 export interface Theme {
-  id: number;
-  bookId: number;
+  id: string;
+  bookId: string;
   name: string;
   description: string;
   color?: string;
 }
 
 export interface ThemeQuote {
-  id: number;
-  themeId: number;
-  content: string;
-  chapter?: string;
-  page?: number;
-  context?: string;
+  id: string;
+  themeId: string;
+  quote: string;
+  context: string;
+  chapterIndex?: number;
 }
 
 export interface ThemeIntensity {
-  id: number;
-  themeId: number;
-  chapter: string;
+  id: string;
+  themeId: string;
+  chapterIndex: number;
   intensity: number;
 }
 
 export interface Character {
-  id: number;
-  bookId: number;
+  id: string;
+  bookId: string;
   name: string;
   description?: string;
   characteristics?: string[];
@@ -60,10 +58,10 @@ export interface Character {
 }
 
 export interface Relationship {
-  id: number;
-  bookId: number;
-  character1Id: number;
-  character2Id: number;
+  id: string;
+  bookId: string;
+  character1Id: string;
+  character2Id: string;
   type: string;
   description: string;
 }
