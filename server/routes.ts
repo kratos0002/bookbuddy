@@ -1,4 +1,4 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Request, Response, NextFunction, ErrorRequestHandler } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { 
@@ -19,6 +19,7 @@ import quoteExplorerService from "./services/quote-explorer-service";
 import feedbackRoutes from './routes/feedback';
 import adminRoutes from './routes/admin';
 import healthRoutes from './routes/health';
+import authRoutes from './routes/auth';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
@@ -35,6 +36,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register health check route
   app.use('/api/health', healthRoutes);
+
+  // Register auth routes
+  app.use('/api/auth', authRoutes);
 
   // Quote Explorer API
   app.get("/api/quotes/explorer-data", async (req, res) => {
@@ -1428,6 +1432,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // Error handling middleware
+  const errorHandler: ErrorRequestHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
+    console.error('Error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  };
+
+  app.use(errorHandler);
 
   const httpServer = createServer(app);
 

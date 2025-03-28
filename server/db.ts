@@ -1,43 +1,25 @@
-import { Sequelize } from 'sequelize';
 import { config } from './config';
+import { neon, neonConfig } from '@neondatabase/serverless';
 
-// Create Sequelize instance based on environment
-export const sequelize = config.db.url && config.env === 'production'
-  ? new Sequelize(config.db.url, {
-      dialect: 'postgres',
-      dialectModule: require('pg'),
-      ssl: true,
-      logging: false,
-      pool: {
-        max: 5,
-        min: 0,
-        acquire: 30000,
-        idle: 10000
-      }
-    })
-  : new Sequelize({
-      dialect: 'postgres',
-      host: config.db.host,
-      port: config.db.port,
-      database: config.db.name,
-      username: config.db.user,
-      password: config.db.password,
-      logging: config.env === 'development' ? console.log : false,
-      pool: {
-        max: 5,
-        min: 0,
-        acquire: 30000,
-        idle: 10000
-      }
-    });
+// Configure Neon client
+neonConfig.fetchConnectionCache = true;
+
+// Create a SQL client based on environment
+const sql = config.db.url 
+  ? neon(config.db.url)
+  : neon(`postgresql://${config.db.user}:${config.db.password}@${config.db.host}:${config.db.port}/${config.db.name}`);
+
+// Export the SQL client
+export const db = sql;
 
 // Test the connection
-export const testConnection = async () => {
+export async function testConnection() {
   try {
-    await sequelize.authenticate();
-    console.log('Database connection established successfully.');
+    const result = await sql`SELECT 1 as result`;
+    console.log('Database connection successful:', result);
+    return true;
   } catch (error) {
-    console.error('Unable to connect to the database:', error);
-    process.exit(1);
+    console.error('Database connection error:', error);
+    throw error;
   }
-};
+}
