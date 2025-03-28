@@ -23,6 +23,20 @@ import authRoutes from './routes/auth';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
+// Helper function to map numeric IDs to UUIDs for backwards compatibility
+function mapIdToUuid(id: string): string {
+  // This maps numeric IDs to UUIDs for backwards compatibility
+  const idMap: Record<string, string> = {
+    "1": "00000000-0000-0000-0000-000000000001", // Map ID 1 to a predictable UUID
+    "2": "00000000-0000-0000-0000-000000000002", // Map ID 2...
+    "3": "00000000-0000-0000-0000-000000000003"
+  };
+  
+  // If numeric ID is provided, try to map it to a UUID
+  const isNumericId = /^\d+$/.test(id);
+  return isNumericId ? idMap[id] || id : id;
+}
+
 // Initialize OpenAI client
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -98,7 +112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   app.get("/api/books/:id", async (req, res) => {
-    const id = req.params.id;
+    const id = mapIdToUuid(req.params.id);
     if (!id || id.trim() === '') {
       return res.status(400).json({ message: "Invalid book ID" });
     }
@@ -113,7 +127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Chapter routes
   app.get("/api/books/:id/chapters", async (req, res) => {
-    const id = req.params.id;
+    const id = mapIdToUuid(req.params.id);
     if (!id || id.trim() === '') {
       return res.status(400).json({ message: "Invalid book ID" });
     }
@@ -124,7 +138,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Key event routes
   app.get("/api/books/:id/key-events", async (req, res) => {
-    const id = req.params.id;
+    const id = mapIdToUuid(req.params.id);
     if (!id || id.trim() === '') {
       return res.status(400).json({ message: "Invalid book ID" });
     }
@@ -135,7 +149,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Theme routes
   app.get("/api/books/:id/themes", async (req, res) => {
-    const id = req.params.id;
+    const id = mapIdToUuid(req.params.id);
     if (!id || id.trim() === '') {
       return res.status(400).json({ message: "Invalid book ID" });
     }
@@ -182,14 +196,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Character routes
   app.get("/api/books/:id/characters", async (req, res) => {
     try {
-      const id = req.params.id;
+      const id = mapIdToUuid(req.params.id);
       if (!id || id.trim() === '') {
         return res.status(400).json({ message: "Invalid book ID" });
       }
       
-      console.log(`Fetching characters for book ID: ${id}`);
+      console.log(`Fetching characters for book ID: ${req.params.id} (mapped to: ${id})`);
       const characters = await storage.getCharactersByBookId(id);
-      console.log(`Retrieved ${characters.length} characters for book ID: ${id}`);
+      console.log(`Retrieved ${characters.length} characters for book ID: ${req.params.id}`);
       
       res.json(characters);
     } catch (error) {
@@ -236,16 +250,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/characters/:id", async (req, res) => {
     try {
-      const id = req.params.id;
+      const id = mapIdToUuid(req.params.id);
       if (!id || id.trim() === '') {
         return res.status(400).json({ message: "Invalid character ID" });
       }
       
-      console.log(`Fetching character with ID: ${id}`);
+      console.log(`Fetching character with ID: ${req.params.id} (mapped to: ${id})`);
       const character = await storage.getCharacterById(id);
       
       if (!character) {
-        console.log(`Character with ID ${id} not found`);
+        console.log(`Character with ID ${req.params.id} not found`);
         return res.status(404).json({ message: "Character not found" });
       }
       
@@ -263,8 +277,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Relationship routes
   app.get("/api/books/:id/relationships", async (req, res) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
+    const id = mapIdToUuid(req.params.id);
+    if (!id || id.trim() === '') {
       return res.status(400).json({ message: "Invalid book ID" });
     }
     
@@ -274,8 +288,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // AI Analysis routes
   app.get("/api/books/:id/ai-analyses", async (req, res) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
+    const id = mapIdToUuid(req.params.id);
+    if (!id || id.trim() === '') {
       return res.status(400).json({ message: "Invalid book ID" });
     }
     
@@ -284,8 +298,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   app.get("/api/books/:id/ai-analyses/:section", async (req, res) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
+    const id = mapIdToUuid(req.params.id);
+    if (!id || id.trim() === '') {
       return res.status(400).json({ message: "Invalid book ID" });
     }
     
@@ -301,7 +315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Visualization data routes
   app.get("/api/books/:id/character-network", async (req, res) => {
-    const id = req.params.id;
+    const id = mapIdToUuid(req.params.id);
     if (!id || id.trim() === '') {
       return res.status(400).json({ message: "Invalid book ID" });
     }
@@ -311,7 +325,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   app.get("/api/books/:id/narrative-data", async (req, res) => {
-    const id = req.params.id;
+    const id = mapIdToUuid(req.params.id);
     if (!id || id.trim() === '') {
       return res.status(400).json({ message: "Invalid book ID" });
     }
@@ -321,7 +335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   app.get("/api/books/:id/theme-heatmap", async (req, res) => {
-    const id = req.params.id;
+    const id = mapIdToUuid(req.params.id);
     if (!id || id.trim() === '') {
       return res.status(400).json({ message: "Invalid book ID" });
     }
@@ -385,7 +399,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/books/:id/librarian", async (req, res) => {
-    const id = req.params.id;
+    const id = mapIdToUuid(req.params.id);
     if (!id || id.trim() === '') {
       return res.status(400).json({ message: "Invalid book ID" });
     }
