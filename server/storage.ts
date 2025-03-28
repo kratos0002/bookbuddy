@@ -50,8 +50,8 @@ export interface IStorage {
   getThemeIntensitiesByBookId(bookId: number): Promise<ThemeIntensity[]>;
   
   // Character methods
-  getCharactersByBookId(bookId: number): Promise<Character[]>;
-  getCharacterById(id: number): Promise<Character | undefined>;
+  getCharactersByBookId(bookId: string): Promise<Character[]>;
+  getCharacterById(id: string): Promise<Character | undefined>;
   
   // Relationship methods
   getRelationshipsByBookId(bookId: number): Promise<Relationship[]>;
@@ -158,12 +158,12 @@ export class DatabaseStorage implements IStorage {
   }
   
   // Character methods
-  async getCharactersByBookId(bookId: number): Promise<Character[]> {
-    const rows = await db`SELECT * FROM characters WHERE bookId = ${bookId}`;
+  async getCharactersByBookId(bookId: string): Promise<Character[]> {
+    const rows = await db`SELECT * FROM characters WHERE book_id = ${bookId}`;
     return rows as Character[];
   }
   
-  async getCharacterById(id: number): Promise<Character | undefined> {
+  async getCharacterById(id: string): Promise<Character | undefined> {
     const rows = await db`SELECT * FROM characters WHERE id = ${id}`;
     return rows[0] as Character | undefined;
   }

@@ -236,4 +236,125 @@ The test suite includes robust error handling to accommodate different scenarios
 - **E2E Tests** (`e2e.test.js`): Tests the frontend user flows using Playwright
 - **Chat Tests** (`chat.test.js`): Tests specifically for the chat functionality
 
-For more details on testing, see the [tests README](./tests/README.md). 
+For more details on testing, see the [tests README](./tests/README.md).
+
+# BookBuddy
+
+A literary companion app that helps users explore and interact with books through AI-powered analysis and character conversations.
+
+## Production Setup
+
+### Prerequisites
+
+- Node.js 18 or higher
+- PostgreSQL 14 or higher
+- Redis 6 or higher
+- Docker (optional, for containerized deployment)
+
+### Environment Setup
+
+1. Copy the example environment file:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Update the environment variables in `.env` with your production values:
+   - Generate a secure JWT secret
+   - Set up database credentials
+   - Configure Redis connection
+   - Add OpenAI API key if needed
+   - Update other environment-specific variables
+
+### Database Setup
+
+1. Create the PostgreSQL database:
+   ```bash
+   createdb bookbuddy
+   ```
+
+2. Run database migrations:
+   ```bash
+   npm run db:migrate
+   ```
+
+### Installation
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Build the application:
+   ```bash
+   npm run build
+   ```
+
+### Running in Production
+
+1. Start the application:
+   ```bash
+   npm run start:prod
+   ```
+
+   Or using PM2:
+   ```bash
+   pm2 start npm --name "bookbuddy" -- run start:prod
+   ```
+
+### Docker Deployment
+
+1. Build the Docker image:
+   ```bash
+   docker build -t bookbuddy .
+   ```
+
+2. Run using Docker Compose:
+   ```bash
+   docker-compose up -d
+   ```
+
+### Monitoring
+
+- Metrics are available at `/metrics` endpoint in Prometheus format
+- Use the admin dashboard at `/admin` to monitor:
+  - Active users
+  - System health
+  - Server metrics
+  - User feedback
+  - Book suggestions
+
+### Security Notes
+
+- Always use HTTPS in production
+- Set strong passwords for database and Redis
+- Keep the JWT secret secure and rotate regularly
+- Use environment variables for sensitive data
+- Regular security updates and monitoring
+
+### Backup and Recovery
+
+1. Database backup:
+   ```bash
+   pg_dump -U postgres bookbuddy > backup.sql
+   ```
+
+2. Database restore:
+   ```bash
+   psql -U postgres bookbuddy < backup.sql
+   ```
+
+## Development
+
+1. Start development servers:
+   ```bash
+   npm run start:dev
+   ```
+
+2. Run tests:
+   ```bash
+   npm test
+   ```
+
+## License
+
+MIT License - see LICENSE file for details 

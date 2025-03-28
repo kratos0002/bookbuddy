@@ -14,6 +14,22 @@ import { BookProvider } from "./contexts/BookContext";
 import { queryClient } from './lib/queryClient';
 import Layout from "./components/Layout";
 import FeedbackChatbot from "./components/feedback/FeedbackChatbot";
+import LoginPage from './pages/LoginPage';
+import { useAuth } from './hooks/useAuth';
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { token, user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!token || !user || user.role !== 'admin') {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -33,7 +49,15 @@ const App = () => (
               <Route path="/chat/:conversationId" element={<ChatPage />} />
               <Route path="/librarian" element={<LibrarianChat />} />
               <Route path="/careers" element={<CareersPage />} />
-              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

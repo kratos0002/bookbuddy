@@ -6,8 +6,12 @@ import {
   Server, 
   BookOpen, 
   MessageSquare,
-  Cpu
+  Cpu,
+  Loader2
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 interface SystemStatus {
   api: 'healthy' | 'degraded' | 'down';
@@ -23,6 +27,10 @@ interface MetricCard {
 }
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
+  const { token, user } = useAuth();
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
   const [activeUsers, setActiveUsers] = React.useState<number>(0);
   const [systemStatus, setSystemStatus] = React.useState<SystemStatus>({
     api: 'healthy',
@@ -37,28 +45,47 @@ const AdminDashboard = () => {
     requests: 0
   });
 
+  // Check admin access on mount
+  React.useEffect(() => {
+    if (!token || !user || user.role !== 'admin') {
+      toast.error('Admin access required');
+      navigate('/');
+      return;
+    }
+  }, [token, user, navigate]);
+
   // Fetch initial data
   React.useEffect(() => {
     fetchDashboardData();
     // Set up polling for real-time updates
     const interval = setInterval(fetchDashboardData, 30000); // Update every 30 seconds
     return () => clearInterval(interval);
-  }, []);
+  }, [token]);
 
   const adminFetch = async (endpoint: string) => {
+    if (!token) throw new Error('No authentication token');
+    
     const response = await fetch(`/api/admin/${endpoint}`, {
       headers: {
-        'x-admin-token': 'vishalsadminrole'
+        'Authorization': `Bearer ${token}`
       }
     });
+    
     if (!response.ok) {
+      if (response.status === 403) {
+        throw new Error('Admin access required');
+      }
       throw new Error(`Admin API error: ${response.statusText}`);
     }
+    
     return response.json();
   };
 
   const fetchDashboardData = async () => {
     try {
+      setIsLoading(true);
+      setError(null);
+
       // Fetch active users
       const usersData = await adminFetch('metrics/active-users');
       setActiveUsers(usersData.count);
@@ -80,6 +107,10 @@ const AdminDashboard = () => {
       setServerMetrics(metricsData);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
+      setError(error instanceof Error ? error.message : 'Failed to fetch dashboard data');
+      toast.error('Failed to fetch dashboard data');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -112,6 +143,34 @@ const AdminDashboard = () => {
       </div>
     </Card>
   );
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          <p className="text-gray-600">Loading dashboard data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-500 mb-4">Error</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={fetchDashboardData}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
