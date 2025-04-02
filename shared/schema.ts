@@ -143,7 +143,7 @@ export const characters = pgTable("characters", {
   bookId: integer("book_id").notNull(),
   name: text("name").notNull(),
   role: text("role").notNull(),
-  affiliation: text("affiliation").notNull(),
+  affiliation: text("affiliation"),
   characterArc: text("character_arc").notNull(),
   psychologicalProfile: text("psychological_profile").notNull(),
   connectionCount: integer("connection_count").notNull(),

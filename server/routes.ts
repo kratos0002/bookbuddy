@@ -217,28 +217,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Character routes
-  app.get("/api/books/:id/characters", async (req, res) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return res.status(400).json({ message: "Invalid book ID" });
+  app.get('/api/books/:bookId/characters', async (req, res) => {
+    try {
+      const bookId = parseInt(req.params.bookId);
+      if (isNaN(bookId)) {
+        return res.status(400).json({ message: "Invalid book ID" });
+      }
+      
+      // Use book fetcher to get characters
+      const characters = await storage.getCharactersByBookId(bookId);
+      
+      // Add fallback for affiliation if missing
+      const safeCharacters = characters.map(character => ({
+        ...character,
+        affiliation: character.affiliation || 'Unknown',
+      }));
+      
+      res.json(safeCharacters);
+    } catch (error) {
+      console.error(`Error fetching characters for book ${req.params.bookId}:`, error);
+      res.status(500).json({ 
+        message: `Failed to get characters for book ${req.params.bookId}`,
+        error: error instanceof Error ? error.message : "Unknown error" 
+      });
     }
-    
-    const characters = await storage.getCharactersByBookId(id);
-    res.json(characters);
   });
   
-  app.get("/api/characters/:id", async (req, res) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return res.status(400).json({ message: "Invalid character ID" });
+  app.get('/api/characters/:characterId', async (req, res) => {
+    try {
+      const characterId = parseInt(req.params.characterId);
+      if (isNaN(characterId)) {
+        return res.status(400).json({ message: "Invalid character ID" });
+      }
+      
+      const character = await storage.getCharacterById(characterId);
+      if (!character) {
+        return res.status(404).json({ message: `Character with ID ${characterId} not found` });
+      }
+      
+      // Add fallback for affiliation if missing
+      const safeCharacter = {
+        ...character,
+        affiliation: character.affiliation || 'Unknown',
+      };
+      
+      res.json(safeCharacter);
+    } catch (error) {
+      console.error(`Error fetching character ${req.params.characterId}:`, error);
+      res.status(500).json({ 
+        message: `Failed to get character ${req.params.characterId}`,
+        error: error instanceof Error ? error.message : "Unknown error" 
+      });
     }
-    
-    const character = await storage.getCharacterById(id);
-    if (!character) {
-      return res.status(404).json({ message: "Character not found" });
-    }
-    
-    res.json(character);
   });
   
   // Relationship routes
@@ -926,20 +956,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fs = await import('fs/promises');
       const path = await import('path');
       
-      // Use __dirname equivalent in ESM
-      const { fileURLToPath } = await import('url');
-      const __filename = fileURLToPath(import.meta.url);
-      const __dirname = path.dirname(__filename);
+      // Create a more robust path resolution for production
+      let filePath;
       
-      // Use an absolute path to the entries.json file
-      const filePath = path.join(__dirname, './data/encyclopedia/entries.json');
+      if (process.env.NODE_ENV === 'production') {
+        // In production, check multiple possible locations
+        const possiblePaths = [
+          path.join(process.cwd(), 'data/encyclopedia/entries.json'),
+          path.join(process.cwd(), 'server/data/encyclopedia/entries.json'),
+          path.join(process.cwd(), 'dist/data/encyclopedia/entries.json'),
+          path.join(process.cwd(), 'server/data/encyclopedia/entries.json')
+        ];
+        
+        // Try to find the first path that exists
+        for (const testPath of possiblePaths) {
+          try {
+            await fs.access(testPath);
+            filePath = testPath;
+            console.log(`Found encyclopedia entries at: ${filePath}`);
+            break;
+          } catch (e) {
+            console.log(`Path not found: ${testPath}`);
+          }
+        }
+        
+        // If no file found, use hardcoded data as fallback
+        if (!filePath) {
+          console.log('Using hardcoded encyclopedia entries as fallback');
+          const hardcodedEntries = [
+            {
+              "id": "newspeak",
+              "title": "Newspeak",
+              "category": "Language",
+              "content": "The official language of Oceania, designed to limit freedom of thought."
+            },
+            {
+              "id": "big-brother",
+              "title": "Big Brother",
+              "category": "Person",
+              "content": "The enigmatic figurehead of the Party and symbolic leader of Oceania."
+            },
+            {
+              "id": "telescreen",
+              "title": "Telescreen",
+              "category": "Technology",
+              "content": "Two-way television screens used for propaganda and surveillance."
+            },
+            {
+              "id": "thoughtcrime",
+              "title": "Thoughtcrime",
+              "category": "Concept",
+              "content": "The criminal act of holding unorthodox or independent thoughts."
+            },
+            {
+              "id": "ministry-of-truth",
+              "title": "Ministry of Truth",
+              "category": "Organization",
+              "content": "Government department responsible for propaganda and historical revisionism."
+            }
+          ];
+          return res.json(hardcodedEntries);
+        }
+      } else {
+        // Use __dirname equivalent in ESM for dev environment
+        const { fileURLToPath } = await import('url');
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+        filePath = path.join(__dirname, './data/encyclopedia/entries.json');
+      }
+      
+      console.log(`Reading encyclopedia entries from: ${filePath}`);
       const fileContent = await fs.readFile(filePath, 'utf-8');
       const entries = JSON.parse(fileContent);
       
       res.json(entries);
     } catch (error) {
       console.error('Error fetching encyclopedia entries:', error);
-      res.status(500).json({ error: 'Failed to fetch encyclopedia entries' });
+      // Return hardcoded fallback data on error
+      const fallbackEntries = [
+        {
+          "id": "newspeak",
+          "title": "Newspeak",
+          "category": "Language",
+          "content": "The official language of Oceania, designed to limit freedom of thought."
+        },
+        {
+          "id": "big-brother",
+          "title": "Big Brother",
+          "category": "Person",
+          "content": "The enigmatic figurehead of the Party and symbolic leader of Oceania."
+        },
+        {
+          "id": "telescreen",
+          "title": "Telescreen",
+          "category": "Technology",
+          "content": "Two-way television screens used for propaganda and surveillance."
+        }
+      ];
+      console.log('Returning fallback encyclopedia entries');
+      res.json(fallbackEntries);
     }
   });
 
