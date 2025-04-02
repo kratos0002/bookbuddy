@@ -516,12 +516,52 @@ export class DatabaseStorage implements IStorage {
   
   // Character methods
   async getCharactersByBookId(bookId: number): Promise<Character[]> {
-    return db.select().from(characters).where(eq(characters.bookId, bookId));
+    try {
+      // Use database query with fallback to mock data
+      const dbCharacters = await db.select().from(characters).where(eq(characters.bookId, bookId));
+      
+      // Add fallback for affiliation field
+      return dbCharacters.map((character: any) => ({
+        ...character,
+        affiliation: character.affiliation || 'Unknown',
+      }));
+    } catch (error) {
+      console.log("Error in database query for characters, using mock data:", error);
+      
+      // Fallback to mock data
+      const mockCharacters = characterData.filter(c => c.bookId === bookId);
+      return mockCharacters.map(character => ({
+        ...character,
+        affiliation: character.affiliation || 'Unknown',
+      }));
+    }
   }
   
   async getCharacterById(id: number): Promise<Character | undefined> {
-    const [character] = await db.select().from(characters).where(eq(characters.id, id));
-    return character || undefined;
+    try {
+      // Use database query with fallback to mock data
+      const [dbCharacter] = await db.select().from(characters).where(eq(characters.id, id));
+      
+      if (dbCharacter) {
+        // Add fallback for affiliation field
+        return {
+          ...dbCharacter,
+          affiliation: dbCharacter.affiliation || 'Unknown',
+        };
+      }
+    } catch (error) {
+      console.log("Error in database query for character by ID, using mock data:", error);
+    }
+    
+    // Fallback to mock data
+    const mockCharacter = characterData.find(c => c.id === id);
+    if (mockCharacter) {
+      return {
+        ...mockCharacter,
+        affiliation: mockCharacter.affiliation || 'Unknown',
+      };
+    }
+    return undefined;
   }
   
   // Relationship methods

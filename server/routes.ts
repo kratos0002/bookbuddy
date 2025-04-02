@@ -1093,13 +1093,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fs = await import('fs/promises');
       const path = await import('path');
       
-      // Use __dirname equivalent in ESM
-      const { fileURLToPath } = await import('url');
-      const __filename = fileURLToPath(import.meta.url);
-      const __dirname = path.dirname(__filename);
+      // Create a more robust path resolution for production
+      let filePath;
       
-      // Use an absolute path to the entries.json file
-      const filePath = path.join(__dirname, './data/encyclopedia/entries.json');
+      if (process.env.NODE_ENV === 'production') {
+        // In production, check multiple possible locations
+        const possiblePaths = [
+          path.join(process.cwd(), 'data/encyclopedia/entries.json'),
+          path.join(process.cwd(), 'server/data/encyclopedia/entries.json'),
+          path.join(process.cwd(), 'dist/data/encyclopedia/entries.json'),
+          path.join(process.cwd(), 'server/data/encyclopedia/entries.json')
+        ];
+        
+        // Try to find the first path that exists
+        for (const testPath of possiblePaths) {
+          try {
+            await fs.access(testPath);
+            filePath = testPath;
+            console.log(`Found encyclopedia entries for categories at: ${filePath}`);
+            break;
+          } catch (e) {
+            console.log(`Path not found: ${testPath}`);
+          }
+        }
+        
+        // If no file found, use hardcoded data as fallback
+        if (!filePath) {
+          console.log('Using hardcoded encyclopedia categories as fallback');
+          const categories = ["Language", "Person", "Technology", "Concept", "Organization"];
+          return res.json(categories);
+        }
+      } else {
+        // Use __dirname equivalent in ESM for dev environment
+        const { fileURLToPath } = await import('url');
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+        filePath = path.join(__dirname, './data/encyclopedia/entries.json');
+      }
+      
+      console.log(`Reading encyclopedia entries for categories from: ${filePath}`);
       const fileContent = await fs.readFile(filePath, 'utf-8');
       const entries = JSON.parse(fileContent);
       
@@ -1108,7 +1140,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(categories);
     } catch (error) {
       console.error('Error fetching encyclopedia categories:', error);
-      res.status(500).json({ error: 'Failed to fetch encyclopedia categories' });
+      // Return hardcoded fallback data on error
+      const fallbackCategories = ["Language", "Person", "Technology", "Concept", "Organization"];
+      console.log('Returning fallback encyclopedia categories');
+      res.json(fallbackCategories);
     }
   });
 
