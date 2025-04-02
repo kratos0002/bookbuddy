@@ -5,8 +5,9 @@
 
 [build.environment]
   NODE_VERSION = "18.18.0"
-  NPM_FLAGS = "--legacy-peer-deps --no-audit --loglevel verbose --ignore-engines"
+  NPM_FLAGS = "--legacy-peer-deps --ignore-engines --no-optional"
   DEBUG = "true"
+  VITE_API_URL = "https://bookbuddy-qpi.onrender.com"
 
 # Set up redirects for SPA
 [[redirects]]
