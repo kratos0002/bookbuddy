@@ -23,7 +23,7 @@ export const books = pgTable("books", {
   title: text("title").notNull(),
   author: text("author").notNull(),
   coverUrl: text("cover_url").notNull(),
-  publicationYear: integer("publication_year").notNull(),
+  publicationYear: integer("publication_year"),
 });
 
 export const insertBookSchema = createInsertSchema(books).pick({

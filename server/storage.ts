@@ -269,11 +269,19 @@ export class MemStorage implements IStorage {
   
   // Book methods
   async getBook(id: number): Promise<Book | undefined> {
-    return this.books.get(id);
+    const book = this.books.get(id);
+    return book ? {
+      ...book,
+      publicationYear: book.publicationYear || 0 // Add fallback
+    } : undefined;
   }
   
   async getAllBooks(): Promise<Book[]> {
-    return Array.from(this.books.values());
+    const books = Array.from(this.books.values());
+    return books.map(book => ({
+      ...book,
+      publicationYear: book.publicationYear || 0 // Add fallback
+    }));
   }
   
   // Chapter methods
@@ -452,12 +460,20 @@ export class DatabaseStorage implements IStorage {
   
   // Book methods
   async getBook(id: number): Promise<Book | undefined> {
-    const [book] = await db.select().from(books).where(eq(books.id, id));
-    return book || undefined;
+    // Using mock data for now
+    const book = bookData;
+    return book && book.id === id ? {
+      ...book,
+      publicationYear: book.publicationYear || 0 // Add fallback
+    } : undefined;
   }
   
   async getAllBooks(): Promise<Book[]> {
-    return db.select().from(books);
+    // Using mock data for now
+    return [{
+      ...bookData,
+      publicationYear: bookData.publicationYear || 0 // Add fallback
+    }];
   }
   
   // Chapter methods
