@@ -168,7 +168,36 @@ cat > package.json <<'EOF'
 EOF
 
 npm install
-cp -r node_modules/esbuild/* ../esbuild/
+
+# Debug directory structure
+echo "=== DEBUG: Current directory: $(pwd) ==="
+echo "=== DEBUG: Content of current directory: ==="
+ls -la
+echo "=== DEBUG: Content of node_modules: ==="
+ls -la node_modules
+
+# Use absolute paths to ensure correct directories
+TEMP_DIR=$(pwd)
+TARGET_DIR="$(cd .. && pwd)/esbuild"
+SOURCE_DIR="${TEMP_DIR}/node_modules/esbuild"
+
+echo "=== DEBUG: Source directory: ${SOURCE_DIR} ==="
+echo "=== DEBUG: Target directory: ${TARGET_DIR} ==="
+
+# Create target directory
+echo "=== Creating target esbuild directory ==="
+mkdir -p "${TARGET_DIR}"
+
+# Copy esbuild files with absolute paths
+echo "=== Copying esbuild files ==="
+if [ -d "${SOURCE_DIR}" ]; then
+  cp -r "${SOURCE_DIR}"/* "${TARGET_DIR}/"
+  echo "Successfully copied esbuild files"
+else
+  echo "ERROR: Source esbuild directory not found at ${SOURCE_DIR}"
+  exit 1
+fi
+
 cd ../..
 
 # Check Vite's esbuild version
