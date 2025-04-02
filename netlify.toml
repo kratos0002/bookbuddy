@@ -1,7 +1,7 @@
 [build]
   base = "."
   publish = "client/dist"
-  command = "./scripts/netlify-build.sh"
+  command = "./scripts/direct-build.sh"
 
 [build.environment]
   NODE_VERSION = "18.16.0"
