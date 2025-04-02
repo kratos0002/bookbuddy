@@ -22,16 +22,20 @@ const app = express();
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   
-  // Allow requests from any localhost port
-  if (origin && origin.match(/^http:\/\/localhost:\d+$/)) {
+  // Allow requests from Netlify domain and localhost
+  if (origin && (
+    origin.match(/^http:\/\/localhost:\d+$/) || 
+    origin === 'https://melodious-gumdrop-0a5254.netlify.app'
+  )) {
     res.header("Access-Control-Allow-Origin", origin);
   } else {
     // Default fallback
-    res.header("Access-Control-Allow-Origin", "http://localhost:8080");
+    res.header("Access-Control-Allow-Origin", "*");
   }
   
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Credentials", "true");
   
   // Handle preflight requests
   if (req.method === "OPTIONS") {
