@@ -1,0 +1,14 @@
+[build]
+  base = "."
+  publish = "client/dist"
+  command = "./scripts/netlify-build.sh"
+
+[build.environment]
+  NODE_VERSION = "18.16.0"
+  NPM_FLAGS = "--legacy-peer-deps"
+
+# Set up redirects for SPA
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200 
