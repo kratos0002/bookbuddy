@@ -88,7 +88,6 @@ cat > client/package.json <<'EOF'
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react-swc": "^3.5.0",
     "autoprefixer": "^10.4.20",
-    "esbuild": "0.25.0",
     "eslint": "^9.9.0",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.9",
@@ -99,6 +98,12 @@ cat > client/package.json <<'EOF'
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.1"
+  },
+  "resolutions": {
+    "esbuild": "0.21.5"
+  },
+  "overrides": {
+    "esbuild": "0.21.5"
   }
 }
 EOF
@@ -127,16 +132,54 @@ export default defineConfig({
 });
 EOF
 
+# Create a .npmrc file that forces correct versions
+echo "=== Creating .npmrc with version resolution ==="
+cat > client/.npmrc <<'EOF'
+legacy-peer-deps=true
+strict-peer-dependencies=false
+auto-install-peers=false
+save-exact=true
+EOF
+
 # Navigate to client directory
 cd client
 echo "=== In client directory: $(pwd) ==="
 
-# Install dependencies with special flags to avoid version issues
+# Force clean install without previous node_modules
+echo "=== Cleaning node_modules ==="
+rm -rf node_modules
+
+# Install dependencies with special flags
 echo "=== Installing dependencies ==="
-npm install --legacy-peer-deps --no-audit --no-optional --ignore-engines
+npm install --legacy-peer-deps --no-audit --ignore-engines
+
+# Fix esbuild nested dependency issues
+echo "=== Fixing nested esbuild dependencies ==="
+mkdir -p node_modules/.temp
+cd node_modules/.temp
+cat > package.json <<'EOF'
+{
+  "name": "esbuild-fixer",
+  "version": "1.0.0",
+  "dependencies": {
+    "esbuild": "0.21.5"
+  }
+}
+EOF
+
+npm install
+cp -r node_modules/esbuild/* ../esbuild/
+cd ../..
+
+# Check Vite's esbuild version
+echo "=== Checking Vite's esbuild version ==="
+if [ -d "node_modules/vite/node_modules/esbuild" ]; then
+  cp -r node_modules/.temp/node_modules/esbuild/* node_modules/vite/node_modules/esbuild/
+  echo "Fixed Vite's esbuild dependency"
+fi
 
 echo "=== Building client ==="
-npm run build
+NODE_ENV=production npm run build
 
 # Verify build output
 if [ -d "./dist" ]; then
