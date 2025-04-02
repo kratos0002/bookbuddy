@@ -88,6 +88,7 @@ cat > client/package.json <<'EOF'
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react-swc": "^3.5.0",
     "autoprefixer": "^10.4.20",
+    "esbuild": "0.25.0",
     "eslint": "^9.9.0",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.9",
@@ -130,9 +131,9 @@ EOF
 cd client
 echo "=== In client directory: $(pwd) ==="
 
-# Install dependencies and build
+# Install dependencies with special flags to avoid version issues
 echo "=== Installing dependencies ==="
-npm install --legacy-peer-deps --no-audit --no-optional
+npm install --legacy-peer-deps --no-audit --no-optional --ignore-engines
 
 echo "=== Building client ==="
 npm run build

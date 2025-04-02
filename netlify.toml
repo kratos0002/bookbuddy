@@ -4,8 +4,8 @@
   command = "./scripts/direct-build.sh"
 
 [build.environment]
-  NODE_VERSION = "18.16.0"
-  NPM_FLAGS = "--legacy-peer-deps --no-audit --loglevel verbose"
+  NODE_VERSION = "18.18.0"
+  NPM_FLAGS = "--legacy-peer-deps --no-audit --loglevel verbose --ignore-engines"
   DEBUG = "true"
 
 # Set up redirects for SPA
