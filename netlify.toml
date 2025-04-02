@@ -5,7 +5,8 @@
 
 [build.environment]
   NODE_VERSION = "18.16.0"
-  NPM_FLAGS = "--legacy-peer-deps"
+  NPM_FLAGS = "--legacy-peer-deps --no-audit --loglevel verbose"
+  DEBUG = "true"
 
 # Set up redirects for SPA
 [[redirects]]
