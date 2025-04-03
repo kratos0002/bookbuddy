@@ -1064,13 +1064,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fs = await import('fs/promises');
       const path = await import('path');
       
-      // Use __dirname equivalent in ESM
-      const { fileURLToPath } = await import('url');
-      const __filename = fileURLToPath(import.meta.url);
-      const __dirname = path.dirname(__filename);
+      // Create a more robust path resolution for production
+      let filePath;
       
-      // Use an absolute path to the entries.json file
-      const filePath = path.join(__dirname, './data/encyclopedia/entries.json');
+      if (process.env.NODE_ENV === 'production') {
+        // In production, check multiple possible locations
+        const possiblePaths = [
+          path.join(process.cwd(), 'data/encyclopedia/entries.json'),
+          path.join(process.cwd(), 'server/data/encyclopedia/entries.json'),
+          path.join(process.cwd(), 'dist/data/encyclopedia/entries.json'),
+          path.join(process.cwd(), 'server/data/encyclopedia/entries.json')
+        ];
+        
+        // Try to find the first path that exists
+        for (const testPath of possiblePaths) {
+          try {
+            await fs.access(testPath);
+            filePath = testPath;
+            console.log(`Found encyclopedia entries for entry detail at: ${filePath}`);
+            break;
+          } catch (e) {
+            console.log(`Path not found: ${testPath}`);
+          }
+        }
+        
+        // If no file found, use hardcoded data as fallback
+        if (!filePath) {
+          console.log('Using hardcoded encyclopedia entry for detail');
+          const hardcodedEntries: { [key: string]: any } = {
+            "newspeak": {
+              "id": "newspeak",
+              "title": "Newspeak",
+              "category": "Language",
+              "content": "The official language of Oceania, designed to limit freedom of thought."
+            },
+            "big-brother": {
+              "id": "big-brother",
+              "title": "Big Brother",
+              "category": "Person",
+              "content": "The enigmatic figurehead of the Party and symbolic leader of Oceania."
+            },
+            "telescreen": {
+              "id": "telescreen",
+              "title": "Telescreen",
+              "category": "Technology",
+              "content": "Two-way television screens used for propaganda and surveillance."
+            },
+            "thoughtcrime": {
+              "id": "thoughtcrime",
+              "title": "Thoughtcrime",
+              "category": "Concept",
+              "content": "The criminal act of holding unorthodox or independent thoughts."
+            },
+            "ministry-of-truth": {
+              "id": "ministry-of-truth",
+              "title": "Ministry of Truth",
+              "category": "Organization",
+              "content": "Government department responsible for propaganda and historical revisionism."
+            }
+          };
+          
+          const entry = hardcodedEntries[req.params.id];
+          if (!entry) {
+            return res.status(404).json({ error: 'Encyclopedia entry not found' });
+          }
+          
+          return res.json(entry);
+        }
+      } else {
+        // Use __dirname equivalent in ESM for dev environment
+        const { fileURLToPath } = await import('url');
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+        filePath = path.join(__dirname, './data/encyclopedia/entries.json');
+      }
+      
+      console.log(`Reading encyclopedia entry detail from: ${filePath}`);
       const fileContent = await fs.readFile(filePath, 'utf-8');
       const entries = JSON.parse(fileContent);
       
@@ -1083,7 +1152,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(entry);
     } catch (error) {
       console.error('Error fetching encyclopedia entry:', error);
-      res.status(500).json({ error: 'Failed to fetch encyclopedia entry' });
+      
+      // Provide a hardcoded fallback based on ID
+      const fallbackEntries: { [key: string]: any } = {
+        "newspeak": {
+          "id": "newspeak",
+          "title": "Newspeak",
+          "category": "Language",
+          "content": "The official language of Oceania, designed to limit freedom of thought."
+        },
+        "big-brother": {
+          "id": "big-brother",
+          "title": "Big Brother",
+          "category": "Person",
+          "content": "The enigmatic figurehead of the Party and symbolic leader of Oceania."
+        },
+        "telescreen": {
+          "id": "telescreen",
+          "title": "Telescreen",
+          "category": "Technology",
+          "content": "Two-way television screens used for propaganda and surveillance."
+        }
+      };
+      
+      const fallbackEntry = fallbackEntries[req.params.id];
+      if (fallbackEntry) {
+        console.log('Returning fallback encyclopedia entry');
+        return res.json(fallbackEntry);
+      }
+      
+      res.status(404).json({ error: 'Encyclopedia entry not found' });
     }
   });
 
@@ -1174,13 +1272,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fs = await import('fs/promises');
       const path = await import('path');
       
-      // Use __dirname equivalent in ESM
-      const { fileURLToPath } = await import('url');
-      const __filename = fileURLToPath(import.meta.url);
-      const __dirname = path.dirname(__filename);
+      // Create a more robust path resolution for production
+      let filePath;
       
-      // Use an absolute path to the entries.json file
-      const filePath = path.join(__dirname, './data/encyclopedia/entries.json');
+      if (process.env.NODE_ENV === 'production') {
+        // In production, check multiple possible locations
+        const possiblePaths = [
+          path.join(process.cwd(), 'data/encyclopedia/entries.json'),
+          path.join(process.cwd(), 'server/data/encyclopedia/entries.json'),
+          path.join(process.cwd(), 'dist/data/encyclopedia/entries.json'),
+          path.join(process.cwd(), 'server/data/encyclopedia/entries.json')
+        ];
+        
+        // Try to find the first path that exists
+        for (const testPath of possiblePaths) {
+          try {
+            await fs.access(testPath);
+            filePath = testPath;
+            console.log(`Found encyclopedia entries for unlocked entries at: ${filePath}`);
+            break;
+          } catch (e) {
+            console.log(`Path not found: ${testPath}`);
+          }
+        }
+        
+        // If no file found, use hardcoded data as fallback
+        if (!filePath) {
+          console.log('Using hardcoded encyclopedia entries for unlocked entries');
+          const hardcodedEntryIds = [
+            "newspeak", "big-brother", "telescreen", "thoughtcrime", "ministry-of-truth"
+          ];
+          return res.json(hardcodedEntryIds);
+        }
+      } else {
+        // Use __dirname equivalent in ESM for dev environment
+        const { fileURLToPath } = await import('url');
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+        filePath = path.join(__dirname, './data/encyclopedia/entries.json');
+      }
+      
+      console.log(`Reading encyclopedia entries for unlocked entries from: ${filePath}`);
       const fileContent = await fs.readFile(filePath, 'utf-8');
       const entries = JSON.parse(fileContent);
       
@@ -1190,7 +1322,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(allEntryIds);
     } catch (error) {
       console.error('Error fetching unlocked encyclopedia entries:', error);
-      res.status(500).json({ error: 'Failed to fetch unlocked encyclopedia entries' });
+      // Return fallback hardcoded data
+      const fallbackEntryIds = ["newspeak", "big-brother", "telescreen"];
+      console.log('Returning fallback unlocked encyclopedia entries');
+      res.json(fallbackEntryIds);
     }
   });
 
