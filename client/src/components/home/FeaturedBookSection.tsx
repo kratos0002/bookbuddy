@@ -47,6 +47,16 @@ const FeaturedBookSection = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   
+  // Convert string book ID to numeric ID for API calls
+  const getNumericBookId = (): number => {
+    if (selectedBook.id === "communist-manifesto") {
+      return 2;
+    }
+    return 1; // Default to 1984
+  };
+  
+  const numericBookId = getNumericBookId();
+  
   // Update the selected book when the current book index changes
   useEffect(() => {
     setSelectedBook(books[currentBookIndex >= 0 ? currentBookIndex : 0]);
@@ -63,10 +73,10 @@ const FeaturedBookSection = () => {
   
   // Fetch characters
   const { data: characters, isLoading: isLoadingCharacters } = useQuery({
-    queryKey: ['/api/books/1/characters'],
+    queryKey: [`/api/books/${numericBookId}/characters`, numericBookId],
     queryFn: () => {
-      console.log("Fetching characters...");
-      return apiRequest('GET', '/api/books/1/characters').then(data => {
+      console.log(`Fetching characters for book ID: ${numericBookId}...`);
+      return apiRequest('GET', `/api/books/${numericBookId}/characters`).then(data => {
         console.log("Characters received:", data);
         return data;
       });
@@ -91,7 +101,7 @@ const FeaturedBookSection = () => {
         'POST',
         '/api/conversations',
         {
-          bookId: 1,
+          bookId: numericBookId,
           characterIds: [characterId],
           isLibrarianPresent: false,
           conversationMode: 'character',
@@ -154,10 +164,17 @@ const FeaturedBookSection = () => {
   };
   
   return (
-    <section id="featured-books" className="bg-white px-4 py-16">
-      <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-serif font-bold text-center mb-8 text-[#1a3a5f]">Available Books</h2>
-        
+    <section className="bg-[#f8f0e3]/30 px-4 py-16 relative overflow-hidden">
+      {/* Decorative elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[#7d8c75]/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#8b2439]/10 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+      </div>
+      
+      <div className="max-w-6xl mx-auto relative z-10">
+        <h2 className="text-3xl font-serif font-bold text-center mb-4 text-[#1a3a5f]">Available Books</h2>
+        <div className="h-px w-24 mx-auto bg-[#8b2439]/30 mb-8"></div>
+
         {/* Book navigation */}
         <div className="flex justify-center items-center gap-4 mb-8">
           <Button 
@@ -197,87 +214,225 @@ const FeaturedBookSection = () => {
           </Button>
         </div>
         
-        {/* Book display and character selection */}
-        <div className="flex flex-col md:flex-row gap-8 items-center">
-          {/* Book cover */}
-          <div className="w-full md:w-1/3 max-w-[250px]">
-            <div className="relative aspect-[2/3] rounded-lg shadow-lg overflow-hidden">
+        <div className="flex flex-col md:flex-row gap-8 items-start">
+          <div 
+            className="relative w-full md:w-1/3 aspect-[2/3] max-w-xs mx-auto group"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            {/* "Available Now" badge */}
+            <div className="absolute -top-3 -right-3 z-30">
+              <Badge className="bg-[#7d8c75] text-white border-0 shadow-lg animate-pulse-subtle px-3 py-1.5">
+                Available Now
+              </Badge>
+            </div>
+
+            {/* Book Cover with 3D effect */}
+            <div className={`absolute inset-0 z-10 rounded-lg shadow-xl transform ${isHovered ? 'translate-y-[-5px] scale-[1.02]' : ''} transition-all duration-300`}>
+              <div className="absolute inset-0 bg-gradient-to-b from-[#1a3a5f]/20 via-transparent to-[#1a3a5f]/70 z-20 rounded-lg"></div>
               <img 
-                src={selectedBook.coverImage || `/lovable-uploads/1984-interactive.jpg`}
+                src={selectedBook.coverImage || "/lovable-uploads/1984-interactive.jpg"}
                 alt={`${selectedBook.title} Book Cover`}
-                className="w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover rounded-lg"
               />
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/50"></div>
-              <div className="absolute bottom-3 left-3 right-3 text-white">
-                <h3 className="font-bold text-lg">{selectedBook.title}</h3>
-                <p className="text-sm opacity-90">{selectedBook.author}</p>
-                <p className="text-xs opacity-75">Published {selectedBook.publishedYear}</p>
+              
+              {/* Book spine effect */}
+              <div className="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-[#1a3a5f]/40 to-transparent rounded-l-lg"></div>
+              
+              {/* Bottom book info */}
+              <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
+                <p className="text-[#f8f0e3] text-sm flex items-center gap-1">
+                  <span className="inline-block w-2 h-2 bg-[#f8f0e3]/50 rounded-full"></span>
+                  <span>Published {selectedBook.publishedYear}</span>
+                </p>
               </div>
             </div>
+            
+            {/* Book shadow and 3D effect */}
+            <div className="absolute inset-0 z-0 rounded-lg bg-black/30 blur-lg -bottom-2 scale-[0.95] transform translate-y-4"></div>
           </div>
           
-          {/* Book info and character selection */}
           <div className="md:w-2/3">
-            <h3 className="text-2xl font-bold mb-3 text-[#1a3a5f]">{selectedBook.title}</h3>
-            <p className="text-sm mb-4 max-w-2xl">{selectedBook.description || "Explore this classic work through conversations with its characters or with our literary librarian."}</p>
+            <h3 className="text-2xl md:text-3xl font-serif font-bold text-[#1a3a5f] mb-2">{selectedBook.title}</h3>
+            <p className="text-xl text-[#8b2439] mb-4">{selectedBook.author}</p>
             
-            <div className="space-y-6">
-              {/* Librarian chat option */}
-              <div className="p-4 bg-[#f8f0e3]/30 rounded-lg">
-                <h4 className="font-medium mb-2 flex items-center">
-                  <BookOpen className="h-5 w-5 mr-2 text-[#8b2439]" />
-                  Chat with the Librarian
-                </h4>
-                <p className="text-sm mb-3">Get scholarly insights, analysis, and context about the book.</p>
-                <Button 
-                  onClick={startChatWithLibrarian}
-                  className="bg-[#8b2439] hover:bg-[#8b2439]/90 text-white w-full sm:w-auto"
-                >
-                  Start Librarian Chat
-                </Button>
-              </div>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="mb-4 bg-[#f8f0e3]/50">
+                <TabsTrigger value="details" className="data-[state=active]:bg-[#1a3a5f] data-[state=active]:text-white">Book Details</TabsTrigger>
+                <TabsTrigger value="chat" className="data-[state=active]:bg-[#1a3a5f] data-[state=active]:text-white">Chat with Characters</TabsTrigger>
+              </TabsList>
               
-              {/* Character chat options */}
-              <div>
-                <h4 className="font-medium mb-3 flex items-center">
-                  <User className="h-5 w-5 mr-2 text-[#1a3a5f]" />
-                  Chat with Characters
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {selectedBook.characters.map((character) => (
-                    <div 
-                      key={character.id}
-                      className="p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                      onClick={() => startChatWithCharacter(character.id)}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8 bg-[#1a3a5f]/10">
-                          <div className="text-xs font-medium text-[#1a3a5f]">
-                            {character.name.charAt(0)}
-                          </div>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">{character.name}</p>
-                          <p className="text-xs text-gray-500">{character.role || "Character"}</p>
+              <TabsContent value="details">
+                <div className="mb-6">
+                  <p className="mb-4 text-gray-700 leading-relaxed">
+                    {selectedBook.description}
+                  </p>
+                  
+                  {/* Character previews */}
+                  <div className="flex flex-wrap gap-3 mb-6">
+                    <TooltipProvider>
+                      {selectedBook.characters.map((character) => (
+                        <Tooltip key={character.id}>
+                          <TooltipTrigger asChild>
+                            <div 
+                              className="w-10 h-10 rounded-full bg-[#1a3a5f]/10 flex items-center justify-center hover:bg-[#1a3a5f]/20 transition-colors cursor-pointer"
+                              onClick={() => handleCharacterSelect(Number(character.id))}
+                            >
+                              <User className="h-5 w-5 text-[#1a3a5f]" />
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom">
+                            <p className="font-medium">{character.name}</p>
+                            <p className="text-xs text-muted-foreground">{character.role || 'Click to chat'}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      ))}
+                    </TooltipProvider>
+                  </div>
+                  
+                  {/* Themes */}
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {selectedBook.themes.slice(0, 4).map((theme) => (
+                      <span key={theme} className="px-3 py-1 bg-[#8b2439]/10 text-[#8b2439] text-sm rounded-full">
+                        {theme}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <Button 
+                    className="gap-2 bg-[#8b2439] hover:bg-[#8b2439]/90"
+                    onClick={() => setActiveTab("chat")}
+                  >
+                    Talk to {selectedBook.title} Characters
+                    <MessageCircle className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="gap-2 border-[#1a3a5f] text-[#1a3a5f] hover:bg-[#1a3a5f]/10"
+                    onClick={() => navigate(`/book/${selectedBook.id}`)}
+                  >
+                    <div className="flex items-center gap-2">
+                      View Book Details
+                      <ArrowRight className="h-4 w-4" />
+                    </div>
+                  </Button>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="chat" className="space-y-4">
+                {!conversationId ? (
+                  <div className="p-6 border rounded-lg bg-white shadow-sm">
+                    <h4 className="text-lg font-medium mb-4 text-[#1a3a5f]">Who would you like to chat with?</h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {Array.isArray(characters) && characters.length > 0 ? (
+                        characters.map((char: Character) => (
+                          <Button
+                            key={char.id}
+                            variant="outline"
+                            className="h-auto py-4 px-3 flex flex-col items-center justify-center border-[#8b2439]/20 hover:bg-[#8b2439]/5 hover:border-[#8b2439]/30"
+                            disabled={isCreatingConversation}
+                            onClick={() => handleCharacterSelect(char.id)}
+                          >
+                            <div className="w-12 h-12 rounded-full bg-[#1a3a5f]/10 flex items-center justify-center mb-2">
+                              {char.avatarUrl ? (
+                                <img 
+                                  src={char.avatarUrl} 
+                                  alt={char.name} 
+                                  className="w-10 h-10 rounded-full"
+                                />
+                              ) : (
+                                <User className="h-6 w-6 text-[#1a3a5f]" />
+                              )}
+                            </div>
+                            <span className="text-sm font-medium text-[#1a3a5f]">{char.name}</span>
+                          </Button>
+                        ))
+                      ) : (
+                        <div className="col-span-3 text-center py-4 text-[#8b2439]">
+                          {isLoadingCharacters ? "Loading characters..." : "No characters available"}
                         </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
+                    <div className="px-4 py-3 bg-[#1a3a5f] text-white">
+                      <div className="flex items-center">
+                        <User className="h-5 w-5 mr-2" />
+                        <span>Chat with {characters?.find(c => c.id === selectedCharacter)?.name || 'Character'}</span>
                       </div>
                     </div>
-                  ))}
+                    
+                    <ScrollArea className="h-52 p-4">
+                      {messages?.length > 0 ? (
+                        <div className="space-y-4">
+                          {messages.map((message: Message) => (
+                            <div 
+                              key={message.id} 
+                              className={`flex ${message.isUserMessage ? 'justify-end' : 'justify-start'}`}
+                            >
+                              <div className={`max-w-[80%] p-3 rounded-lg ${
+                                message.isUserMessage 
+                                  ? 'bg-[#8b2439]/10 text-[#8b2439]' 
+                                  : 'bg-[#1a3a5f]/10 text-[#1a3a5f]'
+                              }`}>
+                                <p className="text-sm">{message.content}</p>
+                                <p className="text-xs opacity-70 mt-1">
+                                  {new Date(message.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="h-full flex items-center justify-center">
+                          <p className="text-muted-foreground text-sm">Start your conversation with a message...</p>
+                        </div>
+                      )}
+                    </ScrollArea>
+                    
+                    <div className="p-3 border-t">
+                      <form 
+                        className="flex gap-2" 
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          sendMessage();
+                        }}
+                      >
+                        <Input 
+                          value={message} 
+                          onChange={(e) => setMessage(e.target.value)} 
+                          placeholder="Type your message..." 
+                          className="border-[#1a3a5f]/20 focus-visible:ring-[#1a3a5f]/30"
+                        />
+                        <Button 
+                          type="submit"
+                          size="icon"
+                          className="bg-[#8b2439] hover:bg-[#8b2439]/90"
+                          disabled={!message.trim()}
+                        >
+                          <ArrowRight className="h-4 w-4" />
+                        </Button>
+                      </form>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Note: This is just a preview, suggest checking full experience */}
+                <div className="text-center mt-8">
+                  <p className="text-sm text-[#1a3a5f]/70 mb-3">
+                    This is just a preview of the conversation experience.
+                  </p>
+                  <Link to="/conversation">
+                    <Button variant="outline" size="sm" className="gap-2 border-[#1a3a5f]/20 text-[#1a3a5f] hover:bg-[#1a3a5f]/5">
+                      Go to full conversation page
+                      <ArrowRight className="h-3 w-3" />
+                    </Button>
+                  </Link>
                 </div>
-              </div>
-              
-              {/* Direct book link */}
-              <Button 
-                variant="outline" 
-                className="mt-4 border-[#1a3a5f] text-[#1a3a5f]"
-                onClick={() => navigate(`/book/${selectedBook.id}`)}
-              >
-                <div className="flex items-center gap-2">
-                  Explore Full Book Page
-                  <ArrowRight className="h-4 w-4" />
-                </div>
-              </Button>
-            </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </div>
