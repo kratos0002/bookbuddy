@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { apiRequest } from '@/lib/queryClient';
+// Import encyclopedia entries for 1984 and Communist Manifesto
+import communistManifestoEntries from '../data/encyclopedia-communist-manifesto';
 
 export interface EncyclopediaEntry {
   id: string;
@@ -52,6 +54,30 @@ export function EncyclopediaProvider({ children }: { children: React.ReactNode }
   const fetchEntries = async () => {
     setIsLoading(true);
     try {
+      // For local development, use imported data
+      if (process.env.NODE_ENV === 'development') {
+        // Use imported entries from Communist Manifesto and any other books
+        const allEntries = [
+          ...communistManifestoEntries
+        ];
+        setEntries(allEntries);
+        
+        // Extract unique categories
+        const uniqueCategories = Array.from(new Set(allEntries.map(entry => entry.category)));
+        setCategories(uniqueCategories);
+        
+        // Entries that start with "initial" are initially unlocked
+        const initiallyUnlocked = allEntries
+          .filter(entry => entry.unlockProgress === 'initial')
+          .map(entry => entry.id);
+          
+        setUnlockedEntryIds(initiallyUnlocked);
+        setError(null);
+        setIsLoading(false);
+        return;
+      }
+      
+      // If not in development, fetch from API
       const fetchedEntries = await apiRequest('GET', '/api/encyclopedia/entries');
       setEntries(fetchedEntries);
       
