@@ -11,13 +11,11 @@ import { Avatar } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import ContextPanel from '../components/ContextPanel';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { EncyclopediaProvider, useEncyclopedia, EncyclopediaEntry } from '@/contexts/EncyclopediaContext';
 import EntryUnlockedNotification from '@/components/encyclopedia/EntryUnlockedNotification';
 import SimpleLibrarian from '@/components/SimpleLibrarian';
 import SuggestionPanel from '@/components/chat/suggestions/SuggestionPanel';
-import { Book, books } from '../data/books';
-import { getNumericBookId, getBookBySlug, getLibrarianName, isValidNumericBookId } from '@/lib/bookHelpers';
 
 interface Message {
   id: number;
@@ -58,13 +56,8 @@ const ConversationPageContent = () => {
   const [conversationId, setConversationId] = useState<number | string | null>(null);
   const queryClient = useQueryClient();
   const { bookId } = useParams();
-  const location = useLocation();
   const navigate = useNavigate();
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-
-  // Parse query parameters
-  const queryParams = new URLSearchParams(location.search);
-  const queryBookId = queryParams.get('bookId');
 
   // Encyclopedia integration
   const { entries, unlockedEntryIds, unlockEntry, selectEntry } = useEncyclopedia();
@@ -72,31 +65,29 @@ const ConversationPageContent = () => {
   
   // If a book ID is provided in the URL, update the selected book
   useEffect(() => {
-    // Get book ID from either path parameter or query parameter
-    const urlBookId = bookId || queryBookId;
-    
-    if (urlBookId) {
-      console.log(`Book ID from URL: ${urlBookId}`);
-      
-      // Use the centralized book helpers
-      const bookToSelect = getBookBySlug(urlBookId);
-      if (bookToSelect) {
-        setSelectedBook(bookToSelect);
-        console.log(`Set selected book to ${bookToSelect.title}`);
-      }
+    if (bookId) {
+      // We only have book ID 1 (1984) in the system, so we'll use that
+      console.log(`Book ID from URL: ${bookId}, using book ID: 1`);
+      // In a real app with multiple books, we would fetch book details here
     }
-  }, [bookId, queryBookId, setSelectedBook]);
+  }, [bookId, selectedBook.id]);
   
-  // Calculate the current numeric book ID to use for API calls
-  // Handle both path parameter and query parameter
-  const currentBookId = getNumericBookId(bookId || queryBookId) || getNumericBookId(selectedBook.id);
+  // Always use book ID 1 for API calls since we only have one book
+  const apiBookId = 1;
   
   // Fetch characters using the hardcoded book ID
   const { data: characters, isLoading: isLoadingCharacters } = useQuery({
-    queryKey: [`/api/books/${currentBookId}/characters`],
+    queryKey: [`/api/books/${apiBookId}/characters`],
     queryFn: () => {
-      console.log(`Fetching characters for book ${currentBookId}...`);
-      return apiRequest('GET', `/api/books/${currentBookId}/characters`).then(data => {
+      // Special case for Communist Manifesto
+      let numericId = apiBookId;
+      if (bookId === 'communist-manifesto') {
+        numericId = 2;
+        console.log('Communist Manifesto detected, using book ID 2');
+      }
+      
+      console.log(`Fetching characters for book ${numericId}...`);
+      return apiRequest('GET', `/api/books/${numericId}/characters`).then(data => {
         console.log("Characters received:", data);
         return data;
       });
@@ -112,22 +103,41 @@ const ConversationPageContent = () => {
     refetchIntervalInBackground: true,
   });
 
+  // Calculate the librarian name once for use in multiple places
+  const getLibrarianNameFromUrl = (): string => {
+    if (bookId === 'communist-manifesto') {
+      return 'Marx Scholar';
+    }
+    return 'Alexandria';
+  };
+  
+  const librarianName = getLibrarianNameFromUrl();
+
   // Create new conversation
   const createConversation = async (characterId: number | null) => {
     setIsCreatingConversation(true);
     
     try {
+      // Special case for Communist Manifesto
+      let numericId = apiBookId;
+      if (bookId === 'communist-manifesto') {
+        numericId = 2;
+      }
+      
+      // Get librarian name based on book ID
+      const librarianName = numericId === 2 ? 'Marx Scholar' : 'Alexandria';
+      
       const response = await apiRequest(
         'POST',
         '/api/conversations',
         {
-          bookId: currentBookId,
+          bookId: numericId,
           characterIds: isLibrarianSelected ? [] : [characterId],
           isLibrarianPresent: isLibrarianSelected,
           conversationMode: isLibrarianSelected ? 'analysis' : 'character',
           userId: 1,
           title: isLibrarianSelected 
-            ? `Chat with ${getLibrarianName(currentBookId)}, the AI Librarian` 
+            ? `Chat with ${librarianName}, the AI Librarian` 
             : `Chat with ${characters?.find(c => c.id === characterId)?.name || 'Character'}`
         }
       );
@@ -317,7 +327,7 @@ const ConversationPageContent = () => {
                         disabled={isCreatingConversation}
                       >
                         <BookText className="mr-2 h-4 w-4" />
-                        {getLibrarianName(currentBookId)}, the AI Librarian
+                        {librarianName}, the AI Librarian
                       </Button>
                       <p className="text-xs text-muted-foreground mt-1 ml-1">
                         Chat with a knowledgeable librarian about themes, analysis, and literary context
@@ -353,13 +363,13 @@ const ConversationPageContent = () => {
                           ) : (
                             <div>
                               <p className="mb-2">No characters found. API call information:</p>
-                              <code className="bg-muted p-1 rounded text-xs block mb-2">GET /api/books/{currentBookId}/characters</code>
+                              <code className="bg-muted p-1 rounded text-xs block mb-2">GET /api/books/{apiBookId}/characters</code>
                               <p className="text-sm text-muted-foreground mb-2">Attempting to fetch characters...</p>
                               <Button 
                                 size="sm" 
                                 variant="outline"
                                 onClick={() => {
-                                  queryClient.invalidateQueries({ queryKey: [`/api/books/${currentBookId}/characters`] });
+                                  queryClient.invalidateQueries({ queryKey: [`/api/books/${apiBookId}/characters`] });
                                 }}
                               >
                                 Retry
@@ -377,7 +387,7 @@ const ConversationPageContent = () => {
                       <div className="flex flex-col h-full">
                         <div className="p-2 bg-muted border mb-4 rounded-md flex items-center">
                           <h4 className="font-medium">
-                            Chatting with {getLibrarianName(currentBookId)}, the AI Librarian
+                            Chatting with {librarianName}, the AI Librarian
                           </h4>
                           <Button
                             variant="ghost"
