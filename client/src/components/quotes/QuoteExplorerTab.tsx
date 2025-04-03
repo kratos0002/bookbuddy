@@ -91,7 +91,7 @@ const QuoteExplorerTab: React.FC = () => {
     queryFn: async () => {
       try {
         console.log('Fetching quotes explorer data from API...');
-        const data = await apiRequest('GET', 'http://localhost:3000/api/quotes/explorer-data');
+        const data = await apiRequest('GET', '/api/quotes/explorer-data');
         console.log('Successfully retrieved quotes explorer data:', data);
         return data;
       } catch (err) {
