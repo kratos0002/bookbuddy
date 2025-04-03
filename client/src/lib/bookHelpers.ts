@@ -17,25 +17,47 @@ export const BOOK_URL_MAPPINGS: BookUrlMapping[] = [
 
 /**
  * Convert a URL slug to a numeric book ID for API calls
- * @param urlSlug - The URL slug from the route parameter
+ * This function handles both path parameters (/book/:bookId) 
+ * and query parameters (?bookId=slug)
+ * 
+ * @param urlSlug - The URL slug from the route parameter or query parameter
  * @returns The numeric book ID, or 1 as a fallback
  */
 export function getNumericBookId(urlSlug: string | undefined): number {
   if (!urlSlug) return 1; // Default to 1984
   
-  const mapping = BOOK_URL_MAPPINGS.find(m => m.slug === urlSlug);
-  return mapping?.numericId || 1; // Default to 1984 if not found
+  // Handle special case for query parameter format (?bookId=communist-manifesto)
+  let slug = urlSlug;
+  
+  // Log for debugging
+  console.log(`Converting URL slug "${urlSlug}" to numeric ID`);
+  
+  const mapping = BOOK_URL_MAPPINGS.find(m => m.slug === slug);
+  
+  if (mapping) {
+    console.log(`Found mapping for "${slug}": ${mapping.numericId}`);
+    return mapping.numericId;
+  }
+  
+  console.log(`No mapping found for "${slug}", defaulting to 1`);
+  return 1; // Default to 1984 if not found
 }
 
 /**
  * Get a book object by its URL slug
- * @param urlSlug - The URL slug from the route parameter
+ * This function handles both path parameters (/book/:bookId) 
+ * and query parameters (?bookId=slug)
+ * 
+ * @param urlSlug - The URL slug from the route parameter or query parameter
  * @returns The book object, or the first book as a fallback
  */
 export function getBookBySlug(urlSlug: string | undefined) {
   if (!urlSlug) return books[0]; // Default to first book
   
-  const mapping = BOOK_URL_MAPPINGS.find(m => m.slug === urlSlug);
+  // Handle special case for query parameter format (?bookId=communist-manifesto)
+  let slug = urlSlug;
+  
+  const mapping = BOOK_URL_MAPPINGS.find(m => m.slug === slug);
   return books.find(book => book.id === mapping?.id) || books[0];
 }
 

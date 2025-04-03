@@ -11,7 +11,7 @@ import { Avatar } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import ContextPanel from '../components/ContextPanel';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { EncyclopediaProvider, useEncyclopedia, EncyclopediaEntry } from '@/contexts/EncyclopediaContext';
 import EntryUnlockedNotification from '@/components/encyclopedia/EntryUnlockedNotification';
 import SimpleLibrarian from '@/components/SimpleLibrarian';
@@ -58,8 +58,13 @@ const ConversationPageContent = () => {
   const [conversationId, setConversationId] = useState<number | string | null>(null);
   const queryClient = useQueryClient();
   const { bookId } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+  // Parse query parameters
+  const queryParams = new URLSearchParams(location.search);
+  const queryBookId = queryParams.get('bookId');
 
   // Encyclopedia integration
   const { entries, unlockedEntryIds, unlockEntry, selectEntry } = useEncyclopedia();
@@ -67,22 +72,26 @@ const ConversationPageContent = () => {
   
   // If a book ID is provided in the URL, update the selected book
   useEffect(() => {
-    if (bookId) {
-      console.log(`Book ID from URL: ${bookId}`);
+    // Get book ID from either path parameter or query parameter
+    const urlBookId = bookId || queryBookId;
+    
+    if (urlBookId) {
+      console.log(`Book ID from URL: ${urlBookId}`);
       
       // Use the centralized book helpers
-      const bookToSelect = getBookBySlug(bookId);
+      const bookToSelect = getBookBySlug(urlBookId);
       if (bookToSelect) {
         setSelectedBook(bookToSelect);
         console.log(`Set selected book to ${bookToSelect.title}`);
       }
     }
-  }, [bookId, setSelectedBook]);
+  }, [bookId, queryBookId, setSelectedBook]);
   
   // Calculate the current numeric book ID to use for API calls
-  const currentBookId = getNumericBookId(bookId) || getNumericBookId(selectedBook.id);
+  // Handle both path parameter and query parameter
+  const currentBookId = getNumericBookId(bookId || queryBookId) || getNumericBookId(selectedBook.id);
   
-  // Fetch characters using the dynamic book ID
+  // Fetch characters using the hardcoded book ID
   const { data: characters, isLoading: isLoadingCharacters } = useQuery({
     queryKey: [`/api/books/${currentBookId}/characters`],
     queryFn: () => {
@@ -305,6 +314,7 @@ const ConversationPageContent = () => {
                         variant="ghost"
                         className="flex items-center"
                         onClick={() => handleCharacterSelect(null)}
+                        disabled={isCreatingConversation}
                       >
                         <BookText className="mr-2 h-4 w-4" />
                         {getLibrarianName(currentBookId)}, the AI Librarian
