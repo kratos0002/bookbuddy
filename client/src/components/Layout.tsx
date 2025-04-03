@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useBook } from '../contexts/BookContext';
 import FeedbackChatbot from './feedback/FeedbackChatbot';
 
@@ -10,6 +10,7 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const { selectedBook } = useBook();
+  const navigate = useNavigate();
   const isHomePage = location.pathname === '/';
   const isChatPage = location.pathname.startsWith('/chat');
   const isBookPage = location.pathname.startsWith('/book/');
@@ -46,6 +47,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Link 
                 to={`/book/${selectedBook.id}`} 
                 className={`text-sm hover:text-book-primary transition-colors ${isBookPage ? 'text-book-primary font-medium' : ''}`}
+                onClick={(e) => {
+                  // Prevent default browser navigation
+                  e.preventDefault();
+                  // Use navigate function for programmatic navigation
+                  navigate(`/book/${selectedBook.id}`);
+                }}
               >
                 {selectedBook.title}
               </Link>
