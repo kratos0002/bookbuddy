@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { BookOpen } from 'lucide-react';
 import SuggestionPanel from './chat/suggestions/SuggestionPanel';
+import { useBook } from '../contexts/BookContext';
 
 // Define a message interface
 interface Message {
@@ -12,7 +13,23 @@ interface Message {
   timestamp: Date;
 }
 
+// Helper function to get the correct librarian name based on book ID
+const getLibrarianName = (bookId: string | number) => {
+  return Number(bookId) === 2 ? 'Marx Scholar' : 'Alexandria';
+};
+
+// Helper function to get the correct book title based on book ID
+const getBookTitle = (bookId: string | number) => {
+  return Number(bookId) === 2 ? 'The Communist Manifesto' : '1984';
+};
+
+// Helper function to get the correct book author based on book ID
+const getBookAuthor = (bookId: string | number) => {
+  return Number(bookId) === 2 ? 'Karl Marx and Friedrich Engels' : 'George Orwell';
+};
+
 const SimpleLibrarian: React.FC = () => {
+  const { selectedBook } = useBook();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -21,15 +38,19 @@ const SimpleLibrarian: React.FC = () => {
 
   // Initial welcome message
   useEffect(() => {
+    const librarianName = getLibrarianName(selectedBook.id);
+    const bookTitle = getBookTitle(selectedBook.id);
+    const bookAuthor = getBookAuthor(selectedBook.id);
+    
     setMessages([
       {
         id: 'welcome',
-        content: "Hello! I'm Alexandria, the AI Librarian. How can I help you with '1984' by George Orwell today?",
+        content: `Hello! I'm ${librarianName}. How can I help you with '${bookTitle}' by ${bookAuthor} today?`,
         isUser: false,
         timestamp: new Date()
       }
     ]);
-  }, []);
+  }, [selectedBook.id]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -57,7 +78,10 @@ const SimpleLibrarian: React.FC = () => {
       const response = await fetch('/api/simple-librarian', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input })
+        body: JSON.stringify({ 
+          message: input,
+          bookId: selectedBook.id
+        })
       });
 
       const data = await response.json();
@@ -95,6 +119,9 @@ const SimpleLibrarian: React.FC = () => {
   const handleSuggestionClick = (text: string) => {
     setInput(text);
   };
+
+  const librarianName = getLibrarianName(selectedBook.id);
+  const bookTitle = getBookTitle(selectedBook.id);
 
   return (
     <div className="flex flex-col h-full border rounded-md bg-background shadow">
@@ -144,7 +171,7 @@ const SimpleLibrarian: React.FC = () => {
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask Alexandria about '1984'..."
+            placeholder={`Ask ${librarianName} about '${bookTitle}'...`}
             className="w-full"
             disabled={isLoading}
           />

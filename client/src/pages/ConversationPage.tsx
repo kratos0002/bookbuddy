@@ -66,21 +66,17 @@ const ConversationPageContent = () => {
   // If a book ID is provided in the URL, update the selected book
   useEffect(() => {
     if (bookId) {
-      // We only have book ID 1 (1984) in the system, so we'll use that
-      console.log(`Book ID from URL: ${bookId}, using book ID: 1`);
+      console.log(`Book ID from URL: ${bookId}, using book ID: ${selectedBook.id}`);
       // In a real app with multiple books, we would fetch book details here
     }
   }, [bookId, selectedBook.id]);
   
-  // Always use book ID 1 for API calls since we only have one book
-  const apiBookId = 1;
-  
-  // Fetch characters using the hardcoded book ID
+  // Fetch characters using the selected book's ID
   const { data: characters, isLoading: isLoadingCharacters } = useQuery({
-    queryKey: [`/api/books/${apiBookId}/characters`],
+    queryKey: [`/api/books/${selectedBook.id}/characters`],
     queryFn: () => {
-      console.log(`Fetching characters for book ${apiBookId}...`);
-      return apiRequest('GET', `/api/books/${apiBookId}/characters`).then(data => {
+      console.log(`Fetching characters for book ${selectedBook.id}...`);
+      return apiRequest('GET', `/api/books/${selectedBook.id}/characters`).then(data => {
         console.log("Characters received:", data);
         return data;
       });
@@ -96,6 +92,11 @@ const ConversationPageContent = () => {
     refetchIntervalInBackground: true,
   });
 
+  // Get the correct librarian name based on the book
+  const getLibrarianName = (bookId: string | number) => {
+    return Number(bookId) === 2 ? 'Marx Scholar' : 'Alexandria';
+  };
+
   // Create new conversation
   const createConversation = async (characterId: number | null) => {
     setIsCreatingConversation(true);
@@ -105,13 +106,13 @@ const ConversationPageContent = () => {
         'POST',
         '/api/conversations',
         {
-          bookId: apiBookId,
+          bookId: selectedBook.id,
           characterIds: isLibrarianSelected ? [] : [characterId],
           isLibrarianPresent: isLibrarianSelected,
           conversationMode: isLibrarianSelected ? 'analysis' : 'character',
           userId: 1,
           title: isLibrarianSelected 
-            ? `Chat with Alexandria, the AI Librarian` 
+            ? `Chat with ${getLibrarianName(selectedBook.id)}` 
             : `Chat with ${characters?.find(c => c.id === characterId)?.name || 'Character'}`
         }
       );
@@ -301,7 +302,7 @@ const ConversationPageContent = () => {
                         disabled={isCreatingConversation}
                       >
                         <BookText className="mr-2 h-4 w-4" />
-                        Alexandria, the AI Librarian
+                        {getLibrarianName(selectedBook.id)}
                       </Button>
                       <p className="text-xs text-muted-foreground mt-1 ml-1">
                         Chat with a knowledgeable librarian about themes, analysis, and literary context
@@ -337,13 +338,13 @@ const ConversationPageContent = () => {
                           ) : (
                             <div>
                               <p className="mb-2">No characters found. API call information:</p>
-                              <code className="bg-muted p-1 rounded text-xs block mb-2">GET /api/books/{apiBookId}/characters</code>
+                              <code className="bg-muted p-1 rounded text-xs block mb-2">GET /api/books/{selectedBook.id}/characters</code>
                               <p className="text-sm text-muted-foreground mb-2">Attempting to fetch characters...</p>
                               <Button 
                                 size="sm" 
                                 variant="outline"
                                 onClick={() => {
-                                  queryClient.invalidateQueries({ queryKey: [`/api/books/${apiBookId}/characters`] });
+                                  queryClient.invalidateQueries({ queryKey: [`/api/books/${selectedBook.id}/characters`] });
                                 }}
                               >
                                 Retry
@@ -361,7 +362,7 @@ const ConversationPageContent = () => {
                       <div className="flex flex-col h-full">
                         <div className="p-2 bg-muted border mb-4 rounded-md flex items-center">
                           <h4 className="font-medium">
-                            Chatting with Alexandria, the AI Librarian
+                            Chatting with {getLibrarianName(selectedBook.id)}
                           </h4>
                           <Button
                             variant="ghost"
