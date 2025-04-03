@@ -16,6 +16,7 @@ import { EncyclopediaProvider, useEncyclopedia, EncyclopediaEntry } from '@/cont
 import EntryUnlockedNotification from '@/components/encyclopedia/EntryUnlockedNotification';
 import SimpleLibrarian from '@/components/SimpleLibrarian';
 import SuggestionPanel from '@/components/chat/suggestions/SuggestionPanel';
+import { Book, books } from '../data/books';
 
 interface Message {
   id: number;
@@ -45,6 +46,17 @@ const ENCYCLOPEDIA_TRIGGERS: Record<string, string[]> = {
   'memory-hole': ['memory hole', 'records', 'documents', 'disposal', 'erase', 'forgotten']
 };
 
+// Helper function to map URL slugs to numeric book IDs
+const getNumericBookId = (urlBookId: string | undefined): number => {
+  if (urlBookId === 'communist-manifesto') return 2;
+  return 1; // Default to 1984
+};
+
+// Helper function to get the librarian name based on book ID
+const getLibrarianName = (bookId: number): string => {
+  return bookId === 2 ? 'Marx Scholar' : 'Alexandria';
+};
+
 const ConversationPageContent = () => {
   const [contextOpen, setContextOpen] = useState(false);
   const { selectedBook, selectedCharacter, setSelectedBook } = useBook();
@@ -66,17 +78,30 @@ const ConversationPageContent = () => {
   // If a book ID is provided in the URL, update the selected book
   useEffect(() => {
     if (bookId) {
-      console.log(`Book ID from URL: ${bookId}, using book ID: ${selectedBook.id}`);
-      // In a real app with multiple books, we would fetch book details here
+      console.log(`Book ID from URL: ${bookId}`);
+      
+      // Get numeric book ID from URL parameter
+      const numericBookId = getNumericBookId(bookId);
+      
+      // Find the corresponding book object
+      const bookToSelect = books.find(book => Number(book.id) === numericBookId);
+      
+      if (bookToSelect) {
+        setSelectedBook(bookToSelect);
+        console.log(`Set selected book to ${bookToSelect.title}`);
+      }
     }
-  }, [bookId, selectedBook.id]);
+  }, [bookId, setSelectedBook]);
   
-  // Fetch characters using the selected book's ID
+  // Calculate the current numeric book ID to use for API calls
+  const currentBookId = Number(selectedBook.id);
+  
+  // Fetch characters using the dynamic book ID
   const { data: characters, isLoading: isLoadingCharacters } = useQuery({
-    queryKey: [`/api/books/${selectedBook.id}/characters`],
+    queryKey: [`/api/books/${currentBookId}/characters`],
     queryFn: () => {
-      console.log(`Fetching characters for book ${selectedBook.id}...`);
-      return apiRequest('GET', `/api/books/${selectedBook.id}/characters`).then(data => {
+      console.log(`Fetching characters for book ${currentBookId}...`);
+      return apiRequest('GET', `/api/books/${currentBookId}/characters`).then(data => {
         console.log("Characters received:", data);
         return data;
       });
@@ -92,11 +117,6 @@ const ConversationPageContent = () => {
     refetchIntervalInBackground: true,
   });
 
-  // Get the correct librarian name based on the book
-  const getLibrarianName = (bookId: string | number) => {
-    return Number(bookId) === 2 ? 'Marx Scholar' : 'Alexandria';
-  };
-
   // Create new conversation
   const createConversation = async (characterId: number | null) => {
     setIsCreatingConversation(true);
@@ -106,13 +126,13 @@ const ConversationPageContent = () => {
         'POST',
         '/api/conversations',
         {
-          bookId: selectedBook.id,
+          bookId: currentBookId,
           characterIds: isLibrarianSelected ? [] : [characterId],
           isLibrarianPresent: isLibrarianSelected,
           conversationMode: isLibrarianSelected ? 'analysis' : 'character',
           userId: 1,
           title: isLibrarianSelected 
-            ? `Chat with ${getLibrarianName(selectedBook.id)}` 
+            ? `Chat with ${getLibrarianName(currentBookId)}, the AI Librarian` 
             : `Chat with ${characters?.find(c => c.id === characterId)?.name || 'Character'}`
         }
       );
@@ -302,7 +322,7 @@ const ConversationPageContent = () => {
                         disabled={isCreatingConversation}
                       >
                         <BookText className="mr-2 h-4 w-4" />
-                        {getLibrarianName(selectedBook.id)}
+                        {getLibrarianName(currentBookId)}, the AI Librarian
                       </Button>
                       <p className="text-xs text-muted-foreground mt-1 ml-1">
                         Chat with a knowledgeable librarian about themes, analysis, and literary context
@@ -338,13 +358,13 @@ const ConversationPageContent = () => {
                           ) : (
                             <div>
                               <p className="mb-2">No characters found. API call information:</p>
-                              <code className="bg-muted p-1 rounded text-xs block mb-2">GET /api/books/{selectedBook.id}/characters</code>
+                              <code className="bg-muted p-1 rounded text-xs block mb-2">GET /api/books/{currentBookId}/characters</code>
                               <p className="text-sm text-muted-foreground mb-2">Attempting to fetch characters...</p>
                               <Button 
                                 size="sm" 
                                 variant="outline"
                                 onClick={() => {
-                                  queryClient.invalidateQueries({ queryKey: [`/api/books/${selectedBook.id}/characters`] });
+                                  queryClient.invalidateQueries({ queryKey: [`/api/books/${currentBookId}/characters`] });
                                 }}
                               >
                                 Retry
@@ -362,7 +382,7 @@ const ConversationPageContent = () => {
                       <div className="flex flex-col h-full">
                         <div className="p-2 bg-muted border mb-4 rounded-md flex items-center">
                           <h4 className="font-medium">
-                            Chatting with {getLibrarianName(selectedBook.id)}
+                            Chatting with {getLibrarianName(currentBookId)}, the AI Librarian
                           </h4>
                           <Button
                             variant="ghost"
