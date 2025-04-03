@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 
 interface EntryDetailProps {
   entry: EncyclopediaEntry;
@@ -26,29 +27,25 @@ const categoryIcons: Record<string, LucideIcon> = {
   'People': Eye,
 };
 
-// Add thematic color scheme by category
-const categoryColors: Record<string, { bg: string, text: string, border: string, accent: string }> = {
-  'Locations': { bg: 'bg-amber-950/10', text: 'text-amber-800', border: 'border-amber-900/20', accent: 'text-amber-600' },
-  'Organizations': { bg: 'bg-red-950/10', text: 'text-red-800', border: 'border-red-900/20', accent: 'text-red-600' },
-  'Concepts': { bg: 'bg-blue-950/10', text: 'text-blue-800', border: 'border-blue-900/20', accent: 'text-blue-600' },
-  'Events': { bg: 'bg-purple-950/10', text: 'text-purple-800', border: 'border-purple-900/20', accent: 'text-purple-600' },
-  'Objects': { bg: 'bg-green-950/10', text: 'text-green-800', border: 'border-green-900/20', accent: 'text-green-600' },
-  'Technology': { bg: 'bg-cyan-950/10', text: 'text-cyan-800', border: 'border-cyan-900/20', accent: 'text-cyan-600' },
-  'People': { bg: 'bg-orange-950/10', text: 'text-orange-800', border: 'border-orange-900/20', accent: 'text-orange-600' },
+// Static styling maps for categories
+const getCategoryColor = (category: string) => {
+  switch(category) {
+    case 'Locations': return 'amber';
+    case 'Organizations': return 'red';
+    case 'Concepts': return 'blue';
+    case 'Events': return 'purple';
+    case 'Objects': return 'green';
+    case 'Technology': return 'cyan';
+    case 'People': return 'orange';
+    default: return 'slate';
+  }
 };
 
 const EntryDetail: React.FC<EntryDetailProps> = ({ entry }) => {
   const { unlockedEntryIds, getEntryById, selectEntry } = useEncyclopedia();
   const isUnlocked = unlockedEntryIds.includes(entry.id);
   const CategoryIcon = categoryIcons[entry.category] || FileQuestion;
-  
-  // Get category-specific styling or default to a neutral style
-  const categoryStyle = categoryColors[entry.category] || { 
-    bg: 'bg-slate-950/10', 
-    text: 'text-slate-800', 
-    border: 'border-slate-900/20',
-    accent: 'text-slate-600'
-  };
+  const colorName = getCategoryColor(entry.category);
   
   // Get related entries that are visible (either unlocked or partially unlocked)
   const relatedEntries = entry.relatedEntries
@@ -56,38 +53,76 @@ const EntryDetail: React.FC<EntryDetailProps> = ({ entry }) => {
     .filter(entry => entry && (
       unlockedEntryIds.includes(entry.id) || entry.unlockProgress === 'initial'
     ));
+    
+  // Category specific colors
+  const headerBg = cn("rounded-lg border-2", {
+    "bg-amber-50/50 dark:bg-amber-950/30 border-amber-300 dark:border-amber-800": colorName === "amber",
+    "bg-red-50/50 dark:bg-red-950/30 border-red-300 dark:border-red-800": colorName === "red",
+    "bg-blue-50/50 dark:bg-blue-950/30 border-blue-300 dark:border-blue-800": colorName === "blue",
+    "bg-purple-50/50 dark:bg-purple-950/30 border-purple-300 dark:border-purple-800": colorName === "purple",
+    "bg-green-50/50 dark:bg-green-950/30 border-green-300 dark:border-green-800": colorName === "green",
+    "bg-cyan-50/50 dark:bg-cyan-950/30 border-cyan-300 dark:border-cyan-800": colorName === "cyan",
+    "bg-orange-50/50 dark:bg-orange-950/30 border-orange-300 dark:border-orange-800": colorName === "orange",
+    "bg-slate-50/50 dark:bg-slate-950/30 border-slate-300 dark:border-slate-800": colorName === "slate",
+  });
+
+  const titleColor = cn({
+    "text-amber-800 dark:text-amber-300": colorName === "amber",
+    "text-red-800 dark:text-red-300": colorName === "red", 
+    "text-blue-800 dark:text-blue-300": colorName === "blue",
+    "text-purple-800 dark:text-purple-300": colorName === "purple",
+    "text-green-800 dark:text-green-300": colorName === "green",
+    "text-cyan-800 dark:text-cyan-300": colorName === "cyan",
+    "text-orange-800 dark:text-orange-300": colorName === "orange",
+    "text-slate-800 dark:text-slate-300": colorName === "slate",
+  });
+
+  const iconBg = cn("flex items-center justify-center w-16 h-16 rounded-lg shadow-md border-2", {
+    "bg-amber-100/80 dark:bg-amber-900/30 border-amber-300 dark:border-amber-800": colorName === "amber",
+    "bg-red-100/80 dark:bg-red-900/30 border-red-300 dark:border-red-800": colorName === "red", 
+    "bg-blue-100/80 dark:bg-blue-900/30 border-blue-300 dark:border-blue-800": colorName === "blue",
+    "bg-purple-100/80 dark:bg-purple-900/30 border-purple-300 dark:border-purple-800": colorName === "purple",
+    "bg-green-100/80 dark:bg-green-900/30 border-green-300 dark:border-green-800": colorName === "green",
+    "bg-cyan-100/80 dark:bg-cyan-900/30 border-cyan-300 dark:border-cyan-800": colorName === "cyan",
+    "bg-orange-100/80 dark:bg-orange-900/30 border-orange-300 dark:border-orange-800": colorName === "orange",
+    "bg-slate-100/80 dark:bg-slate-900/30 border-slate-300 dark:border-slate-800": colorName === "slate",
+  });
+
+  const iconColor = cn({
+    "text-amber-600 dark:text-amber-400": colorName === "amber",
+    "text-red-600 dark:text-red-400": colorName === "red", 
+    "text-blue-600 dark:text-blue-400": colorName === "blue",
+    "text-purple-600 dark:text-purple-400": colorName === "purple",
+    "text-green-600 dark:text-green-400": colorName === "green",
+    "text-cyan-600 dark:text-cyan-400": colorName === "cyan",
+    "text-orange-600 dark:text-orange-400": colorName === "orange",
+    "text-slate-600 dark:text-slate-400": colorName === "slate",
+  });
   
   return (
     <div className="space-y-6">
-      <div className={`
-        p-5 rounded-lg border-2 ${categoryStyle.border} ${categoryStyle.bg}
-        flex items-start gap-4 relative
-      `}>
+      <div className={cn("p-5 flex items-start gap-4 relative", headerBg)}>
         {/* Decorative corner patterns */}
         <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 -translate-x-0.5 -translate-y-0.5 rounded-tl-sm"></div>
         <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 translate-x-0.5 -translate-y-0.5 rounded-tr-sm"></div>
         <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 -translate-x-0.5 translate-y-0.5 rounded-bl-sm"></div>
         <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 translate-x-0.5 translate-y-0.5 rounded-br-sm"></div>
         
-        <div className={`
-          flex items-center justify-center w-16 h-16 rounded-lg
-          ${categoryStyle.bg.replace('/10', '/30')} border-2 ${categoryStyle.border}
-          shadow-md
-        `}>
-          <CategoryIcon className={`h-8 w-8 ${categoryStyle.accent}`} />
+        <div className={iconBg}>
+          <CategoryIcon className={cn("h-8 w-8", iconColor)} />
         </div>
         
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <h2 className={`text-2xl font-bold tracking-tight ${categoryStyle.text}`}>
+            <h2 className={cn("text-2xl font-bold tracking-tight", titleColor)}>
               {entry.title}
             </h2>
             <Badge 
               variant="outline" 
-              className={`
-                text-xs flex items-center gap-1 ${categoryStyle.accent} 
-                border-2 ${categoryStyle.border} px-2 py-0.5
-              `}
+              className={cn(
+                "text-xs flex items-center gap-1 border-2 px-2 py-0.5",
+                iconColor
+              )}
             >
               <CategoryIcon className="h-3 w-3" />
               {entry.category}
@@ -96,13 +131,12 @@ const EntryDetail: React.FC<EntryDetailProps> = ({ entry }) => {
           
           <div className="flex items-center gap-3 mt-2 text-sm">
             <Badge 
-              variant={isUnlocked ? "default" : "secondary"} 
-              className={`
-                text-xs rounded-sm px-2 py-0.5 flex items-center gap-1
-                ${isUnlocked 
-                  ? 'bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border-emerald-300' 
-                  : 'bg-amber-100 hover:bg-amber-200 text-amber-800 border-amber-300'}
-              `}
+              className={cn(
+                "text-xs rounded-sm px-2 py-0.5 flex items-center gap-1",
+                isUnlocked 
+                  ? "bg-emerald-100 dark:bg-emerald-900/50 hover:bg-emerald-200 text-emerald-800 dark:text-emerald-200 border-emerald-300 dark:border-emerald-800"
+                  : "bg-amber-100 dark:bg-amber-900/50 hover:bg-amber-200 text-amber-800 dark:text-amber-200 border-amber-300 dark:border-amber-800"
+              )}
             >
               {isUnlocked ? (
                 <>
@@ -129,7 +163,10 @@ const EntryDetail: React.FC<EntryDetailProps> = ({ entry }) => {
       
       <Tabs defaultValue={isUnlocked ? "reality" : "party"} className="mt-6">
         <TabsList className="w-full grid grid-cols-2">
-          <TabsTrigger value="party" className="rounded-md data-[state=active]:bg-amber-100 data-[state=active]:text-amber-900">
+          <TabsTrigger 
+            value="party" 
+            className="rounded-md data-[state=active]:bg-amber-100 dark:data-[state=active]:bg-amber-900/50 data-[state=active]:text-amber-900 dark:data-[state=active]:text-amber-100"
+          >
             <div className="flex items-center gap-1.5 py-0.5">
               <BookOpen className="h-4 w-4" />
               Party Version
@@ -139,7 +176,7 @@ const EntryDetail: React.FC<EntryDetailProps> = ({ entry }) => {
           <TabsTrigger 
             value="reality" 
             disabled={!isUnlocked}
-            className="rounded-md data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-900"
+            className="rounded-md data-[state=active]:bg-emerald-100 dark:data-[state=active]:bg-emerald-900/50 data-[state=active]:text-emerald-900 dark:data-[state=active]:text-emerald-100"
           >
             <div className="flex items-center gap-1.5 py-0.5">
               <FileText className="h-4 w-4" />
@@ -150,22 +187,22 @@ const EntryDetail: React.FC<EntryDetailProps> = ({ entry }) => {
         </TabsList>
         
         <TabsContent value="party" className="mt-4">
-          <Card className="border-2 border-amber-900/30 overflow-hidden">
-            <div className="h-1.5 w-full bg-amber-500/30"></div>
-            <CardHeader className="p-4 pb-2 border-b border-dashed border-amber-900/20">
-              <div className="flex items-center gap-2 text-amber-800">
+          <Card className="border-2 border-amber-300 dark:border-amber-800 overflow-hidden shadow-md">
+            <div className="h-1.5 w-full bg-amber-500/50 dark:bg-amber-600/30"></div>
+            <CardHeader className="p-4 pb-2 border-b border-dashed border-amber-300/50 dark:border-amber-800/50">
+              <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300">
                 <Eye className="h-4 w-4" />
                 <h3 className="font-semibold tracking-tight">Official Party Description</h3>
               </div>
             </CardHeader>
             <CardContent className="p-5 pt-3">
-              <div className="bg-amber-50/30 p-4 rounded-md border border-dashed border-amber-900/20">
+              <div className="bg-amber-50/30 dark:bg-amber-900/20 p-4 rounded-md border border-dashed border-amber-300/50 dark:border-amber-800/50">
                 <p className="text-sm leading-relaxed">{entry.partyDescription}</p>
               </div>
               
-              <div className="mt-4 p-3 bg-amber-50/50 border border-amber-900/20 rounded-md flex items-start gap-2">
-                <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                <p className="text-xs text-amber-800">
+              <div className="mt-4 p-3 bg-amber-50/50 dark:bg-amber-900/30 border border-amber-300/50 dark:border-amber-800/50 rounded-md flex items-start gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-amber-800 dark:text-amber-200">
                   <span className="font-semibold">APPROVED VERSION:</span> Authorized by the Ministry of Truth for general consumption. This represents the official Party narrative.
                 </p>
               </div>
@@ -175,40 +212,43 @@ const EntryDetail: React.FC<EntryDetailProps> = ({ entry }) => {
         
         <TabsContent value="reality" className="mt-4">
           {isUnlocked ? (
-            <Card className="border-2 border-emerald-900/30 overflow-hidden">
-              <div className="h-1.5 w-full bg-emerald-500/30"></div>
-              <CardHeader className="p-4 pb-2 border-b border-dashed border-emerald-900/20">
-                <div className="flex items-center gap-2 text-emerald-800">
+            <Card className="border-2 border-emerald-300 dark:border-emerald-800 overflow-hidden shadow-md">
+              <div className="h-1.5 w-full bg-emerald-500/50 dark:bg-emerald-600/30"></div>
+              <CardHeader className="p-4 pb-2 border-b border-dashed border-emerald-300/50 dark:border-emerald-800/50">
+                <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300">
                   <Unlock className="h-4 w-4" />
                   <h3 className="font-semibold tracking-tight">Actual Reality</h3>
                 </div>
               </CardHeader>
               <CardContent className="p-5 pt-3">
-                <div className="bg-emerald-50/30 p-4 rounded-md border border-dashed border-emerald-900/20">
+                <div className="bg-emerald-50/30 dark:bg-emerald-900/20 p-4 rounded-md border border-dashed border-emerald-300/50 dark:border-emerald-800/50">
                   <p className="text-sm leading-relaxed">{entry.reality}</p>
                 </div>
                 
-                <div className="mt-4 p-3 bg-emerald-50/50 border border-emerald-900/20 rounded-md flex items-start gap-2">
-                  <AlertCircle className="h-4 w-4 text-emerald-600 mt-0.5 flex-shrink-0" />
-                  <p className="text-xs text-emerald-800">
+                <div className="mt-4 p-3 bg-emerald-50/50 dark:bg-emerald-900/30 border border-emerald-300/50 dark:border-emerald-800/50 rounded-md flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs text-emerald-800 dark:text-emerald-200">
                     <span className="font-semibold">UNALTERED TRUTH:</span> This information contradicts the Party's narrative and would be considered thoughtcrime. You have discovered this through conversations.
                   </p>
                 </div>
               </CardContent>
             </Card>
           ) : (
-            <Card className="border-2 border-red-900/30 overflow-hidden bg-red-50/10">
-              <div className="h-1.5 w-full bg-red-500/30"></div>
+            <Card className="border-2 border-red-300 dark:border-red-800 overflow-hidden bg-red-50/10 dark:bg-red-900/10 shadow-md">
+              <div className="h-1.5 w-full bg-red-500/50 dark:bg-red-600/30"></div>
               <CardContent className="flex flex-col items-center justify-center py-8 text-center px-8">
-                <div className="w-16 h-16 bg-red-100/30 rounded-full flex items-center justify-center mb-4 border-2 border-red-900/20">
-                  <Lock className="h-8 w-8 text-red-800/70" />
+                <div className="w-16 h-16 bg-red-100/30 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-4 border-2 border-red-300/50 dark:border-red-800/50">
+                  <Lock className="h-8 w-8 text-red-800/70 dark:text-red-400/70" />
                 </div>
-                <h3 className="text-red-800 font-bold mb-2">CLASSIFIED INFORMATION</h3>
-                <p className="text-red-700/80 text-sm max-w-md">
+                <h3 className="text-red-800 dark:text-red-300 font-bold mb-2">CLASSIFIED INFORMATION</h3>
+                <p className="text-red-700/80 dark:text-red-300/80 text-sm max-w-md">
                   This truth is currently restricted. Continue conversations with characters who mention this topic to unlock the full reality behind the Party's narrative.
                 </p>
                 
-                <Badge variant="outline" className="mt-4 border-red-900/30 text-red-700">
+                <Badge 
+                  variant="outline" 
+                  className="mt-4 border-red-300/50 dark:border-red-800/50 text-red-700 dark:text-red-300"
+                >
                   THOUGHTCRIME WARNING
                 </Badge>
               </CardContent>
@@ -229,9 +269,9 @@ const EntryDetail: React.FC<EntryDetailProps> = ({ entry }) => {
               {entry.quotes.map((quote, index) => (
                 <div 
                   key={index} 
-                  className="p-4 bg-black/10 border rounded-md relative"
+                  className="p-4 bg-black/10 dark:bg-white/5 border rounded-md relative"
                 >
-                  <Quote className="absolute text-black/5 h-12 w-12 -top-1 -left-1" />
+                  <Quote className="absolute text-black/5 dark:text-white/5 h-12 w-12 -top-1 -left-1" />
                   <p className="text-sm italic relative z-10">"{quote}"</p>
                 </div>
               ))}
@@ -252,17 +292,35 @@ const EntryDetail: React.FC<EntryDetailProps> = ({ entry }) => {
               <Button
                 key={relatedEntry.id}
                 variant="outline"
-                className="justify-start h-auto py-3 px-4 hover:bg-black/5 border-2"
+                className="justify-start h-auto py-3 px-4 hover:bg-black/5 dark:hover:bg-white/5 border-2 shadow-sm"
                 onClick={() => selectEntry(relatedEntry.id)}
               >
                 <div className="flex gap-2 items-center">
                   {categoryIcons[relatedEntry.category] && (
-                    <div className={`
-                      w-8 h-8 rounded-full flex items-center justify-center
-                      ${categoryColors[relatedEntry.category]?.bg || 'bg-slate-100'}
-                    `}>
+                    <div className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center",
+                      {
+                        "bg-amber-100/50 dark:bg-amber-900/20": getCategoryColor(relatedEntry.category) === "amber",
+                        "bg-red-100/50 dark:bg-red-900/20": getCategoryColor(relatedEntry.category) === "red",
+                        "bg-blue-100/50 dark:bg-blue-900/20": getCategoryColor(relatedEntry.category) === "blue",
+                        "bg-purple-100/50 dark:bg-purple-900/20": getCategoryColor(relatedEntry.category) === "purple",
+                        "bg-green-100/50 dark:bg-green-900/20": getCategoryColor(relatedEntry.category) === "green",
+                        "bg-cyan-100/50 dark:bg-cyan-900/20": getCategoryColor(relatedEntry.category) === "cyan",
+                        "bg-orange-100/50 dark:bg-orange-900/20": getCategoryColor(relatedEntry.category) === "orange",
+                        "bg-slate-100/50 dark:bg-slate-900/20": getCategoryColor(relatedEntry.category) === "slate",
+                      }
+                    )}>
                       {React.createElement(categoryIcons[relatedEntry.category], { 
-                        className: `h-4 w-4 ${categoryColors[relatedEntry.category]?.accent || 'text-slate-600'}`
+                        className: cn("h-4 w-4", {
+                          "text-amber-600 dark:text-amber-400": getCategoryColor(relatedEntry.category) === "amber",
+                          "text-red-600 dark:text-red-400": getCategoryColor(relatedEntry.category) === "red",
+                          "text-blue-600 dark:text-blue-400": getCategoryColor(relatedEntry.category) === "blue",
+                          "text-purple-600 dark:text-purple-400": getCategoryColor(relatedEntry.category) === "purple",
+                          "text-green-600 dark:text-green-400": getCategoryColor(relatedEntry.category) === "green",
+                          "text-cyan-600 dark:text-cyan-400": getCategoryColor(relatedEntry.category) === "cyan",
+                          "text-orange-600 dark:text-orange-400": getCategoryColor(relatedEntry.category) === "orange",
+                          "text-slate-600 dark:text-slate-400": getCategoryColor(relatedEntry.category) === "slate",
+                        })
                       })}
                     </div>
                   )}
@@ -289,7 +347,7 @@ const EntryDetail: React.FC<EntryDetailProps> = ({ entry }) => {
               <Badge 
                 key={character} 
                 variant="secondary"
-                className="py-1.5 px-3 bg-black/10 hover:bg-black/15"
+                className="py-1.5 px-3 bg-black/10 dark:bg-white/5 hover:bg-black/15 dark:hover:bg-white/10"
               >
                 {character.split('-').map(word => 
                   word.charAt(0).toUpperCase() + word.slice(1)

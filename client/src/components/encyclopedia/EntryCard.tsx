@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface EntryCardProps {
   entry: EncyclopediaEntry;
@@ -24,38 +25,31 @@ const categoryIcons: Record<string, LucideIcon> = {
   'People': Eye,
 };
 
-// Add thematic color scheme by category
-const categoryColors: Record<string, { bg: string, text: string, border: string, icon: string }> = {
-  'Locations': { bg: 'bg-amber-950/10', text: 'text-amber-800', border: 'border-amber-900/20', icon: 'text-amber-700' },
-  'Organizations': { bg: 'bg-red-950/10', text: 'text-red-800', border: 'border-red-900/20', icon: 'text-red-700' },
-  'Concepts': { bg: 'bg-blue-950/10', text: 'text-blue-800', border: 'border-blue-900/20', icon: 'text-blue-700' },
-  'Events': { bg: 'bg-purple-950/10', text: 'text-purple-800', border: 'border-purple-900/20', icon: 'text-purple-700' },
-  'Objects': { bg: 'bg-green-950/10', text: 'text-green-800', border: 'border-green-900/20', icon: 'text-green-700' },
-  'Technology': { bg: 'bg-cyan-950/10', text: 'text-cyan-800', border: 'border-cyan-900/20', icon: 'text-cyan-700' },
-  'People': { bg: 'bg-orange-950/10', text: 'text-orange-800', border: 'border-orange-900/20', icon: 'text-orange-700' },
+// Static styling maps for categories
+const getCategoryColor = (category: string) => {
+  switch(category) {
+    case 'Locations': return 'amber';
+    case 'Organizations': return 'red';
+    case 'Concepts': return 'blue';
+    case 'Events': return 'purple';
+    case 'Objects': return 'green';
+    case 'Technology': return 'cyan';
+    case 'People': return 'orange';
+    default: return 'slate';
+  }
 };
 
 const EntryCard: React.FC<EntryCardProps> = ({ entry, isUnlocked, onClick }) => {
   const isFullyLocked = !isUnlocked && entry.unlockProgress === 'locked';
   const CategoryIcon = categoryIcons[entry.category] || FileQuestion;
-  
-  // Get category-specific styling or default to a neutral style
-  const categoryStyle = categoryColors[entry.category] || { 
-    bg: 'bg-slate-950/10', 
-    text: 'text-slate-800', 
-    border: 'border-slate-900/20',
-    icon: 'text-slate-700'
-  };
+  const colorName = getCategoryColor(entry.category);
   
   // For locked entries, show a redacted version
   if (isFullyLocked) {
     return (
       <Card 
-        className={`
-          overflow-hidden border-2 ${categoryStyle.border} bg-black/30 backdrop-blur-sm 
-          transition-all hover:bg-black/40 cursor-pointer relative
-          hover:shadow-md hover:shadow-black/20 group
-        `} 
+        className="overflow-hidden border-2 border-slate-300 dark:border-slate-700 bg-black/30 backdrop-blur-sm 
+          transition-all hover:bg-black/40 cursor-pointer relative shadow-md group"
         onClick={onClick}
       >
         {/* Semi-transparent overlay with lock icon */}
@@ -76,7 +70,7 @@ const EntryCard: React.FC<EntryCardProps> = ({ entry, isUnlocked, onClick }) => 
           <CardHeader className="p-5 pb-2 border-b border-dashed border-muted">
             <div className="flex items-center justify-between">
               <h3 className="font-bold tracking-tight">[REDACTED]</h3>
-              <Badge variant="outline" className={`text-xs flex items-center gap-1 ${categoryStyle.icon}`}>
+              <Badge variant="outline" className="text-xs flex items-center gap-1">
                 <CategoryIcon className="h-3 w-3" />
                 {entry.category}
               </Badge>
@@ -99,32 +93,95 @@ const EntryCard: React.FC<EntryCardProps> = ({ entry, isUnlocked, onClick }) => 
     );
   }
   
+  // Custom styling based on color name and unlock status
+  const cardBorder = isUnlocked 
+    ? cn("border-2", {
+        "border-amber-300 dark:border-amber-800": colorName === "amber",
+        "border-red-300 dark:border-red-800": colorName === "red",
+        "border-blue-300 dark:border-blue-800": colorName === "blue",
+        "border-purple-300 dark:border-purple-800": colorName === "purple",
+        "border-green-300 dark:border-green-800": colorName === "green",
+        "border-cyan-300 dark:border-cyan-800": colorName === "cyan",
+        "border-orange-300 dark:border-orange-800": colorName === "orange",
+        "border-slate-300 dark:border-slate-800": colorName === "slate",
+      })
+    : "border-2 border-amber-300 dark:border-amber-800";
+  
+  const cardBg = isUnlocked 
+    ? cn({
+        "bg-amber-50/50 dark:bg-amber-950/20": colorName === "amber",
+        "bg-red-50/50 dark:bg-red-950/20": colorName === "red",
+        "bg-blue-50/50 dark:bg-blue-950/20": colorName === "blue",
+        "bg-purple-50/50 dark:bg-purple-950/20": colorName === "purple",
+        "bg-green-50/50 dark:bg-green-950/20": colorName === "green",
+        "bg-cyan-50/50 dark:bg-cyan-950/20": colorName === "cyan",
+        "bg-orange-50/50 dark:bg-orange-950/20": colorName === "orange",
+        "bg-slate-50/50 dark:bg-slate-950/20": colorName === "slate",
+      })
+    : "bg-amber-50/50 dark:bg-amber-950/20";
+  
+  const titleColor = isUnlocked 
+    ? cn({
+        "text-amber-800 dark:text-amber-300": colorName === "amber",
+        "text-red-800 dark:text-red-300": colorName === "red",
+        "text-blue-800 dark:text-blue-300": colorName === "blue",
+        "text-purple-800 dark:text-purple-300": colorName === "purple",
+        "text-green-800 dark:text-green-300": colorName === "green",
+        "text-cyan-800 dark:text-cyan-300": colorName === "cyan",
+        "text-orange-800 dark:text-orange-300": colorName === "orange",
+        "text-slate-800 dark:text-slate-300": colorName === "slate",
+      })
+    : "text-amber-800 dark:text-amber-300";
+  
+  const bannerColor = isUnlocked 
+    ? cn("h-1.5 w-full", {
+        "bg-amber-500/50 dark:bg-amber-500/30": colorName === "amber",
+        "bg-red-500/50 dark:bg-red-500/30": colorName === "red",
+        "bg-blue-500/50 dark:bg-blue-500/30": colorName === "blue",
+        "bg-purple-500/50 dark:bg-purple-500/30": colorName === "purple",
+        "bg-green-500/50 dark:bg-green-500/30": colorName === "green",
+        "bg-cyan-500/50 dark:bg-cyan-500/30": colorName === "cyan",
+        "bg-orange-500/50 dark:bg-orange-500/30": colorName === "orange",
+        "bg-slate-500/50 dark:bg-slate-500/30": colorName === "slate",
+      })
+    : "h-1.5 w-full bg-amber-500/50 dark:bg-amber-500/30";
+  
+  const iconColor = isUnlocked 
+    ? cn({
+        "text-amber-600 dark:text-amber-400": colorName === "amber",
+        "text-red-600 dark:text-red-400": colorName === "red",
+        "text-blue-600 dark:text-blue-400": colorName === "blue",
+        "text-purple-600 dark:text-purple-400": colorName === "purple",
+        "text-green-600 dark:text-green-400": colorName === "green",
+        "text-cyan-600 dark:text-cyan-400": colorName === "cyan",
+        "text-orange-600 dark:text-orange-400": colorName === "orange",
+        "text-slate-600 dark:text-slate-400": colorName === "slate",
+      })
+    : "text-amber-600 dark:text-amber-400";
+  
   return (
     <Card 
-      className={`
-        overflow-hidden border-2 transition-all group cursor-pointer
-        ${isUnlocked 
-          ? `${categoryStyle.border} ${categoryStyle.bg} hover:shadow-lg hover:shadow-${categoryStyle.border}/30` 
-          : 'border-amber-900/30 bg-amber-50/30 hover:shadow-md hover:shadow-amber-900/20'}
-        hover:translate-y-[-2px]
-      `}
+      className={cn(
+        "overflow-hidden transition-all group cursor-pointer hover:shadow-lg shadow-sm hover:-translate-y-1",
+        cardBorder,
+        cardBg,
+      )}
       onClick={onClick}
     >
       {/* Top decorative banner */}
-      <div className={`h-1.5 w-full ${isUnlocked ? categoryStyle.bg.replace('/10', '/40') : 'bg-amber-500/30'}`}></div>
+      <div className={bannerColor}></div>
       
       <CardHeader className="p-5 pb-3 relative">
         <div className="flex items-center justify-between">
-          <h3 className={`font-bold tracking-tight ${isUnlocked ? categoryStyle.text : 'text-amber-800'}`}>
+          <h3 className={cn("font-bold tracking-tight", titleColor)}>
             {entry.title}
           </h3>
           <Badge 
             variant="outline" 
-            className={`
-              text-xs flex items-center gap-1 
-              ${isUnlocked ? categoryStyle.icon : 'text-amber-700'}
-              border-2 px-2 py-0.5
-            `}
+            className={cn(
+              "text-xs flex items-center gap-1 border-2 px-2 py-0.5",
+              iconColor
+            )}
           >
             <CategoryIcon className="h-3 w-3" />
             {entry.category}
@@ -154,13 +211,12 @@ const EntryCard: React.FC<EntryCardProps> = ({ entry, isUnlocked, onClick }) => 
           )}
         </div>
         <Badge 
-          variant={isUnlocked ? "default" : "secondary"} 
-          className={`
-            text-xs rounded-sm px-2 py-0.5
-            ${isUnlocked 
-              ? 'bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border-emerald-300' 
-              : 'bg-amber-100 hover:bg-amber-200 text-amber-800 border-amber-300'}
-          `}
+          className={cn(
+            "text-xs rounded-sm px-2 py-0.5",
+            isUnlocked 
+              ? "bg-emerald-100 dark:bg-emerald-900/50 hover:bg-emerald-200 text-emerald-800 dark:text-emerald-200 border-emerald-300 dark:border-emerald-800"
+              : "bg-amber-100 dark:bg-amber-900/50 hover:bg-amber-200 text-amber-800 dark:text-amber-200 border-amber-300 dark:border-amber-800"
+          )}
         >
           {isUnlocked ? "Unlocked" : "Partially Revealed"}
         </Badge>
