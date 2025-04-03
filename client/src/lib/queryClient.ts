@@ -1,7 +1,7 @@
 import { QueryClient } from '@tanstack/react-query';
 
-// Get the API URL from environment or use a fallback for development
-const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+// Get the API URL from environment or use the Render.com backend as fallback
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://bookbuddy-qpi.onrender.com';
 console.log('API Base URL:', API_BASE_URL);
 
 // API request helper

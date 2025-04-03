@@ -5,6 +5,7 @@ import { BookOpen, RefreshCw } from 'lucide-react';
 import SuggestionPanel from './chat/suggestions/SuggestionPanel';
 import { useBook } from '../contexts/BookContext';
 import { getLibrarianName } from '@/lib/bookHelpers';
+import { apiRequest } from '@/lib/queryClient';
 
 // Define a message interface
 interface Message {
@@ -71,33 +72,15 @@ const SimpleLibrarian: React.FC = () => {
     try {
       console.log(`Sending request to /api/simple-librarian with bookId: ${Number(selectedBook.id)}`);
       
-      // Send to the simple librarian API
-      const response = await fetch('/api/simple-librarian', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+      // Use the apiRequest helper instead of direct fetch
+      const data = await apiRequest(
+        'POST',
+        '/api/simple-librarian',
+        { 
           message: input,
           bookId: Number(selectedBook.id)
-        })
-      });
-
-      // Get the response text first to check if it's HTML
-      const responseText = await response.text();
-      
-      // Check if response is HTML (which indicates an error)
-      if (isHtmlResponse(responseText)) {
-        console.error('Received HTML response instead of JSON:', responseText.substring(0, 100) + '...');
-        throw new Error('Received HTML response instead of expected JSON data');
-      }
-      
-      // Try to parse the response as JSON
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error('Failed to parse response as JSON:', parseError);
-        throw new Error('Invalid JSON response from server');
-      }
+        }
+      );
 
       if (data.success) {
         // Add librarian response
@@ -133,7 +116,7 @@ const SimpleLibrarian: React.FC = () => {
   };
 
   // Try to reconnect/refresh the API
-  const handleRetryConnection = () => {
+  const handleRetryConnection = async () => {
     setApiError(null);
     setMessages(prev => [
       ...prev,
@@ -145,31 +128,29 @@ const SimpleLibrarian: React.FC = () => {
       }
     ]);
     
-    // Simulate a ping to the API
-    fetch('/api/ping')
-      .then(response => response.json())
-      .then(data => {
-        setMessages(prev => [
-          ...prev,
-          {
-            id: `system-${Date.now()}`,
-            content: "Connection restored. You can continue your conversation.",
-            isUser: false,
-            timestamp: new Date()
-          }
-        ]);
-      })
-      .catch(error => {
-        setMessages(prev => [
-          ...prev,
-          {
-            id: `system-${Date.now()}`,
-            content: "Still having trouble connecting to the server. Please try again later.",
-            isUser: false,
-            timestamp: new Date()
-          }
-        ]);
-      });
+    // Use apiRequest helper for ping
+    try {
+      const pingResponse = await apiRequest('GET', '/api/ping');
+      setMessages(prev => [
+        ...prev,
+        {
+          id: `system-${Date.now()}`,
+          content: "Connection restored. You can continue your conversation.",
+          isUser: false,
+          timestamp: new Date()
+        }
+      ]);
+    } catch (error) {
+      setMessages(prev => [
+        ...prev,
+        {
+          id: `system-${Date.now()}`,
+          content: "Still having trouble connecting to the server. Please try again later.",
+          isUser: false,
+          timestamp: new Date()
+        }
+      ]);
+    }
   };
 
   // Handle suggestion clicks
