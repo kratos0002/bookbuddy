@@ -1,0 +1,12 @@
+This is a placeholder for the Proletariat avatar image.
+
+You should replace this text file with an actual JPG image representing the Proletariat concept.
+
+The image should ideally be:
+- Square format
+- At least 200x200px
+- In JPG format
+- Named "proletariat-avatar.jpg" 
+- Placed in the public directory
+
+Suggestion: Use a period-appropriate illustration depicting 19th century industrial workers, possibly in a factory setting, or a symbolic representation of the working class from that era. 

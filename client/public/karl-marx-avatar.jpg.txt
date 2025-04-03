@@ -1,0 +1,12 @@
+This is a placeholder for Karl Marx's avatar image.
+
+You should replace this text file with an actual JPG image file of Karl Marx.
+
+The image should ideally be:
+- Square format
+- At least 200x200px
+- In JPG format
+- Named "karl-marx-avatar.jpg" 
+- Placed in the public directory
+
+The image should feature a recognizable portrait of Karl Marx, preferably a historical photograph or illustration. 

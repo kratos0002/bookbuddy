@@ -1,0 +1,14 @@
+This is a placeholder for the Communist Manifesto cover image.
+
+You should replace this text file with an actual JPG image file of the cover for The Communist Manifesto.
+
+The image should ideally be:
+- High resolution (at least 1000px in height)
+- In JPG format
+- Named "communist-manifesto-cover.jpg" 
+- Placed in the public directory
+
+The cover should feature:
+- The title "The Communist Manifesto"
+- Authors: Karl Marx and Friedrich Engels
+- Preferably a classic cover design with red and black color scheme 

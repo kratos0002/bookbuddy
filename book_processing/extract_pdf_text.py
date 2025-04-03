@@ -35,8 +35,8 @@ def extract_text_from_pdf(pdf_path, output_path):
     return output_path
 
 if __name__ == "__main__":
-    pdf_path = "attached_assets/1984.pdf"
-    output_path = "book_processing/data/1984.txt"
+    pdf_path = "attached_assets/communist_manifesto.pdf"
+    output_path = "book_processing/data/communist_manifesto.txt"
     
     # Ensure the data directory exists
     os.makedirs("book_processing/data", exist_ok=True)

@@ -1,0 +1,12 @@
+This is a placeholder for the Bourgeoisie avatar image.
+
+You should replace this text file with an actual JPG image representing the Bourgeoisie concept.
+
+The image should ideally be:
+- Square format
+- At least 200x200px
+- In JPG format
+- Named "bourgeoisie-avatar.jpg" 
+- Placed in the public directory
+
+Suggestion: Use a period-appropriate illustration depicting a 19th century capitalist, factory owner, or businessman with formal attire, top hat, etc. 

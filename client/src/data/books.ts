@@ -1,4 +1,3 @@
-
 export interface Book {
   id: string;
   title: string;
@@ -93,6 +92,71 @@ export const books: Book[] = [
       { year: 1944, event: "Oceania forms from the merger of the Americas with the British Empire" },
       { year: 1950, event: "The Party rises to power and establishes totalitarian rule" },
       { year: 1984, event: "Winston begins his diary (the events of the novel)" }
+    ]
+  },
+  {
+    id: "communist-manifesto",
+    title: "The Communist Manifesto",
+    author: "Karl Marx and Friedrich Engels",
+    publishedYear: 1848,
+    coverImage: "/communist-manifesto-cover.jpg", // Placeholder path - we'll need to create this asset
+    description: "A foundational political document that outlines the theory and criticism of capitalism as developed by Karl Marx and Friedrich Engels. It examines class struggles and the problems of capitalism, proposing a path towards a society without classes, private property, or state structure.",
+    themeColors: {
+      primary: "#B31942", // Red for communism
+      secondary: "#F5F1E3", // Off-white for paper/parchment
+      accent: "#0A3161",   // Dark blue for contrast
+    },
+    characters: [
+      {
+        id: "karl-marx",
+        name: "Karl Marx",
+        role: "Author",
+        description: "German philosopher, economist, historian, sociologist, political theorist, and revolutionary socialist who authored The Communist Manifesto with Engels.",
+        avatar: "/karl-marx-avatar.jpg", // Placeholder
+      },
+      {
+        id: "friedrich-engels",
+        name: "Friedrich Engels",
+        role: "Co-Author",
+        description: "German philosopher, historian, political scientist and revolutionary socialist who collaborated with Karl Marx on The Communist Manifesto.",
+        avatar: "/engels-avatar.jpg", // Placeholder
+      },
+      {
+        id: "bourgeoisie",
+        name: "The Bourgeoisie",
+        role: "Antagonist",
+        description: "The social class that owns the means of production in the capitalist system, characterized as exploiters of the working class.",
+        avatar: "/bourgeoisie-avatar.jpg", // Placeholder
+      },
+      {
+        id: "proletariat",
+        name: "The Proletariat",
+        role: "Protagonist",
+        description: "The working class who must sell their labor to survive, characterized as being exploited by the bourgeoisie.",
+        avatar: "/proletariat-avatar.jpg", // Placeholder
+      }
+    ],
+    themes: [
+      "Class Struggle",
+      "Capitalism Critique",
+      "Historical Materialism",
+      "Proletariat Revolution",
+      "Bourgeois Society",
+      "Communism",
+      "Exploitation of Labor"
+    ],
+    keyLocations: [
+      "European Industrial Centers",
+      "London (where it was published)",
+      "Germany",
+      "France",
+      "Industrial Factories"
+    ],
+    timeline: [
+      { year: 1848, event: "Publication of The Communist Manifesto in London" },
+      { year: 1848, event: "European revolutions begin across multiple countries" },
+      { year: 1871, event: "Paris Commune established as first working-class government" },
+      { year: 1917, event: "Russian Revolution influenced by Marxist ideas" }
     ]
   }
 ];

@@ -373,7 +373,7 @@ def ensure_directories():
     print("Created directories for BookNLP processing")
 
 def process_1984():
-    """Main function to process 1984 with BookNLP"""
+    """Process 1984 with BookNLP"""
     ensure_directories()
     
     # Input and output paths
@@ -413,5 +413,46 @@ def process_1984():
     
     print("BookNLP processing of 1984 complete!")
 
+def process_communist_manifesto():
+    """Process The Communist Manifesto with BookNLP"""
+    ensure_directories()
+    
+    # Input and output paths
+    input_file = "book_processing/data/communist_manifesto.txt"
+    output_dir = "book_processing/data/communist_manifesto_booknlp"
+    book_id = "communist_manifesto"
+    
+    # Check if the text file exists, if not, exit
+    if not os.path.exists(input_file):
+        print(f"Error: Input file {input_file} does not exist.")
+        print("Please run extract_pdf_text.py first to convert the PDF to text.")
+        return
+    
+    # Process the book with BookNLP
+    process_book_with_booknlp(input_file, output_dir, book_id)
+    
+    # Paths to the BookNLP output files
+    entities_file = os.path.join(output_dir, f"{book_id}.entities")
+    tokens_file = os.path.join(output_dir, f"{book_id}.tokens")
+    quotes_file = os.path.join(output_dir, f"{book_id}.quotes")
+    
+    # Extract character information
+    character_data = extract_characters(entities_file, tokens_file, quotes_file)
+    save_data_to_json(character_data, "communist_manifesto_characters.json")
+    
+    # Extract theme information
+    theme_data = extract_themes(tokens_file, character_data)
+    save_data_to_json(theme_data, "communist_manifesto_themes.json")
+    
+    # Extract relationship information
+    relationship_data = extract_relationships(entities_file, quotes_file, tokens_file, character_data)
+    save_data_to_json(relationship_data, "communist_manifesto_relationships.json")
+    
+    # Create character profiles
+    character_profile_data = create_character_profiles(character_data, relationship_data)
+    save_data_to_json(character_profile_data, "communist_manifesto_character_profiles.json")
+    
+    print("BookNLP processing of The Communist Manifesto complete!")
+
 if __name__ == "__main__":
-    process_1984()
+    process_communist_manifesto()
