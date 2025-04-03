@@ -47,7 +47,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 to={`/book/${selectedBook.id}`} 
                 className={`text-sm hover:text-book-primary transition-colors ${isBookPage ? 'text-book-primary font-medium' : ''}`}
               >
-                1984
+                {selectedBook.title}
               </Link>
             </li>
             <li>
@@ -69,7 +69,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Footer is now handled by the Footer component for the home page */}
       {!isHomePage && (
         <footer className="border-t border-border/50 py-2 px-4 text-xs text-center text-muted-foreground backdrop-blur-sm bg-background/80">
-          <span>Exploring "1984" by George Orwell — BookBuddy Literary Companion</span>
+          <span>Exploring "{selectedBook.title}" by {selectedBook.author} — BookBuddy Literary Companion</span>
         </footer>
       )}
 

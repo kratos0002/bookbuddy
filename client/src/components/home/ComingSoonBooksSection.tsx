@@ -48,6 +48,12 @@ const comingSoonBooks: ComingSoonBook[] = [
     author: 'Aldous Huxley',
     estimatedRelease: 'Spring 2025',
     color: '#1a3a5f'
+  },
+  {
+    title: 'Animal Farm',
+    author: 'George Orwell',
+    estimatedRelease: 'Summer 2025',
+    color: '#8b2439'
   }
 ];
 
