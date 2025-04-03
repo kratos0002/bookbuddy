@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { BookOpen } from 'lucide-react';
 import SuggestionPanel from './chat/suggestions/SuggestionPanel';
 import { useBook } from '../contexts/BookContext';
+import { getLibrarianName } from '@/lib/bookHelpers';
 
 // Define a message interface
 interface Message {
@@ -12,21 +13,6 @@ interface Message {
   isUser: boolean;
   timestamp: Date;
 }
-
-// Helper function to get the correct librarian name based on book ID
-const getLibrarianName = (bookId: string | number) => {
-  return Number(bookId) === 2 ? 'Marx Scholar' : 'Alexandria';
-};
-
-// Helper function to get the correct book title based on book ID
-const getBookTitle = (bookId: string | number) => {
-  return Number(bookId) === 2 ? 'The Communist Manifesto' : '1984';
-};
-
-// Helper function to get the correct book author based on book ID
-const getBookAuthor = (bookId: string | number) => {
-  return Number(bookId) === 2 ? 'Karl Marx and Friedrich Engels' : 'George Orwell';
-};
 
 const SimpleLibrarian: React.FC = () => {
   const { selectedBook } = useBook();
@@ -38,19 +24,17 @@ const SimpleLibrarian: React.FC = () => {
 
   // Initial welcome message
   useEffect(() => {
-    const librarianName = getLibrarianName(selectedBook.id);
-    const bookTitle = getBookTitle(selectedBook.id);
-    const bookAuthor = getBookAuthor(selectedBook.id);
+    const librarianName = getLibrarianName(Number(selectedBook.id));
     
     setMessages([
       {
         id: 'welcome',
-        content: `Hello! I'm ${librarianName}. How can I help you with '${bookTitle}' by ${bookAuthor} today?`,
+        content: `Hello! I'm ${librarianName}. How can I help you with '${selectedBook.title}' by ${selectedBook.author} today?`,
         isUser: false,
         timestamp: new Date()
       }
     ]);
-  }, [selectedBook.id]);
+  }, [selectedBook.id, selectedBook.title, selectedBook.author]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -80,7 +64,7 @@ const SimpleLibrarian: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           message: input,
-          bookId: selectedBook.id
+          bookId: Number(selectedBook.id)
         })
       });
 
@@ -120,8 +104,7 @@ const SimpleLibrarian: React.FC = () => {
     setInput(text);
   };
 
-  const librarianName = getLibrarianName(selectedBook.id);
-  const bookTitle = getBookTitle(selectedBook.id);
+  const librarianName = getLibrarianName(Number(selectedBook.id));
 
   return (
     <div className="flex flex-col h-full border rounded-md bg-background shadow">
@@ -171,7 +154,7 @@ const SimpleLibrarian: React.FC = () => {
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={`Ask ${librarianName} about '${bookTitle}'...`}
+            placeholder={`Ask ${librarianName} about '${selectedBook.title}'...`}
             className="w-full"
             disabled={isLoading}
           />

@@ -17,6 +17,7 @@ import EntryUnlockedNotification from '@/components/encyclopedia/EntryUnlockedNo
 import SimpleLibrarian from '@/components/SimpleLibrarian';
 import SuggestionPanel from '@/components/chat/suggestions/SuggestionPanel';
 import { Book, books } from '../data/books';
+import { getNumericBookId, getBookBySlug, getLibrarianName, isValidNumericBookId } from '@/lib/bookHelpers';
 
 interface Message {
   id: number;
@@ -46,17 +47,6 @@ const ENCYCLOPEDIA_TRIGGERS: Record<string, string[]> = {
   'memory-hole': ['memory hole', 'records', 'documents', 'disposal', 'erase', 'forgotten']
 };
 
-// Helper function to map URL slugs to numeric book IDs
-const getNumericBookId = (urlBookId: string | undefined): number => {
-  if (urlBookId === 'communist-manifesto') return 2;
-  return 1; // Default to 1984
-};
-
-// Helper function to get the librarian name based on book ID
-const getLibrarianName = (bookId: number): string => {
-  return bookId === 2 ? 'Marx Scholar' : 'Alexandria';
-};
-
 const ConversationPageContent = () => {
   const [contextOpen, setContextOpen] = useState(false);
   const { selectedBook, selectedCharacter, setSelectedBook } = useBook();
@@ -80,12 +70,8 @@ const ConversationPageContent = () => {
     if (bookId) {
       console.log(`Book ID from URL: ${bookId}`);
       
-      // Get numeric book ID from URL parameter
-      const numericBookId = getNumericBookId(bookId);
-      
-      // Find the corresponding book object
-      const bookToSelect = books.find(book => Number(book.id) === numericBookId);
-      
+      // Use the centralized book helpers
+      const bookToSelect = getBookBySlug(bookId);
       if (bookToSelect) {
         setSelectedBook(bookToSelect);
         console.log(`Set selected book to ${bookToSelect.title}`);
@@ -94,7 +80,7 @@ const ConversationPageContent = () => {
   }, [bookId, setSelectedBook]);
   
   // Calculate the current numeric book ID to use for API calls
-  const currentBookId = Number(selectedBook.id);
+  const currentBookId = getNumericBookId(bookId) || getNumericBookId(selectedBook.id);
   
   // Fetch characters using the dynamic book ID
   const { data: characters, isLoading: isLoadingCharacters } = useQuery({
@@ -316,10 +302,9 @@ const ConversationPageContent = () => {
                     {/* Librarian option */}
                     <div className="mb-4">
                       <Button
-                        variant={isLibrarianSelected ? "default" : "outline"}
-                        className="w-full justify-start bg-gradient-to-r from-amber-100 to-amber-50 border-amber-200 hover:from-amber-200 hover:to-amber-100 text-amber-900"
+                        variant="ghost"
+                        className="flex items-center"
                         onClick={() => handleCharacterSelect(null)}
-                        disabled={isCreatingConversation}
                       >
                         <BookText className="mr-2 h-4 w-4" />
                         {getLibrarianName(currentBookId)}, the AI Librarian
