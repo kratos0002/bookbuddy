@@ -190,7 +190,7 @@ const EntryCard: React.FC<EntryCardProps> = ({ entry, isUnlocked, onClick }) => 
       </CardHeader>
       
       <CardContent className="p-5 pt-0">
-        <p className="text-sm text-muted-foreground line-clamp-3 group-hover:line-clamp-none transition-all">
+        <p className="text-sm text-muted-foreground min-h-[4.5rem] line-clamp-3 group-hover:line-clamp-none transition-all">
           {isUnlocked ? entry.reality : entry.partyDescription}
         </p>
       </CardContent>
@@ -225,4 +225,4 @@ const EntryCard: React.FC<EntryCardProps> = ({ entry, isUnlocked, onClick }) => 
   );
 };
 
-export default EntryCard; 
+export default EntryCard;
