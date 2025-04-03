@@ -1,37 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useBook } from '@/contexts/BookContext';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
-import { 
-  User, 
-  ArrowRight, 
-  MessageCircle,
-  ChevronLeft,
-  ChevronRight 
-} from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { books } from '@/data/books';
-import {
+import { Play, ArrowRight, User, MessageCircle, ChevronLeft, ChevronRight, BookOpen } from 'lucide-react';
+import { useBook } from '../../contexts/BookContext';
+import { Badge } from '@/components/ui/badge';
+import { 
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from "@/components/ui/tooltip";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { Card } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
+import { books } from '@/data/books';
 
 interface Message {
-  id: string;
+  id: number;
   content: string;
   isUserMessage: boolean;
-  timestamp: string;
+  senderId?: number;
+  sentAt: string;
+}
+
+interface Character {
+  id: number;
+  name: string;
+  avatarUrl?: string;
 }
 
 const FeaturedBookSection = () => {
   const { selectedBook, setSelectedBook } = useBook();
+  const [currentBookIndex, setCurrentBookIndex] = useState(() => {
+    return books.findIndex(book => book.id === selectedBook.id);
+  });
+  const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
   const [activeTab, setActiveTab] = useState("details");
   const [message, setMessage] = useState('');
@@ -39,13 +46,20 @@ const FeaturedBookSection = () => {
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [conversationId, setConversationId] = useState<number | null>(null);
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
   
-  // Add state to track the current book index
-  const [currentBookIndex, setCurrentBookIndex] = useState(() => {
-    // Initialize with the index of the current selectedBook
-    return books.findIndex(book => book.id === selectedBook.id);
-  });
+  // Update the selected book when the current book index changes
+  useEffect(() => {
+    setSelectedBook(books[currentBookIndex]);
+  }, [currentBookIndex, setSelectedBook]);
+
+  // Simple book navigation
+  const navigateBook = (direction: 'next' | 'prev') => {
+    if (direction === 'next') {
+      setCurrentBookIndex(prev => (prev + 1) % books.length);
+    } else {
+      setCurrentBookIndex(prev => (prev - 1 + books.length) % books.length);
+    }
+  };
   
   // Fetch characters
   const { data: characters, isLoading: isLoadingCharacters } = useQuery({
@@ -68,81 +82,83 @@ const FeaturedBookSection = () => {
     refetchIntervalInBackground: true,
   });
 
-  // Update the selected book when the current book index changes
-  useEffect(() => {
-    setSelectedBook(books[currentBookIndex]);
-  }, [currentBookIndex, setSelectedBook]);
-
-  // Handler for navigating between books
-  const navigateBook = (direction: 'next' | 'prev') => {
-    if (direction === 'next') {
-      setCurrentBookIndex(prev => (prev + 1) % books.length);
-    } else {
-      setCurrentBookIndex(prev => (prev - 1 + books.length) % books.length);
-    }
-  };
-
   // Create new conversation
-  const createConversation = async () => {
-    if (!message || !conversationId) return;
+  const createConversation = async (characterId: number) => {
+    setIsCreatingConversation(true);
     
     try {
-      await apiRequest('POST', `/api/conversations/${conversationId}/messages`, {
-        content: message,
-        isUserMessage: true
-      });
-      
-      setMessage('');
-      refetchMessages();
+      const response = await apiRequest(
+        'POST',
+        '/api/conversations',
+        {
+          bookId: 1,
+          characterIds: [characterId],
+          isLibrarianPresent: false,
+          conversationMode: 'character',
+          userId: 1,
+          title: `Chat with ${characters?.find(c => c.id === characterId)?.name || 'Character'}`
+        }
+      );
+
+      // Set the conversation ID
+      if (response && response.id) {
+        setConversationId(response.id);
+      }
+      return response;
     } catch (error) {
-      console.error('Error sending message:', error);
-    }
-  };
-  
-  // Handle character selection
-  const handleCharacterSelect = (characterId: number) => {
-    setSelectedCharacter(characterId);
-    setActiveTab("chat");
-  };
-  
-  // Handle starting a chat
-  const handleStartChat = async () => {
-    setIsCreatingConversation(true);
-    try {
-      // Create a conversation with the selected character or librarian
-      const characterIds = selectedCharacter !== null ? [selectedCharacter] : [];
-      const isLibrarianPresent = selectedCharacter === null || selectedCharacter === 1; // 1 is librarian ID
-      
-      const conversation = await apiRequest('POST', '/api/conversations', {
-        bookId: 1, // Hardcoded for now since we're using book ID 1 on the backend
-        title: `Conversation about ${selectedBook.title}`,
-        characterIds,
-        isLibrarianPresent,
-        conversationMode: 'character'
-      });
-      
-      // Navigate to the conversation
-      navigate(`/chat/${conversation.id}`);
-    } catch (error) {
-      console.error('Error creating conversation:', error);
+      console.error("Error creating conversation:", error);
+      return null;
     } finally {
       setIsCreatingConversation(false);
     }
   };
+
+  // Send message
+  const sendMessage = async () => {
+    if (!message.trim() || !conversationId) return;
+
+    try {
+      const response = await apiRequest(
+        'POST',
+        `/api/conversations/${conversationId}/messages`,
+        {
+          content: message,
+          isUserMessage: true,
+        }
+      );
+
+      setMessage('');
+      refetchMessages();
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
+
+  // Handler for selecting a character
+  const handleCharacterSelect = async (characterId: number) => {
+    setSelectedCharacter(characterId);
+    if (!conversationId) {
+      await createConversation(characterId);
+    }
+    setActiveTab("chat");
+  };
+  
+  // Handle starting a chat with a specific character
+  const startChatWithCharacter = (characterId: string | number) => {
+    navigate(`/conversation?bookId=${selectedBook.id}&characterId=${characterId}`);
+  };
+  
+  // Handle starting a chat with the librarian
+  const startChatWithLibrarian = () => {
+    navigate(`/conversation?bookId=${selectedBook.id}`);
+  };
   
   return (
-    <section className="bg-[#f8f0e3]/30 px-4 py-16 relative overflow-hidden">
-      {/* Decorative elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#7d8c75]/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#8b2439]/10 rounded-full translate-y-1/2 -translate-x-1/2"></div>
-      </div>
-      
-      <div className="max-w-6xl mx-auto relative z-10">
-        <h2 className="text-3xl font-serif font-bold text-center mb-4 text-[#1a3a5f]">Featured Books</h2>
-        <div className="h-px w-24 mx-auto bg-[#8b2439]/30 mb-6"></div>
+    <section id="featured-books" className="bg-white px-4 py-16">
+      <div className="max-w-6xl mx-auto">
+        <h2 className="text-3xl font-serif font-bold text-center mb-8 text-[#1a3a5f]">Available Books</h2>
         
-        {/* Book navigation controls */}
+        {/* Book navigation */}
         <div className="flex justify-center items-center gap-4 mb-8">
           <Button 
             variant="outline" 
@@ -181,166 +197,87 @@ const FeaturedBookSection = () => {
           </Button>
         </div>
         
-        <div className="flex flex-col md:flex-row gap-8 items-start">
-          <div 
-            className="relative w-full md:w-1/3 aspect-[2/3] max-w-xs mx-auto group"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-          >
-            {/* "Available Now" badge */}
-            <div className="absolute -top-3 -right-3 z-30">
-              <Badge className="bg-[#7d8c75] text-white border-0 shadow-lg animate-pulse-subtle px-3 py-1.5">
-                Available Now
-              </Badge>
-            </div>
-
-            {/* Book Cover with 3D effect */}
-            <div className={`absolute inset-0 z-10 rounded-lg shadow-xl transform ${isHovered ? 'translate-y-[-5px] scale-[1.02]' : ''} transition-all duration-300`}>
-              <div className="absolute inset-0 bg-gradient-to-b from-[#1a3a5f]/20 via-transparent to-[#1a3a5f]/70 z-20 rounded-lg"></div>
+        {/* Book display and character selection */}
+        <div className="flex flex-col md:flex-row gap-8 items-center">
+          {/* Book cover */}
+          <div className="w-full md:w-1/3 max-w-[250px]">
+            <div className="relative aspect-[2/3] rounded-lg shadow-lg overflow-hidden">
               <img 
-                src={selectedBook.id === "1984" ? "/lovable-uploads/1984-interactive.jpg" : selectedBook.coverImage}
+                src={selectedBook.coverImage || `/lovable-uploads/1984-interactive.jpg`}
                 alt={`${selectedBook.title} Book Cover`}
-                className="absolute inset-0 w-full h-full object-cover rounded-lg"
+                className="w-full h-full object-cover"
               />
-              
-              {/* Book spine effect */}
-              <div className="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-[#1a3a5f]/40 to-transparent rounded-l-lg"></div>
-              
-              {/* Bottom book info */}
-              <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
-                <p className="text-[#f8f0e3] text-sm flex items-center gap-1">
-                  <span className="inline-block w-2 h-2 bg-[#f8f0e3]/50 rounded-full"></span>
-                  <span>Published {selectedBook.publishedYear}</span>
-                </p>
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/50"></div>
+              <div className="absolute bottom-3 left-3 right-3 text-white">
+                <h3 className="font-bold text-lg">{selectedBook.title}</h3>
+                <p className="text-sm opacity-90">{selectedBook.author}</p>
+                <p className="text-xs opacity-75">Published {selectedBook.publishedYear}</p>
               </div>
             </div>
-            
-            {/* Book shadow and 3D effect */}
-            <div className="absolute inset-0 z-0 rounded-lg bg-black/30 blur-lg -bottom-2 scale-[0.95] transform translate-y-4"></div>
           </div>
           
+          {/* Book info and character selection */}
           <div className="md:w-2/3">
-            <h3 className="text-2xl md:text-3xl font-serif font-bold text-[#1a3a5f] mb-2">{selectedBook.title}</h3>
-            <p className="text-xl text-[#8b2439] mb-4">{selectedBook.author}</p>
+            <h3 className="text-2xl font-bold mb-3 text-[#1a3a5f]">{selectedBook.title}</h3>
+            <p className="text-sm mb-4 max-w-2xl">{selectedBook.description || "Explore this classic work through conversations with its characters or with our literary librarian."}</p>
             
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="mb-4 bg-[#f8f0e3]/50">
-                <TabsTrigger value="details" className="data-[state=active]:bg-[#1a3a5f] data-[state=active]:text-white">Book Details</TabsTrigger>
-                <TabsTrigger value="chat" className="data-[state=active]:bg-[#1a3a5f] data-[state=active]:text-white">Chat with Characters</TabsTrigger>
-              </TabsList>
+            <div className="space-y-6">
+              {/* Librarian chat option */}
+              <div className="p-4 bg-[#f8f0e3]/30 rounded-lg">
+                <h4 className="font-medium mb-2 flex items-center">
+                  <BookOpen className="h-5 w-5 mr-2 text-[#8b2439]" />
+                  Chat with the Librarian
+                </h4>
+                <p className="text-sm mb-3">Get scholarly insights, analysis, and context about the book.</p>
+                <Button 
+                  onClick={startChatWithLibrarian}
+                  className="bg-[#8b2439] hover:bg-[#8b2439]/90 text-white w-full sm:w-auto"
+                >
+                  Start Librarian Chat
+                </Button>
+              </div>
               
-              <TabsContent value="details">
-                <div className="mb-6">
-                  <p className="mb-4 text-gray-700 leading-relaxed">
-                    {selectedBook.description}
-                  </p>
-                  
-                  {/* Character previews */}
-                  <div className="flex flex-wrap gap-3 mb-6">
-                    <TooltipProvider>
-                      {selectedBook.characters.map((character) => (
-                        <Tooltip key={character.id}>
-                          <TooltipTrigger asChild>
-                            <div 
-                              className="w-10 h-10 rounded-full bg-[#1a3a5f]/10 flex items-center justify-center hover:bg-[#1a3a5f]/20 transition-colors cursor-pointer"
-                              onClick={() => handleCharacterSelect(Number(character.id))}
-                            >
-                              <User className="h-5 w-5 text-[#1a3a5f]" />
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom">
-                            <p className="font-medium">{character.name}</p>
-                            <p className="text-xs text-muted-foreground">{character.role || 'Click to chat'}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      ))}
-                    </TooltipProvider>
-                  </div>
-                  
-                  {/* Themes */}
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {selectedBook.themes.slice(0, 4).map((theme) => (
-                      <span key={theme} className="px-3 py-1 bg-[#8b2439]/10 text-[#8b2439] text-sm rounded-full">
-                        {theme}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <Button 
-                    className="gap-2 bg-[#8b2439] hover:bg-[#8b2439]/90"
-                    onClick={() => setActiveTab("chat")}
-                  >
-                    Talk to {selectedBook.title} Characters
-                    <MessageCircle className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" asChild className="gap-2 border-[#1a3a5f] text-[#1a3a5f] hover:bg-[#1a3a5f]/10">
-                    <Link to={`/book/${selectedBook.id}`}>
-                      View Book Details
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="chat" className="space-y-4">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {/* Render the librarian first */}
+              {/* Character chat options */}
+              <div>
+                <h4 className="font-medium mb-3 flex items-center">
+                  <User className="h-5 w-5 mr-2 text-[#1a3a5f]" />
+                  Chat with Characters
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {selectedBook.characters.map((character) => (
                     <div 
-                      className={`border rounded-lg p-3 flex flex-col items-center space-y-2 cursor-pointer transition-colors ${selectedCharacter === 1 ? 'bg-[#1a3a5f]/10 border-[#1a3a5f]' : 'hover:bg-[#f8f0e3]/70 border-transparent'}`}
-                      onClick={() => setSelectedCharacter(1)}
+                      key={character.id}
+                      className="p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                      onClick={() => startChatWithCharacter(character.id)}
                     >
-                      <Avatar className="h-12 w-12 rounded-full border border-[#1a3a5f]/20">
-                        <User className="h-6 w-6 text-[#1a3a5f]" />
-                      </Avatar>
-                      <p className="text-sm font-medium text-center">Librarian</p>
-                      <p className="text-xs text-center text-muted-foreground">Analysis</p>
-                    </div>
-                    
-                    {/* Render other characters */}
-                    {isLoadingCharacters ? (
-                      <div className="col-span-4 text-center py-8">
-                        <p className="text-muted-foreground">Loading characters...</p>
-                      </div>
-                    ) : (
-                      characters && characters
-                        .filter(char => char.id !== 1) // Filter out librarian
-                        .map(character => (
-                          <div 
-                            key={character.id}
-                            className={`border rounded-lg p-3 flex flex-col items-center space-y-2 cursor-pointer transition-colors ${selectedCharacter === character.id ? 'bg-[#1a3a5f]/10 border-[#1a3a5f]' : 'hover:bg-[#f8f0e3]/70 border-transparent'}`}
-                            onClick={() => setSelectedCharacter(character.id)}
-                          >
-                            <Avatar className="h-12 w-12 rounded-full border border-[#1a3a5f]/20">
-                              <User className="h-6 w-6 text-[#1a3a5f]" />
-                            </Avatar>
-                            <p className="text-sm font-medium text-center">{character.name}</p>
-                            <p className="text-xs text-center text-muted-foreground">{character.role || 'Character'}</p>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8 bg-[#1a3a5f]/10">
+                          <div className="text-xs font-medium text-[#1a3a5f]">
+                            {character.name.charAt(0)}
                           </div>
-                        ))
-                    )}
-                  </div>
-                  
-                  <div className="mt-4">
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {selectedCharacter 
-                        ? `Start a conversation with ${selectedCharacter === 1 ? 'the Librarian' : characters?.find(c => c.id === selectedCharacter)?.name || 'this character'}`
-                        : 'Select a character to chat with'}
-                    </p>
-                    
-                    <Button 
-                      className="w-full flex items-center justify-center gap-2 bg-[#8b2439] hover:bg-[#8b2439]/90"
-                      onClick={handleStartChat}
-                      disabled={isCreatingConversation || selectedCharacter === null}
-                    >
-                      {isCreatingConversation ? 'Creating...' : 'Start Chat'}
-                      <MessageCircle className="h-4 w-4" />
-                    </Button>
-                  </div>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{character.name}</p>
+                          <p className="text-xs text-gray-500">{character.role || "Character"}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </TabsContent>
-            </Tabs>
+              </div>
+              
+              {/* Direct book link */}
+              <Button 
+                asChild
+                variant="outline" 
+                className="mt-4 border-[#1a3a5f] text-[#1a3a5f]"
+              >
+                <Link to={`/book/${selectedBook.id}`} className="flex items-center gap-2">
+                  Explore Full Book Page
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
