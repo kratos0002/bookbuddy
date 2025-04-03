@@ -161,16 +161,182 @@ export const librarianSuggestions: Suggestion[] = [
   createSuggestion("How accurate were Orwell's predictions about the future?", "experience", null, ["predictions", "relevance"])
 ];
 
+// Karl Marx suggestions (id: 10)
+export const karlMarxSuggestions: Suggestion[] = [
+  // Character-specific experiences
+  createSuggestion("What inspired you to write The Communist Manifesto?", "experience", 10, ["writing", "manifesto"]),
+  createSuggestion("How did your collaboration with Engels begin?", "experience", 10, ["engels", "collaboration"]),
+  createSuggestion("What was your life like during your exile in London?", "experience", 10, ["exile", "london"]),
+  createSuggestion("How did you develop your theories on capitalism?", "experience", 10, ["capitalism", "theory"]),
+  createSuggestion("What difficulties did you face while writing Das Kapital?", "experience", 10, ["das kapital", "writing"]),
+  
+  // Relationship inquiries
+  createSuggestion("What was your relationship with Friedrich Engels like?", "relationship", 10, ["engels", "friendship"]),
+  createSuggestion("How do you view the bourgeoisie?", "relationship", 10, ["bourgeoisie", "class"]),
+  createSuggestion("What is your opinion of the proletariat's consciousness?", "relationship", 10, ["proletariat", "consciousness"]),
+  createSuggestion("How do you view your intellectual opponents?", "relationship", 10, ["opponents", "criticism"]),
+  createSuggestion("What do you think of the various socialist movements?", "relationship", 10, ["socialist", "movements"]),
+
+  // Worldview prompts
+  createSuggestion("What is your vision of a communist society?", "worldview", 10, ["communism", "vision"]),
+  createSuggestion("How do you see historical materialism playing out?", "worldview", 10, ["historical materialism", "history"]),
+  createSuggestion("What role does revolution play in social change?", "worldview", 10, ["revolution", "change"]),
+  createSuggestion("How do you view religion in relation to society?", "worldview", 10, ["religion", "opium"]),
+  createSuggestion("What do you think about the state and its eventual fate?", "worldview", 10, ["state", "withering"]),
+
+  // Thematic exploration
+  createSuggestion("Can you explain the concept of class struggle?", "theme", 10, ["class struggle", "conflict"]),
+  createSuggestion("What do you mean by 'alienation of labor'?", "theme", 10, ["alienation", "labor"]),
+  createSuggestion("How does capitalism create its own destruction?", "theme", 10, ["capitalism", "contradiction"]),
+  createSuggestion("What is the significance of material conditions in your theory?", "theme", 10, ["material conditions", "economics"]),
+  createSuggestion("How do you define exploitation in the capitalist system?", "theme", 10, ["exploitation", "surplus value"]),
+
+  // Emotional questions
+  createSuggestion("What brings you the most satisfaction in your work?", "emotional", 10, ["satisfaction", "purpose"]),
+  createSuggestion("What frustrates you most about capitalist society?", "emotional", 10, ["frustration", "capitalism"]),
+  createSuggestion("How do you feel about the future of communism?", "emotional", 10, ["future", "hope"]),
+  createSuggestion("What personal sacrifices have you made for your cause?", "emotional", 10, ["sacrifice", "personal"]),
+  createSuggestion("What gives you hope for the working class?", "emotional", 10, ["hope", "proletariat"])
+];
+
+// Friedrich Engels suggestions (id: 11)
+export const engelsSuggestions: Suggestion[] = [
+  // Character-specific experiences
+  createSuggestion("What was your role in writing The Communist Manifesto?", "experience", 11, ["manifesto", "writing"]),
+  createSuggestion("How did your background in business shape your views?", "experience", 11, ["business", "factory"]),
+  createSuggestion("What did you observe about the condition of workers in Manchester?", "experience", 11, ["manchester", "workers"]),
+  createSuggestion("How did you help Marx financially during his life?", "experience", 11, ["marx", "financial support"]),
+  createSuggestion("What was your work on 'The Condition of the Working Class in England'?", "experience", 11, ["working class", "england"]),
+  
+  // Relationship inquiries
+  createSuggestion("How would you describe your friendship with Marx?", "relationship", 11, ["marx", "friendship"]),
+  createSuggestion("What was your view of the industrialists you knew?", "relationship", 11, ["industrialists", "capitalists"]),
+  createSuggestion("How did you interact with working class movements?", "relationship", 11, ["movements", "organizations"]),
+  createSuggestion("What was your role in spreading Marx's ideas after his death?", "relationship", 11, ["legacy", "promotion"]),
+  createSuggestion("How did your family react to your radical politics?", "relationship", 11, ["family", "reaction"]),
+
+  // Worldview prompts
+  createSuggestion("How do science and dialectics intersect in your philosophy?", "worldview", 11, ["science", "dialectics"]),
+  createSuggestion("What role does military history play in your analysis?", "worldview", 11, ["military", "history"]),
+  createSuggestion("How do you view the development of socialism in different countries?", "worldview", 11, ["socialism", "international"]),
+  createSuggestion("What are your predictions for capitalism's future?", "worldview", 11, ["capitalism", "future"]),
+  createSuggestion("How important is theory versus practice in revolutionary politics?", "worldview", 11, ["theory", "practice"]),
+
+  // Thematic exploration
+  createSuggestion("Can you explain dialectical materialism?", "theme", 11, ["dialectics", "materialism"]),
+  createSuggestion("What is the importance of historical analysis in your work?", "theme", 11, ["history", "analysis"]),
+  createSuggestion("How does private property relate to class conflict?", "theme", 11, ["private property", "class"]),
+  createSuggestion("What role does the state play in class society?", "theme", 11, ["state", "oppression"]),
+  createSuggestion("How do you view the connection between family structure and capitalism?", "theme", 11, ["family", "property"])
+];
+
+// The Bourgeoisie suggestions (id: 12)
+export const bourgeoisSuggestions: Suggestion[] = [
+  // Character-specific experiences
+  createSuggestion("How has your class risen to dominance in society?", "experience", 12, ["rise", "power"]),
+  createSuggestion("What innovations has the bourgeoisie created?", "experience", 12, ["innovation", "industry"]),
+  createSuggestion("How have you transformed traditional industries?", "experience", 12, ["transformation", "industry"]),
+  createSuggestion("What markets have you conquered globally?", "experience", 12, ["global", "markets"]),
+  createSuggestion("How do you respond to economic crises?", "experience", 12, ["crisis", "overproduction"]),
+  
+  // Relationship inquiries
+  createSuggestion("What is your relationship with the proletariat?", "relationship", 12, ["proletariat", "workers"]),
+  createSuggestion("How do you view Marx and Engels' critique of your class?", "relationship", 12, ["marx", "critique"]),
+  createSuggestion("What is your relationship with the state?", "relationship", 12, ["state", "government"]),
+  createSuggestion("How do you interact with other social classes?", "relationship", 12, ["classes", "society"]),
+  createSuggestion("What do you think of socialist and communist movements?", "relationship", 12, ["socialist", "opposition"]),
+
+  // Worldview prompts
+  createSuggestion("How do you justify your economic dominance?", "worldview", 12, ["justification", "dominance"]),
+  createSuggestion("What is your vision for capitalism's future?", "worldview", 12, ["capitalism", "future"]),
+  createSuggestion("How do you view property rights?", "worldview", 12, ["property", "rights"]),
+  createSuggestion("What is your perspective on exploitation of labor?", "worldview", 12, ["labor", "profit"]),
+  createSuggestion("How do you view the concept of progress?", "worldview", 12, ["progress", "development"])
+];
+
+// The Proletariat suggestions (id: 13)
+export const proletariatSuggestions: Suggestion[] = [
+  // Character-specific experiences
+  createSuggestion("What are your working conditions like?", "experience", 13, ["conditions", "factory"]),
+  createSuggestion("How has industrialization changed your existence?", "experience", 13, ["industrialization", "change"]),
+  createSuggestion("What forms of organization have you developed?", "experience", 13, ["organization", "unions"]),
+  createSuggestion("How do economic crises affect your class?", "experience", 13, ["crisis", "suffering"]),
+  createSuggestion("What revolutionary potential do you possess?", "experience", 13, ["revolution", "potential"]),
+  
+  // Relationship inquiries
+  createSuggestion("How do you view the bourgeoisie?", "relationship", 13, ["bourgeoisie", "exploitation"]),
+  createSuggestion("What is your relationship with Marx and Engels?", "relationship", 13, ["marx", "theory"]),
+  createSuggestion("How do you relate to other working people globally?", "relationship", 13, ["international", "solidarity"]),
+  createSuggestion("What is your relationship to the means of production?", "relationship", 13, ["means of production", "labor"]),
+  createSuggestion("How do you view the state and its institutions?", "relationship", 13, ["state", "oppression"]),
+
+  // Worldview prompts
+  createSuggestion("What is class consciousness and how does it develop?", "worldview", 13, ["class consciousness", "awareness"]),
+  createSuggestion("What is your historic mission according to Marx?", "worldview", 13, ["historic mission", "revolution"]),
+  createSuggestion("How do you envision society after capitalism?", "worldview", 13, ["post-capitalism", "communism"]),
+  createSuggestion("What role does solidarity play in your struggle?", "worldview", 13, ["solidarity", "unity"]),
+  createSuggestion("How do you view the chains that bind you?", "worldview", 13, ["chains", "freedom"])
+];
+
+// Marx Scholar Librarian suggestions
+export const marxScholarSuggestions: Suggestion[] = [
+  // Analytical questions (librarian-specific category)
+  createSuggestion("Can you explain the historical context of The Communist Manifesto?", "analytical", null, ["history", "context"]),
+  createSuggestion("What literary techniques do Marx and Engels use in the Manifesto?", "analytical", null, ["literary", "technique"]),
+  createSuggestion("How does the concept of class struggle function in the text?", "analytical", null, ["class struggle", "concept"]),
+  createSuggestion("What are the parallels between Marx's ideas and modern economic systems?", "analytical", null, ["comparison", "modern"]),
+  createSuggestion("How does the language of the Manifesto reflect its revolutionary aims?", "analytical", null, ["language", "revolution"]),
+  
+  // Thematic questions
+  createSuggestion("What are the main themes in The Communist Manifesto?", "theme", null, ["themes", "overview"]),
+  createSuggestion("How does historical materialism work as a framework?", "theme", null, ["historical materialism", "analysis"]),
+  createSuggestion("What does the Manifesto say about the nature of capitalism?", "theme", null, ["capitalism", "critique"]),
+  createSuggestion("How do Marx and Engels view human nature and freedom?", "theme", null, ["human nature", "freedom"]),
+  createSuggestion("What is the significance of the final call to action?", "theme", null, ["call to action", "workers unite"]),
+  
+  // Character analysis
+  createSuggestion("Can you analyze Marx's role as both author and revolutionary?", "relationship", null, ["marx", "character"]),
+  createSuggestion("What was Engels' contribution to Marxist theory?", "relationship", null, ["engels", "theory"]),
+  createSuggestion("How are the bourgeoisie characterized in the text?", "relationship", null, ["bourgeoisie", "characterization"]),
+  createSuggestion("What agency do the proletariat have in the narrative?", "relationship", null, ["proletariat", "agency"]),
+  createSuggestion("How do Marx and Engels portray their intellectual opponents?", "relationship", null, ["opponents", "critique"]),
+  
+  // Educational/contextual
+  createSuggestion("When was The Communist Manifesto written and what was happening in Europe then?", "experience", null, ["history", "europe"]),
+  createSuggestion("What was Marx's background and how did it influence the Manifesto?", "experience", null, ["marx", "biography"]),
+  createSuggestion("How has The Communist Manifesto influenced modern politics and economics?", "experience", null, ["influence", "modern"]),
+  createSuggestion("What other socialist texts should I read to understand Marxism better?", "experience", null, ["recommendations", "socialism"]),
+  createSuggestion("How accurate were Marx's predictions about capitalism's development?", "experience", null, ["predictions", "accuracy"])
+];
+
 // Combined map of all suggestions by character ID
 export const allSuggestionsByCharacter: Record<string, Suggestion[]> = {
   "1": winstonSuggestions,
   "2": juliaSuggestions,
   "3": obrienSuggestions,
-  "librarian": librarianSuggestions
+  "10": karlMarxSuggestions,
+  "11": engelsSuggestions, 
+  "12": bourgeoisSuggestions,
+  "13": proletariatSuggestions,
+  "librarian": librarianSuggestions,
+  "marxScholar": marxScholarSuggestions
 };
 
 // Get suggestions for a specific character or librarian
 export const getSuggestionsForCharacter = (characterId: number | null): Suggestion[] => {
-  const key = characterId === null ? 'librarian' : characterId.toString();
+  // Special handling for book-specific librarians
+  if (characterId === null) {
+    // Check the current URL to determine which book we're viewing
+    const url = window.location.href;
+    if (url.includes('communist-manifesto')) {
+      console.log('Loading Marx Scholar suggestions for Communist Manifesto');
+      return marxScholarSuggestions;
+    }
+    // Default to Alexandria for 1984
+    return librarianSuggestions;
+  }
+  
+  // For characters, use the character ID to look up suggestions
+  const key = characterId.toString();
   return allSuggestionsByCharacter[key] || [];
 }; 

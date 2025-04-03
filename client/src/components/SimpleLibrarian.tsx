@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, RefreshCw } from 'lucide-react';
 import SuggestionPanel from './chat/suggestions/SuggestionPanel';
 import { useBook } from '../contexts/BookContext';
 import { getLibrarianName } from '@/lib/bookHelpers';
@@ -19,6 +19,7 @@ const SimpleLibrarian: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [suggestionsMinimized, setSuggestionsMinimized] = useState(false);
 
@@ -41,10 +42,20 @@ const SimpleLibrarian: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Check if response is HTML (indicating an error)
+  const isHtmlResponse = (text: string): boolean => {
+    return text.trim().startsWith('<!DOCTYPE html>') || 
+           text.trim().startsWith('<html') || 
+           (text.includes('<head>') && text.includes('<body>'));
+  };
+
   // Send message to the librarian
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim() === '') return;
+
+    // Reset any previous API errors
+    setApiError(null);
 
     // Add user message
     const userMessage: Message = {
@@ -58,6 +69,8 @@ const SimpleLibrarian: React.FC = () => {
     setIsLoading(true);
 
     try {
+      console.log(`Sending request to /api/simple-librarian with bookId: ${Number(selectedBook.id)}`);
+      
       // Send to the simple librarian API
       const response = await fetch('/api/simple-librarian', {
         method: 'POST',
@@ -68,7 +81,23 @@ const SimpleLibrarian: React.FC = () => {
         })
       });
 
-      const data = await response.json();
+      // Get the response text first to check if it's HTML
+      const responseText = await response.text();
+      
+      // Check if response is HTML (which indicates an error)
+      if (isHtmlResponse(responseText)) {
+        console.error('Received HTML response instead of JSON:', responseText.substring(0, 100) + '...');
+        throw new Error('Received HTML response instead of expected JSON data');
+      }
+      
+      // Try to parse the response as JSON
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Failed to parse response as JSON:', parseError);
+        throw new Error('Invalid JSON response from server');
+      }
 
       if (data.success) {
         // Add librarian response
@@ -84,12 +113,16 @@ const SimpleLibrarian: React.FC = () => {
       }
     } catch (error) {
       console.error('Error getting librarian response:', error);
+      
+      // Store the error for display
+      setApiError(error instanceof Error ? error.message : 'Unknown error occurred');
+      
       // Show error message
       setMessages(prev => [
         ...prev,
         {
           id: `error-${Date.now()}`,
-          content: "I'm sorry, I couldn't process your request. Please try again later.",
+          content: "I'm sorry, I couldn't process your request. The server returned an invalid response. Please try again later or use a different character.",
           isUser: false,
           timestamp: new Date()
         }
@@ -97,6 +130,46 @@ const SimpleLibrarian: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Try to reconnect/refresh the API
+  const handleRetryConnection = () => {
+    setApiError(null);
+    setMessages(prev => [
+      ...prev,
+      {
+        id: `system-${Date.now()}`,
+        content: "Attempting to reconnect to the server...",
+        isUser: false,
+        timestamp: new Date()
+      }
+    ]);
+    
+    // Simulate a ping to the API
+    fetch('/api/ping')
+      .then(response => response.json())
+      .then(data => {
+        setMessages(prev => [
+          ...prev,
+          {
+            id: `system-${Date.now()}`,
+            content: "Connection restored. You can continue your conversation.",
+            isUser: false,
+            timestamp: new Date()
+          }
+        ]);
+      })
+      .catch(error => {
+        setMessages(prev => [
+          ...prev,
+          {
+            id: `system-${Date.now()}`,
+            content: "Still having trouble connecting to the server. Please try again later.",
+            isUser: false,
+            timestamp: new Date()
+          }
+        ]);
+      });
   };
 
   // Handle suggestion clicks
@@ -135,6 +208,21 @@ const SimpleLibrarian: React.FC = () => {
                   <div className="dot-flashing"></div>
                 </div>
               </div>
+            </div>
+          )}
+          {apiError && (
+            <div className="p-3 mb-4 bg-red-100 text-red-800 rounded-lg">
+              <p className="font-semibold">Connection Error</p>
+              <p className="text-sm">{apiError}</p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-2 text-xs"
+                onClick={handleRetryConnection}
+              >
+                <RefreshCw className="h-3 w-3 mr-1" />
+                Retry Connection
+              </Button>
             </div>
           )}
           <div ref={messagesEndRef} />
